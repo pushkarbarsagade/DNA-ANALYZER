@@ -67,6 +67,85 @@ def clear_caches() -> None:
     _bq_result_cache.clear()
 
 
+def _extract_field(obj: Any, key: str, default: Any = None) -> Any:
+    """Safely extract a field from a dict, BigQuery Row, mapping, or object."""
+    if obj is None:
+        return default
+    if isinstance(obj, dict):
+        return obj.get(key, default)
+    if hasattr(obj, "get") and callable(obj.get):
+        try:
+            val = obj.get(key, default)
+            if val is not None:
+                return val
+        except Exception:
+            pass
+    if hasattr(obj, "__getitem__"):
+        try:
+            val = obj[key]
+            if val is not None:
+                return val
+        except (KeyError, IndexError, TypeError):
+            pass
+    if hasattr(obj, key):
+        try:
+            val = getattr(obj, key)
+            if not callable(val) and val is not None:
+                return val
+        except Exception:
+            pass
+    return default
+
+
+def _normalize_string_or_list(val: Any, delimiter: str = ", ") -> str:
+    """
+    Safely normalize BigQuery fields that may be returned as ARRAY/REPEATED (list/tuple/set),
+    nested structs, strings, numbers, or None.
+    Returns a clean, trimmed string.
+    """
+    if val is None:
+        return ""
+
+    if isinstance(val, (list, tuple, set)):
+        items: List[str] = []
+        for item in val:
+            if item is None:
+                continue
+            if isinstance(item, (list, tuple, set)):
+                sub = _normalize_string_or_list(item, delimiter=delimiter)
+                if sub:
+                    items.append(sub)
+            elif isinstance(item, dict) or hasattr(item, "keys"):
+                gene_val = (
+                    _extract_field(item, "gene_symbol")
+                    or _extract_field(item, "gene")
+                    or _extract_field(item, "element_symbol")
+                    or _extract_field(item, "name")
+                    or _extract_field(item, "amr_genotype")
+                    or _extract_field(item, "value")
+                )
+                if gene_val is not None:
+                    s = str(gene_val).strip().strip("\"'")
+                else:
+                    s = ", ".join(
+                        str(v).strip().strip("\"'")
+                        for v in getattr(item, "values", lambda: [])()
+                        if v is not None and str(v).strip().strip("\"'")
+                    )
+                if s:
+                    items.append(s)
+            else:
+                s = str(item).strip().strip("\"'")
+                if s:
+                    items.append(s)
+        return delimiter.join(items)
+
+    s = str(val).strip()
+    if (s.startswith('"') and s.endswith('"')) or (s.startswith("'") and s.endswith("'")):
+        s = s[1:-1].strip()
+    return s
+
+
 def validate_accession(acc: str) -> bool:
     """Validate BioSample accession pattern."""
     return bool(_VALID_ACCESSION_RE.match((acc or "").strip()))
@@ -257,15 +336,15 @@ def query_biosample_bigquery(
 
     row = rows[0]
 
-    taxgroup_name = (row.get("taxgroup_name") or "").strip()
-    scientific_name = (row.get("scientific_name") or "").strip()
+    taxgroup_name = _normalize_string_or_list(_extract_field(row, "taxgroup_name"))
+    scientific_name = _normalize_string_or_list(_extract_field(row, "scientific_name"))
     organism = scientific_name or taxgroup_name or "Unknown"
 
-    asm_acc = (row.get("asm_acc") or "").strip()
-    amr_genotypes_raw = (row.get("amr_genotypes") or "").strip()
-    amr_genotypes_core = (row.get("amr_genotypes_core") or "").strip()
-    amrfinder_version = (row.get("amrfinderplus_version") or "").strip()
-    amrfinder_analysis_type = (row.get("amrfinderplus_analysis_type") or "").strip()
+    asm_acc = _normalize_string_or_list(_extract_field(row, "asm_acc"))
+    amr_genotypes_raw = _normalize_string_or_list(_extract_field(row, "amr_genotypes"), delimiter=", ")
+    amr_genotypes_core = _normalize_string_or_list(_extract_field(row, "amr_genotypes_core"), delimiter=", ")
+    amrfinder_version = _normalize_string_or_list(_extract_field(row, "amrfinderplus_version"))
+    amrfinder_analysis_type = _normalize_string_or_list(_extract_field(row, "amrfinderplus_analysis_type"))
 
     base_result["organism"] = organism
     base_result["taxgroup_name"] = taxgroup_name
@@ -290,33 +369,50 @@ def query_biosample_bigquery(
     base_result["amr_genotypes"] = amr_genotypes_raw
     base_result["raw_genotype_row"] = {"amr_genotypes": amr_genotypes_raw}
 
-    raw_ast = row.get("ast_phenotypes")
+    raw_ast = _extract_field(row, "ast_phenotypes")
     ast_records: List[Dict[str, str]] = []
 
-    if raw_ast:
+    if isinstance(raw_ast, str) and raw_ast.strip().startswith("["):
+        try:
+            raw_ast = json.loads(raw_ast)
+        except Exception:
+            pass
+
+    if isinstance(raw_ast, str) and "=" in raw_ast and not raw_ast.strip().startswith("["):
+        for pair in raw_ast.replace('"', '').split(','):
+            if '=' in pair:
+                drug, pheno = pair.split('=', 1)
+                d_clean = drug.strip()
+                p_clean = pheno.strip().lower()
+                p_map = {'s': 'susceptible', 'r': 'resistant', 'i': 'intermediate'}
+                if d_clean:
+                    ast_records.append({
+                        "antibiotic": d_clean,
+                        "phenotype": p_map.get(p_clean, p_clean),
+                        "mic": "",
+                        "units": "",
+                        "method": "MIC",
+                        "guideline": "CLSI",
+                    })
+    elif raw_ast and isinstance(raw_ast, (list, tuple)):
         for ast in raw_ast:
-            if isinstance(ast, dict):
-                abx = str(ast.get("antibiotic") or "").strip()
-                ph = str(ast.get("phenotype") or "").strip()
-                mic = str(ast.get("mic") or "").strip()
-                units = str(ast.get("units") or "").strip()
-                method = str(ast.get("method") or "").strip()
-                guideline = str(ast.get("guideline") or "").strip()
-            elif hasattr(ast, "keys"):
-                abx = str(ast["antibiotic"] or "").strip() if "antibiotic" in ast else ""
-                ph = str(ast["phenotype"] or "").strip() if "phenotype" in ast else ""
-                mic = str(ast["mic"] or "").strip() if "mic" in ast else ""
-                units = str(ast["units"] or "").strip() if "units" in ast else ""
-                method = str(ast["method"] or "").strip() if "method" in ast else ""
-                guideline = str(ast["guideline"] or "").strip() if "guideline" in ast else ""
-            else:
-                continue
+            abx = _normalize_string_or_list(_extract_field(ast, "antibiotic"))
+            ph = _normalize_string_or_list(_extract_field(ast, "phenotype"))
+            mic = _normalize_string_or_list(_extract_field(ast, "mic"))
+            units = _normalize_string_or_list(_extract_field(ast, "units"))
+            method = _normalize_string_or_list(_extract_field(ast, "method"))
+            guideline = _normalize_string_or_list(_extract_field(ast, "guideline"))
 
             if abx:
+                if units and units.lower() not in mic.lower():
+                    mic_str = f"{mic} {units}".strip()
+                else:
+                    mic_str = mic
+
                 ast_records.append({
                     "antibiotic": abx,
                     "phenotype": ph,
-                    "mic": f"{mic} {units}".strip() if units else mic,
+                    "mic": mic_str,
                     "units": units,
                     "method": method,
                     "guideline": guideline,

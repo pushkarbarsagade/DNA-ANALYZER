@@ -1,4 +1,4 @@
-﻿"""
+"""
 backend/tests/test_phase7_bigquery_provider.py
 
 Unit tests for the Phase 7 BigQuery Provider, multi-organism support,
@@ -179,6 +179,113 @@ class TestBigQueryProviderUnit(unittest.TestCase):
             self.assertEqual(len(res.get("ast_records", [])), 1)
             self.assertEqual(res.get("ast_records")[0]["antibiotic"], "meropenem")
 
+    def test_bigquery_row_with_list_and_struct_values_regression(self):
+        """
+        Regression test for 'list' object has no attribute 'strip'.
+        NCBI BigQuery returns amr_genotypes and amr_genotypes_core as ARRAY<STRING> (Python list)
+        and ast_phenotypes as ARRAY<STRUCT> (list of dicts/Rows).
+        """
+        mock_client = MagicMock()
+        mock_job = MagicMock()
+        mock_row = {
+            "biosample_acc": "SAMN04014975",
+            "taxgroup_name": ["Escherichia coli"],
+            "scientific_name": "Escherichia coli",
+            "asm_acc": ["GCA_001234567.1"],
+            "amr_genotypes": ["blaCTX-M-15", "blaTEM-1", "aph(3'')-Ib", "sul2"],
+            "amr_genotypes_core": ["blaCTX-M-15", "blaTEM-1"],
+            "amrfinderplus_version": ["3.12.8"],
+            "amrfinderplus_analysis_type": "COMBINED",
+            "ast_phenotypes": [
+                {
+                    "antibiotic": "ampicillin",
+                    "phenotype": "resistant",
+                    "mic": "> 32",
+                    "units": "mg/L",
+                    "method": "MIC",
+                    "guideline": "CLSI",
+                },
+                {
+                    "antibiotic": "ceftriaxone",
+                    "phenotype": "resistant",
+                    "mic": "16",
+                    "units": "mg/L",
+                    "method": "MIC",
+                    "guideline": "CLSI",
+                },
+            ],
+        }
+        mock_job.result.return_value = [mock_row]
+        mock_client.query.return_value = mock_job
+
+        with patch.dict("os.environ", {"BIGQUERY_PROJECT_ID": "test-project", "BIGQUERY_CREDENTIALS_JSON": "{}"}):
+            res = bq_prov_mod.query_biosample_bigquery("SAMN04014975", client=mock_client)
+
+            self.assertEqual(res.get("state"), "ok")
+            self.assertEqual(res.get("organism"), "Escherichia coli")
+            self.assertEqual(res.get("assembly_accession"), "GCA_001234567.1")
+            self.assertEqual(res.get("amr_genotypes"), "blaCTX-M-15, blaTEM-1, aph(3'')-Ib, sul2")
+            self.assertEqual(res.get("AMR_genotypes_core"), "blaCTX-M-15, blaTEM-1")
+            self.assertEqual(res.get("amrfinder_version"), "3.12.8")
+            self.assertEqual(len(res.get("ast_records", [])), 2)
+            self.assertEqual(res.get("ast_records")[0]["mic"], "> 32 mg/L")
+
+    def test_bigquery_real_row_object_with_nested_types(self):
+        """
+        Verify that google.cloud.bigquery.Row objects containing lists and struct
+        elements are parsed without error into strings and structured AST records.
+        """
+        try:
+            from google.cloud.bigquery import Row
+        except ImportError:
+            self.skipTest("google-cloud-bigquery not installed")
+
+        mock_client = MagicMock()
+        mock_job = MagicMock()
+
+        # Build actual BigQuery Row objects
+        ast_row1 = Row(
+            ("ampicillin", "resistant", "> 32", "mg/L", "MIC", "CLSI"),
+            {"antibiotic": 0, "phenotype": 1, "mic": 2, "units": 3, "method": 4, "guideline": 5},
+        )
+        main_row = Row(
+            (
+                "SAMN04014975",
+                "Escherichia coli",
+                "Escherichia coli",
+                "GCA_001234567.1",
+                ["blaTEM-1", "tet(A)"],
+                ["blaTEM-1"],
+                "3.12.8",
+                "COMBINED",
+                [ast_row1],
+            ),
+            {
+                "biosample_acc": 0,
+                "taxgroup_name": 1,
+                "scientific_name": 2,
+                "asm_acc": 3,
+                "amr_genotypes": 4,
+                "amr_genotypes_core": 5,
+                "amrfinderplus_version": 6,
+                "amrfinderplus_analysis_type": 7,
+                "ast_phenotypes": 8,
+            },
+        )
+
+        mock_job.result.return_value = [main_row]
+        mock_client.query.return_value = mock_job
+
+        with patch.dict("os.environ", {"BIGQUERY_PROJECT_ID": "test-project", "BIGQUERY_CREDENTIALS_JSON": "{}"}):
+            res = bq_prov_mod.query_biosample_bigquery("SAMN04014975", client=mock_client)
+
+            self.assertEqual(res.get("state"), "ok")
+            self.assertEqual(res.get("amr_genotypes"), "blaTEM-1, tet(A)")
+            self.assertEqual(len(res.get("ast_records", [])), 1)
+            self.assertEqual(res.get("ast_records")[0]["antibiotic"], "ampicillin")
+            self.assertEqual(res.get("ast_records")[0]["phenotype"], "resistant")
+            self.assertEqual(res.get("ast_records")[0]["mic"], "> 32 mg/L")
+
 
 class TestBigQueryProviderRoutesIntegration(unittest.TestCase):
     """Integration tests for routes with BigQueryProvider and fallback semantics."""
@@ -205,6 +312,49 @@ class TestBigQueryProviderRoutesIntegration(unittest.TestCase):
             data = resp.get_json()
             self.assertEqual(data.get("availability_state"), "dynamic_provider_not_configured")
             self.assertIn("BigQuery", data.get("error", ""))
+
+    def test_samn04014975_live_shape_via_route(self):
+        """
+        End-to-end route test simulating SAMN04014975 with BigQuery array/repeated fields.
+        Must return 200 success without 'list' object has no attribute 'strip'.
+        """
+        mock_client = MagicMock()
+        mock_job = MagicMock()
+        mock_row = {
+            "biosample_acc": "SAMN04014975",
+            "taxgroup_name": "Escherichia coli",
+            "scientific_name": "Escherichia coli",
+            "asm_acc": "GCA_001234567.1",
+            "amr_genotypes": ["blaTEM-1", "tet(A)"],
+            "amr_genotypes_core": ["blaTEM-1"],
+            "amrfinderplus_version": "3.12.8",
+            "amrfinderplus_analysis_type": "COMBINED",
+            "ast_phenotypes": [
+                {
+                    "antibiotic": "ampicillin",
+                    "phenotype": "resistant",
+                    "mic": "> 32",
+                    "units": "mg/L",
+                    "method": "MIC",
+                    "guideline": "CLSI",
+                }
+            ],
+        }
+        mock_job.result.return_value = [mock_row]
+        mock_client.query.return_value = mock_job
+
+        bq_module = amr_routes_mod._get_bigquery_provider()
+        with patch.dict("os.environ", {"BIGQUERY_PROJECT_ID": "test-project", "BIGQUERY_CREDENTIALS_JSON": '{"project_id": "test"}'}):
+            with patch.object(bq_module, "_create_bigquery_client", return_value=mock_client):
+                bq_module.clear_caches()
+                resp = self.client.get("/api/amr/isolate/SAMN04014975")
+                self.assertEqual(resp.status_code, 200)
+                data = resp.get_json()
+                self.assertEqual(data.get("status"), "success")
+                self.assertEqual(data.get("biosample_accession"), "SAMN04014975")
+                self.assertEqual(data.get("amr_genotypes"), "blaTEM-1, tet(A)")
+                self.assertEqual(len(data.get("comparisons", [])), 1)
+                self.assertEqual(data.get("comparisons")[0]["classification"], "Concordant")
 
 
 if __name__ == "__main__":
