@@ -14,6 +14,13 @@ FIXES APPLIED:
 import os
 import sys
 import requests
+
+# Fix Windows console encoding: cp1252 cannot render Unicode symbols (✓, ✅, ⚠️)
+# used in the startup banner. Reconfigure to UTF-8 to prevent crash at startup.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 from datetime import datetime, timedelta
 from collections import defaultdict
 
@@ -944,11 +951,11 @@ if __name__ == '__main__':
     print(f"Email: barsagadepushkar26@gmail.com")
     print("=" * 70)
     print(f"Server: http://localhost:5000")
-    print(f"CORS: Enabled ✓")
+    print(f"CORS: Enabled [OK]")
     print(f"  - Allowed Origins: https://dna-analyzer-taupe.vercel.app, http://localhost:3000")
     print(f"  - Methods: GET, POST, OPTIONS")
-    print(f"  - Preflight Handling: Enabled ✓")
-    print(f"AI Explanations: {'ENABLED ✓ (Groq - llama-3.3-70b-versatile)' if GROQ_API_KEY else 'DISABLED ✗ (No API key)'}")
+    print(f"  - Preflight Handling: Enabled [OK]")
+    print(f"AI Explanations: {'ENABLED [OK] (Groq - llama-3.3-70b-versatile)' if GROQ_API_KEY else 'DISABLED [OFF] (No API key)'}")
     print(f"Rate Limit: {MAX_REQUESTS_PER_WINDOW} requests per minute")
     print("=" * 70)
     print("\nAvailable Endpoints:")
@@ -963,12 +970,12 @@ if __name__ == '__main__':
     print("=" * 70)
     
     if not GROQ_API_KEY:
-        print("\n⚠️  WARNING: AI features disabled - no GROQ_API_KEY found")
+        print("\n[WARNING] AI features disabled - no GROQ_API_KEY found")
         print("   To enable: Add GROQ_API_KEY to your .env file")
         print("   Get free key from: https://console.groq.com\n")
     else:
-        print("\n✅ AI service configured and ready!\n")
+        print("\n[OK] AI service configured and ready!\n")
     
-    print("✅ Server ready to accept requests!\n")
+    print("[OK] Server ready to accept requests!\n")
     
     app.run(debug=True, port=5000, host='0.0.0.0')
