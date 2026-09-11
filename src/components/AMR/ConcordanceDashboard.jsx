@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
+import { exportAmrReportPdf } from '../../utils/amrPdfExport';
 import './ConcordanceDashboard.css';
 
 export default function ConcordanceDashboard({ isolateData }) {
   const [activeFilter, setActiveFilter] = useState('ALL');
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [pdfError, setPdfError] = useState('');
 
   if (!isolateData) return null;
 
@@ -21,6 +24,19 @@ export default function ConcordanceDashboard({ isolateData }) {
   const notComparableCount = summary_metrics.not_comparable ?? 0;
   const notEvaluableCount = summary_metrics.not_evaluable ?? 0;
 
+  const handleExportPdf = () => {
+    try {
+      setExportingPdf(true);
+      setPdfError('');
+      exportAmrReportPdf(isolateData);
+    } catch (err) {
+      console.error('Failed to export PDF:', err);
+      setPdfError(err.message || 'Failed to generate PDF report.');
+    } finally {
+      setExportingPdf(false);
+    }
+  };
+
   // Split genotype string into clean array for visual tags
   const genotypeList = amr_genotypes
     ? amr_genotypes.split(',').map((g) => g.trim()).filter(Boolean)
@@ -37,9 +53,21 @@ export default function ConcordanceDashboard({ isolateData }) {
               <span style={{ fontSize: '1.2rem' }}>🔬</span>
               <span className="isolate-accession-badge">{biosample_accession}</span>
             </div>
-            <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
-              Organism: <strong style={{ color: '#f1f5f9' }}>{organism || 'Escherichia coli'}</strong>
-            </span>
+            <div className="isolate-header-actions">
+              <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
+                Organism: <strong style={{ color: '#f1f5f9' }}>{organism || 'Escherichia coli'}</strong>
+              </span>
+              <button
+                type="button"
+                className="export-pdf-btn"
+                onClick={handleExportPdf}
+                disabled={exportingPdf}
+                title="Export dynamic PDF report for this BioSample"
+              >
+                <span>{exportingPdf ? '⏳' : '📄'}</span>
+                <span>{exportingPdf ? 'Exporting...' : 'Export Results as PDF'}</span>
+              </button>
+            </div>
           </div>
           <div className="isolate-meta-grid">
             <div className="isolate-meta-item">
@@ -83,13 +111,32 @@ export default function ConcordanceDashboard({ isolateData }) {
             <span style={{ fontSize: '1.25rem' }}>🔬</span>
             <span className="isolate-accession-badge">{biosample_accession}</span>
           </div>
-          <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
-            <span className="isolate-meta-label" style={{ margin: 0 }}>Organism:</span>
-            <span style={{ fontSize: '0.92rem', color: '#f1f5f9', fontWeight: 600 }}>
-              {organism || 'Escherichia coli'}
-            </span>
+          <div className="isolate-header-actions">
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <span className="isolate-meta-label" style={{ margin: 0 }}>Organism:</span>
+              <span style={{ fontSize: '0.92rem', color: '#f1f5f9', fontWeight: 600 }}>
+                {organism || 'Escherichia coli'}
+              </span>
+            </div>
+            <button
+              type="button"
+              className="export-pdf-btn"
+              onClick={handleExportPdf}
+              disabled={exportingPdf}
+              title="Export dynamic PDF report for this BioSample"
+            >
+              <span>{exportingPdf ? '⏳' : '📄'}</span>
+              <span>{exportingPdf ? 'Exporting...' : 'Export Results as PDF'}</span>
+            </button>
           </div>
         </div>
+
+        {pdfError && (
+          <div className="amr-alert error" style={{ margin: '0.5rem 0', padding: '0.6rem 1rem' }}>
+            <span>⚠️</span>
+            <span style={{ fontSize: '0.85rem' }}>{pdfError}</span>
+          </div>
+        )}
 
         <div className="isolate-meta-grid">
           <div className="isolate-meta-item">
