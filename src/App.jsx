@@ -10,6 +10,8 @@ import CRISPRFinder from './components/CRISPRFinder';
 import PrimerDesigner from './components/PrimerDesigner';
 import LandingPage from './components/LandingPage';
 import AMROverview from './components/AMR/AMROverview';
+import BioSampleAnalysis from './components/AMR/BioSampleAnalysis';
+import EvidenceReconciliation from './components/AMR/EvidenceReconciliation';
 
 
 // Loading Spinner Component
@@ -38,6 +40,8 @@ const ONBOARDING_PREF_KEY = 'dna_analyzer_onboarding_opt_out';
 function App() {
   // Navigation branch state ('landing' | 'dna' | 'amr')
   const [currentBranch, setCurrentBranch] = useState('landing');
+  // AMR workspace sub-tab ('overview' | 'analysis')
+  const [amrActiveTab, setAmrActiveTab] = useState('analysis');
 
   // Input state
   const [dna, setDna] = useState("");
@@ -912,10 +916,46 @@ function App() {
         )}
 
         {currentBranch === 'amr' && (
-          <AMROverview
-            onNavigateHome={() => setCurrentBranch('landing')}
-            onNavigateDna={() => setCurrentBranch('dna')}
-          />
+          <div className="amr-workspace fade-in">
+            <div className="amr-tab-nav">
+              <button
+                onClick={() => setAmrActiveTab("overview")}
+                className={`amr-tab-btn ${amrActiveTab === "overview" ? "active" : ""}`}
+              >
+                <span>📋</span> Overview
+              </button>
+              <button
+                onClick={() => setAmrActiveTab("analysis")}
+                className={`amr-tab-btn ${amrActiveTab === "analysis" ? "active" : ""}`}
+              >
+                <span>🔬</span> BioSample Analysis &amp; Concordance
+              </button>
+              <button
+                onClick={() => setAmrActiveTab("reconciliation")}
+                className={`amr-tab-btn ${amrActiveTab === "reconciliation" ? "active" : ""}`}
+              >
+                <span>⚖️</span> Evidence Reconciliation
+              </button>
+            </div>
+
+            {amrActiveTab === 'overview' && (
+              <AMROverview
+                onNavigateAnalysis={() => setAmrActiveTab('analysis')}
+                onNavigateHome={() => setCurrentBranch('landing')}
+                onNavigateDna={() => setCurrentBranch('dna')}
+              />
+            )}
+
+            {amrActiveTab === 'analysis' && (
+              <BioSampleAnalysis />
+            )}
+
+            {amrActiveTab === 'reconciliation' && (
+              <EvidenceReconciliation
+                onNavigateAnalysis={() => setAmrActiveTab('analysis')}
+              />
+            )}
+          </div>
         )}
 
         {currentBranch === 'dna' && (

@@ -280,6 +280,33 @@
   transform: translateY(-1px);
 }
 
+.amr-disclaimer-card {
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 1.25rem 1.75rem;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.amr-disclaimer-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  color: #94a3b8;
+  margin-bottom: 0.4rem;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.amr-disclaimer-text {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #64748b;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+}
+
 @media (max-width: 768px) {
   .amr-flow-outcomes {
     grid-template-columns: repeat(2, 1fr);

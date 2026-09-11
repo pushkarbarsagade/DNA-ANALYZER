@@ -1,0 +1,541 @@
+/* Concordance Dashboard Styles */
+
+.concordance-dashboard {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ISOLATE HEADER CARD */
+.isolate-header-card {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.isolate-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 1rem;
+}
+
+.isolate-title-area {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.isolate-accession-badge {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #38bdf8;
+  letter-spacing: 0.5px;
+}
+
+.isolate-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.isolate-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.isolate-meta-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #64748b;
+  font-family: 'Inter', sans-serif;
+}
+
+.isolate-meta-val {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  font-family: 'Inter', sans-serif;
+}
+
+.isolate-genotypes-box {
+  background: rgba(11, 18, 32, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  margin-top: 0.5rem;
+}
+
+.genotype-tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.4rem;
+}
+
+.genotype-tag {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #7dd3fc;
+  font-family: 'Courier New', monospace;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+}
+
+/* SUMMARY METRICS GRID */
+.metrics-grid-four {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.metric-card-four {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.metric-card-four:hover {
+  transform: translateY(-2px);
+}
+
+.metric-card-four.concordant {
+  border-top: 4px solid #10b981;
+}
+
+.metric-card-four.discordant {
+  border-top: 4px solid #ef4444;
+}
+
+.metric-card-four.not-comparable {
+  border-top: 4px solid #94a3b8;
+}
+
+.metric-card-four.not-evaluable {
+  border-top: 4px solid #f59e0b;
+}
+
+.metric-card-four.total {
+  border-top: 4px solid #38bdf8;
+}
+
+.metric-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.metric-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #94a3b8;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.metric-value-num {
+  font-size: 2.2rem;
+  font-weight: 800;
+  font-family: 'Montserrat', sans-serif;
+  margin-bottom: 0.35rem;
+}
+
+.metric-card-four.concordant .metric-value-num {
+  color: #10b981;
+}
+
+.metric-card-four.discordant .metric-value-num {
+  color: #ef4444;
+}
+
+.metric-card-four.not-comparable .metric-value-num {
+  color: #94a3b8;
+}
+
+.metric-card-four.not-evaluable .metric-value-num {
+  color: #f59e0b;
+}
+
+.metric-card-four.total .metric-value-num {
+  color: #38bdf8;
+}
+
+.metric-desc {
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #64748b;
+  font-family: 'Inter', sans-serif;
+}
+
+/* TOTAL RECONCILIATION BAR */
+.reconciliation-card {
+  background: rgba(11, 18, 32, 0.8);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 10px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.reconciliation-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #38bdf8;
+  font-family: 'Montserrat', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.reconciliation-formula {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  flex-wrap: wrap;
+}
+
+.formula-part {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  background: rgba(15, 23, 42, 0.8);
+}
+
+.formula-part.conc {
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.formula-part.disc {
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.formula-part.notcomp {
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.formula-part.noteval {
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.formula-part.total {
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  font-weight: 700;
+}
+
+.formula-op {
+  color: #64748b;
+  font-weight: 700;
+}
+
+/* WHOLE-ISOLATE EMPTY STATE */
+.whole-isolate-empty-state {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.empty-state-icon {
+  font-size: 2.5rem;
+  color: #f59e0b;
+}
+
+.empty-state-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.empty-state-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #94a3b8;
+  max-width: 600px;
+  font-family: 'Inter', sans-serif;
+}
+
+.empty-state-status-badge {
+  display: inline-block;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #f59e0b;
+  padding: 0.4rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* FILTERS SECTION */
+.table-controls-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.table-filter-chips {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  padding: 0.45rem 0.9rem;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.6);
+  color: #94a3b8;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s ease;
+}
+
+.filter-chip:hover {
+  background: rgba(30, 41, 59, 0.8);
+  color: #e2e8f0;
+}
+
+.filter-chip.active {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: rgba(56, 189, 248, 0.5);
+  color: #38bdf8;
+  font-weight: 700;
+}
+
+/* COMPARISON TABLE */
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.7);
+}
+
+.concordance-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-family: 'Inter', sans-serif;
+}
+
+.concordance-table th {
+  background: rgba(11, 18, 32, 0.9);
+  color: #cbd5e1;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 0.9rem 1.15rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: 'Montserrat', sans-serif;
+}
+
+.concordance-table td {
+  padding: 0.9rem 1.15rem;
+  font-size: 0.88rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: #e2e8f0;
+  vertical-align: top;
+}
+
+.concordance-table tr:last-child td {
+  border-bottom: none;
+}
+
+.concordance-table tr:hover td {
+  background: rgba(30, 41, 59, 0.4);
+}
+
+/* DISCORDANCE HIGHLIGHTING */
+.concordance-table tr.row-discordant td {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.concordance-table tr.row-discordant:hover td {
+  background: rgba(239, 68, 68, 0.14);
+}
+
+.concordance-table tr.row-discordant td:first-child {
+  border-left: 4px solid #ef4444;
+}
+
+.abx-name-cell {
+  font-weight: 600;
+  color: #f1f5f9;
+  text-transform: capitalize;
+}
+
+.gene-evidence-code {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  background: rgba(11, 18, 32, 0.6);
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: inline-block;
+}
+
+.gene-evidence-none {
+  color: #64748b;
+  font-style: italic;
+}
+
+/* CLASSIFICATION BADGES */
+.classification-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-family: 'Montserrat', sans-serif;
+  white-space: nowrap;
+}
+
+.classification-badge.concordant {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #10b981;
+}
+
+.classification-badge.discordant {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  color: #ef4444;
+}
+
+.classification-badge.not-comparable {
+  background: rgba(148, 163, 184, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  color: #94a3b8;
+}
+
+.classification-badge.not-evaluable {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #f59e0b;
+}
+
+.ast-phenotype-pill {
+  display: inline-block;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.ast-phenotype-pill.resistant {
+  color: #ef4444;
+}
+
+.ast-phenotype-pill.susceptible {
+  color: #10b981;
+}
+
+.ast-phenotype-pill.intermediate {
+  color: #f59e0b;
+}
+
+.mic-subtext {
+  display: block;
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.2rem;
+}
+
+.eval-reason-text {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #94a3b8;
+}
+
+/* RESEARCH VALIDATION FOOTER PANEL */
+.validation-benchmark-panel {
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.benchmark-badge {
+  background: rgba(0, 163, 137, 0.15);
+  border: 1px solid rgba(0, 163, 137, 0.35);
+  color: #00BFA5;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.25rem 0.55rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.benchmark-text {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #94a3b8;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+@media (max-width: 768px) {
+  .metrics-grid-four {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .reconciliation-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

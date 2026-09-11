@@ -22,6 +22,11 @@ export const API_ENDPOINTS = {
   crispr: `${API_BASE_URL}/api/crispr`,
   primers: `${API_BASE_URL}/api/primers`,
   explain: `${API_BASE_URL}/api/explain`,
+  amrValidation: `${API_BASE_URL}/api/amr/validation-dataset`,
+  amrIsolate: `${API_BASE_URL}/api/amr/isolate`,
+  amrCompare: `${API_BASE_URL}/api/amr/compare`,
+  amrReconcile: `${API_BASE_URL}/api/amr/reconcile`,
+  amrExplain: `${API_BASE_URL}/api/amr/explain`,
 };
 
 export const API_CONFIG = {

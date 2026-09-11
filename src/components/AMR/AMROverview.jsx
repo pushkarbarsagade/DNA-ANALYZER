@@ -1,26 +1,26 @@
 import React from 'react';
 import './AMROverview.css';
 
-export default function AMROverview({ onNavigateHome, onNavigateDna }) {
+export default function AMROverview({ onNavigateAnalysis, onNavigateHome, onNavigateDna }) {
   return (
     <div className="amr-overview-container fade-in">
       {/* HEADER SECTION */}
       <header className="amr-overview-header">
-        <div className="amr-overview-badge">Research Module &bull; In Development</div>
-        <h1 className="amr-overview-title">AMR Research</h1>
+        <div className="amr-overview-badge">AMR Research Module &bull; Phase 4</div>
+        <h1 className="amr-overview-title">Antimicrobial Resistance Research</h1>
         <p className="amr-overview-explanation">
-          Antimicrobial resistance can be studied by comparing resistance-associated genomic determinants with experimentally observed antibiotic susceptibility. This research module is being developed to evaluate those relationships at the isolate level and identify potentially discordant genotype–phenotype observations.
+          Detection of a resistance-associated genomic determinant does not necessarily guarantee phenotypic resistance. This module evaluates documented genotype–antibiotic relationships against isolate-level AST observations and highlights potentially discordant cases.
         </p>
       </header>
 
-      {/* DIAGRAM SECTION */}
+      {/* WORKFLOW ARCHITECTURE CARD */}
       <section className="amr-diagram-card">
-        <h2 className="amr-diagram-title">Genotype–Phenotype Comparison Architecture</h2>
-        <p className="amr-diagram-subtitle">Standardized evaluation pipeline for isolate resistance profiles</p>
+        <h2 className="amr-diagram-title">Genotype–Phenotype Concordance Pipeline</h2>
+        <p className="amr-diagram-subtitle">Standardized four-state comparison model for isolate resistance determinants</p>
 
         <div className="amr-flow-diagram">
           <div className="amr-flow-box genomic">
-            GENOMIC EVIDENCE (NCBI / AMRFinderPlus)
+            GENOMIC EVIDENCE (NCBI BioSample / AMRFinderPlus)
           </div>
           <div className="amr-flow-arrow">↓</div>
           
@@ -31,10 +31,10 @@ export default function AMROverview({ onNavigateHome, onNavigateDna }) {
 
           <div className="amr-flow-converge">
             <div className="amr-flow-box comparison">
-              ⚖️ COMPARISON &amp; EVALUATION
+              ⚖️ COMPARISON ENGINE
             </div>
             <div className="amr-flow-box phenotype">
-              AST PHENOTYPE (Antibiogram)
+              AST PHENOTYPE (NCBI Antibiogram)
             </div>
           </div>
           <div className="amr-flow-arrow">↓</div>
@@ -56,48 +56,44 @@ export default function AMROverview({ onNavigateHome, onNavigateDna }) {
         </div>
       </section>
 
-      {/* CURRENT RESEARCH STATUS SECTION */}
-      <section className="amr-status-card">
-        <h3 className="amr-status-title">
-          <span>📋</span> Current Research Status
-        </h3>
-        <div className="amr-status-items">
-          <div className="amr-status-item">
-            <span className="amr-status-check complete">✓</span>
-            <div>
-              <strong>Validated backend workflow available</strong>
-              <div style={{ fontSize: '0.84rem', color: '#94a3b8' }}>
-                Standardized comparison engine and isolate classification logic verified across frozen validation isolates.
-              </div>
-            </div>
-          </div>
+      {/* CTA SECTION */}
+      <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+        <button
+          className="amr-nav-btn primary"
+          style={{ margin: '0 auto', fontSize: '1.05rem', padding: '0.9rem 2rem' }}
+          onClick={onNavigateAnalysis}
+        >
+          <span>Analyze a BioSample</span>
+          <span>→</span>
+        </button>
+      </div>
 
-          <div className="amr-status-item">
-            <span className="amr-status-check upcoming">⏳</span>
-            <div>
-              <strong>Interactive AMR analysis interface will be added in the next phase</strong>
-              <div style={{ fontSize: '0.84rem', color: '#94a3b8' }}>
-                Interactive isolate explorer, concordance tables, and discrepancy inspector are queued for Phase 4.
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* RESEARCH DISCLAIMER */}
+      <section className="amr-disclaimer-card">
+        <h3 className="amr-disclaimer-title">Research &amp; Educational Use</h3>
+        <p className="amr-disclaimer-text">
+          This module is intended for educational and preliminary research purposes. Genomic AMR findings and concordance analyses should not be interpreted as clinical diagnoses or treatment recommendations.
+        </p>
       </section>
 
       {/* NAVIGATION CONTROLS */}
       <div className="amr-nav-actions">
-        <button
-          className="amr-nav-btn secondary"
-          onClick={onNavigateHome}
-        >
-          <span>←</span> Back to Platform Hub
-        </button>
-        <button
-          className="amr-nav-btn primary"
-          onClick={onNavigateDna}
-        >
-          Explore DNA Analyzer <span>→</span>
-        </button>
+        {onNavigateHome && (
+          <button
+            className="amr-nav-btn secondary"
+            onClick={onNavigateHome}
+          >
+            <span>←</span> Platform Hub
+          </button>
+        )}
+        {onNavigateDna && (
+          <button
+            className="amr-nav-btn secondary"
+            onClick={onNavigateDna}
+          >
+            DNA Analyzer <span>→</span>
+          </button>
+        )}
       </div>
     </div>
   );

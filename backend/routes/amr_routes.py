@@ -212,3 +212,266 @@ def compare_genotype_phenotype():
         "comparisons": comparisons,
         "summary_metrics": metrics
     }), 200
+
+
+# ==============================================================================
+# PHASE 5: EVIDENCE RECONCILIATION & AI EXPLANATION ENDPOINTS
+# ==============================================================================
+
+try:
+    from services.amr_reconciliation import reconcile_isolate_evidence
+except ImportError:
+    from backend.services.amr_reconciliation import reconcile_isolate_evidence
+
+import os
+import requests
+
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+
+
+@amr_bp.route("/reconcile", methods=["POST"])
+def reconcile_evidence():
+    """
+    POST /api/amr/reconcile
+
+    Deterministically reconciles Genomic Evidence, NCBI AST observations,
+    and optional User Laboratory Evidence for an isolate.
+
+    Payload format:
+    {
+      "biosample": "SAMN03177675",
+      "user_lab": [
+        {
+          "antibiotic": "ceftriaxone",
+          "phenotype": "Resistant",
+          "mic": "16 ug/mL",
+          "method": "MIC"
+        }
+      ]
+    }
+    """
+    data = request.get_json(silent=True)
+    if data is None:
+        return jsonify({
+            "error": "No JSON data provided",
+            "details": "Request body must be valid JSON"
+        }), 400
+
+    if not isinstance(data, dict):
+        return jsonify({
+            "error": "Invalid request structure",
+            "details": "Request body must be a JSON object"
+        }), 400
+
+    biosample = data.get("biosample")
+    if not biosample or not isinstance(biosample, str):
+        return jsonify({
+            "error": "Missing required field",
+            "details": "'biosample' accession string is required"
+        }), 400
+
+    user_lab = data.get("user_lab", [])
+    if not isinstance(user_lab, list):
+        return jsonify({
+            "error": "Invalid request structure",
+            "details": "'user_lab' must be an array of laboratory records"
+        }), 400
+
+    for idx, item in enumerate(user_lab):
+        if not isinstance(item, dict):
+            return jsonify({
+                "error": "Invalid request structure",
+                "details": f"User lab record at index {idx} must be a JSON object"
+            }), 400
+        if "antibiotic" not in item:
+            return jsonify({
+                "error": "Missing required field in user lab record",
+                "details": f"User lab record at index {idx} missing 'antibiotic' field"
+            }), 400
+
+    acc_clean = biosample.strip().upper()
+    try:
+        fixture_data = _load_validation_fixture()
+    except Exception as e:
+        return jsonify({"error": "Failed to read validation fixture", "details": str(e)}), 500
+
+    matched_iso = next(
+        (i for i in fixture_data.get("isolates", []) if i.get("biosample_accession", "").upper() == acc_clean),
+        None
+    )
+
+    if not matched_iso:
+        return jsonify({
+            "error": "BioSample not available in frozen validation dataset",
+            "biosample": biosample
+        }), 404
+
+    # Execute deterministic evidence reconciliation
+    reconciliation_result = reconcile_isolate_evidence(matched_iso, user_lab)
+
+    return jsonify({
+        "status": "success",
+        **reconciliation_result
+    }), 200
+
+
+@amr_bp.route("/explain", methods=["POST"])
+def explain_reconciliation():
+    """
+    POST /api/amr/explain
+
+    Generates a controlled, research-oriented explanation of DETERMINISTIC
+    reconciliation findings. AI only explains pre-calculated facts and
+    never determines scientific classifications or provides clinical advice.
+
+    Payload format:
+    {
+      "biosample": "SAMN03177675",
+      "findings": [ ... ]
+    }
+    """
+    data = request.get_json(silent=True)
+    if data is None:
+        return jsonify({
+            "error": "No JSON data provided",
+            "details": "Request body must be valid JSON"
+        }), 400
+
+    if not isinstance(data, dict):
+        return jsonify({
+            "error": "Invalid request structure",
+            "details": "Request body must be a JSON object"
+        }), 400
+
+    findings = data.get("findings")
+    if findings is None or not isinstance(findings, list):
+        return jsonify({
+            "error": "Missing or invalid 'findings' field",
+            "details": "'findings' must be an array of structured reconciliation findings"
+        }), 400
+
+    biosample = data.get("biosample", "Selected BioSample")
+
+    # Format structured summary for AI or deterministic fallback
+    concordant_items = []
+    conflict_items = []
+    not_comparable_items = []
+
+    for f in findings:
+        abx = f.get("antibiotic", "Unknown")
+        status = f.get("reconciliation_status", "")
+        gen_genes = f.get("genomic_evidence", {}).get("evidence_str", "(none)")
+        ncbi_ph = f.get("ncbi_ast", {}).get("phenotype", "N/A")
+        user_ph = f.get("user_lab", {}).get("phenotype", "Not supplied")
+
+        if f.get("has_conflict"):
+            conflict_items.append(
+                f"- {abx}: Status={status}. Genomic={gen_genes}, NCBI AST={ncbi_ph}, User Lab={user_ph}."
+            )
+        elif "concordant" in status.lower():
+            concordant_items.append(
+                f"- {abx}: Status={status}. Genomic={gen_genes}, NCBI AST={ncbi_ph}, User Lab={user_ph}."
+            )
+        else:
+            not_comparable_items.append(
+                f"- {abx}: Status={status}. Genomic={gen_genes}."
+            )
+
+    # Deterministic fallback builder
+    def build_deterministic_explanation() -> str:
+        lines = []
+        lines.append(f"### Research Reconciliation Summary for {biosample}\n")
+        lines.append(f"**Evidence Evaluated:** {len(findings)} antibiotic relationships evaluated against genomic determinants and available AST observations.\n")
+
+        if concordant_items:
+            lines.append("#### Concordant Evidence")
+            lines.append("The following antibiotic observations demonstrate agreement between documented genomic resistance determinants and observed AST phenotypes:")
+            lines.extend(concordant_items[:5])
+            lines.append("")
+
+        if conflict_items:
+            lines.append("#### Observed Discrepancies & Conflicts")
+            lines.append("The following cases demonstrate genotype–phenotype discordance or disagreement between testing sources:")
+            lines.extend(conflict_items)
+            lines.append("\n**Possible Research Explanations for Discrepancies:**")
+            lines.append("1. The resistance determinant may not be functionally expressed or may exhibit low transcriptional activity in this isolate.")
+            lines.append("2. Phenotypic susceptibility testing methods (e.g. broth microdilution vs. disk diffusion) or laboratory conditions may vary.")
+            lines.append("3. Genotype–phenotype relationships are not universally deterministic across all isolate backgrounds.")
+            lines.append("4. Curated reference database rules have inherent scope limitations.")
+            lines.append("")
+
+        if not_comparable_items:
+            lines.append("#### Non-Comparable Determinants")
+            lines.append(f"A total of {len(not_comparable_items)} antibiotic observations do not have established genotype-to-antibiotic rules in the current validated rule set. Absence of a mapped gene does not establish phenotypic susceptibility.")
+            lines.append("")
+
+        lines.append("#### Limitations")
+        lines.append("- Analysis is limited to validated reference determinants and supplied antibiograms.")
+        lines.append("- User-provided laboratory results are evaluated as supplied without independent verification.")
+        lines.append("\n---\n*Research interpretation only — not a clinical or diagnostic result.*")
+        return "\n".join(lines)
+
+    # Attempt AI call via Groq if API key is available
+    if GROQ_API_KEY:
+        system_prompt = (
+            "You are an expert bioinformatics research assistant specializing in antimicrobial resistance (AMR). "
+            "Your task is to provide a structured scientific explanation of the provided DETERMINISTIC evidence findings. "
+            "SAFETY & SCIENTIFIC CONSTRAINTS:\n"
+            "1. Explain ONLY the facts provided in the structured findings. Do not alter classifications.\n"
+            "2. Do NOT diagnose patient infections, recommend treatments, or suggest specific antimicrobial therapy.\n"
+            "3. Do NOT invent genes, AST values, or clinical breakpoints.\n"
+            "4. Do NOT infer susceptibility from the absence of a resistance gene.\n"
+            "5. Clearly distinguish observed evidence from possible research explanations.\n"
+            "6. Always conclude with: 'Research interpretation only — not a clinical or diagnostic result.'"
+        )
+
+        user_content = (
+            f"Please explain these deterministic AMR evidence reconciliation findings for BioSample {biosample}:\n\n"
+            f"TOTAL ANTIBIOTICS EVALUATED: {len(findings)}\n"
+            f"CONCORDANT OBSERVATIONS:\n" + ("\n".join(concordant_items) if concordant_items else "None") + "\n\n"
+            f"CONFLICTING / DISCORDANT OBSERVATIONS:\n" + ("\n".join(conflict_items) if conflict_items else "None") + "\n\n"
+            f"NON-COMPARABLE OBSERVATIONS:\n" + ("\n".join(not_comparable_items[:6]) if not_comparable_items else "None") + "\n\n"
+            "Provide structured explanation sections: Summary, Evidence Considered, Observed Agreement/Conflict, Possible Explanations, Limitations, and Research Disclaimer."
+        )
+
+        try:
+            resp = requests.post(
+                GROQ_API_URL,
+                headers={
+                    "Authorization": f"Bearer {GROQ_API_KEY}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "model": "llama-3.3-70b-versatile",
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_content}
+                    ],
+                    "temperature": 0.5,
+                    "max_tokens": 1200
+                },
+                timeout=25
+            )
+            if resp.status_code == 200:
+                ai_text = resp.json().get("choices", [{}])[0].get("message", {}).get("content", "")
+                if ai_text:
+                    return jsonify({
+                        "status": "success",
+                        "explanation": ai_text,
+                        "disclaimer": "Research interpretation only — not a clinical or diagnostic result.",
+                        "ai_provider": "groq"
+                    }), 200
+        except Exception as e:
+            # Fall back safely on error
+            pass
+
+    # Safe deterministic fallback
+    fallback_text = build_deterministic_explanation()
+    return jsonify({
+        "status": "success",
+        "explanation": fallback_text,
+        "disclaimer": "Research interpretation only — not a clinical or diagnostic result.",
+        "ai_provider": "deterministic_fallback"
+    }), 200
+
