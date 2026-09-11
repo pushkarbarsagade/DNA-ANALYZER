@@ -12,6 +12,7 @@ Endpoints:
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -89,51 +90,180 @@ def get_validation_dataset():
     }), 200
 
 
+# ---------------------------------------------------------------------------
+# PHASE 6 — Dynamic BioSample Lookup
+# ---------------------------------------------------------------------------
+
+_ncbi_provider = None
+
+def _get_ncbi_provider():
+    """Lazily import ncbi_provider to avoid import-time network calls."""
+    global _ncbi_provider
+    if _ncbi_provider is None:
+        try:
+            from backend.services import ncbi_provider as _mod
+        except ImportError:
+            from services import ncbi_provider as _mod
+        _ncbi_provider = _mod
+    return _ncbi_provider
+
+_VALIDATION_ACCESSIONS = frozenset({
+    "SAMN03177674",
+    "SAMN03177676",
+    "SAMN03177659",
+    "SAMN03177675",
+    "SAMN03177664",
+})
+
+_AVAILABILITY_STATE_HTTP: Dict[str, int] = {
+    "not_in_pathogen_detection": 404,
+    "no_amr_genotype": 200,
+    "no_ast_data": 200,
+    "biosample_not_found": 404,
+    "ncbi_unavailable": 503,
+    "no_compatible_release": 503,
+}
+
+
 @amr_bp.route("/isolate/<biosample_accession>", methods=["GET"])
 def get_isolate(biosample_accession: str):
     """
     GET /api/amr/isolate/<biosample_accession>
 
-    Returns frozen validation isolate data and calculated concordance results.
-    If the isolate is not in the frozen validation fixture, returns HTTP 404.
-    (No live NCBI retrieval in Phase 2).
+    Phase 6 — Dynamic NCBI BioSample Lookup.
+
+    Routing rules:
+      1. Validate accession format.
+      2. If accession is one of the five frozen validation BioSamples:
+         → return the exact frozen validation result from fixture.
+      3. Otherwise:
+         → call NCBI provider (Pathogen Detection TSV + BioSample efetch).
+         → run the existing AMR comparison engine on the retrieved data.
+         → return the result with provenance metadata.
     """
     acc_clean = (biosample_accession or "").strip().upper()
     if not acc_clean:
         return jsonify({"error": "BioSample accession is required"}), 400
 
-    try:
-        fixture_data = _load_validation_fixture()
-    except Exception as e:
-        return jsonify({"error": "Failed to read validation fixture", "details": str(e)}), 500
-
-    matched_iso = next(
-        (i for i in fixture_data.get("isolates", []) if i.get("biosample_accession", "").upper() == acc_clean),
-        None
-    )
-
-    if not matched_iso:
+    # Gate 1: Security & malformed input check (alphanumeric, hyphen, underscore, dot only, 3-50 chars)
+    if not re.match(r'^[A-Z0-9_.-]{3,50}$', acc_clean):
         return jsonify({
-            "error": "BioSample not available in frozen validation dataset",
-            "biosample": biosample_accession
+            "error": "Invalid BioSample accession format",
+            "details": "Accession must be 3-50 alphanumeric characters (hyphens/underscores/dots allowed).",
+            "biosample": biosample_accession,
+        }), 400
+
+    # Gate 2: Frozen validation fixture (exact five BioSamples)
+    if acc_clean in _VALIDATION_ACCESSIONS:
+        try:
+            fixture_data = _load_validation_fixture()
+        except Exception as e:
+            return jsonify({"error": "Failed to read validation fixture", "details": str(e)}), 500
+
+        matched_iso = next(
+            (i for i in fixture_data.get("isolates", [])
+             if i.get("biosample_accession", "").upper() == acc_clean),
+            None,
+        )
+        if not matched_iso:
+            return jsonify({
+                "error": "Validation fixture missing expected BioSample",
+                "biosample": acc_clean,
+            }), 500
+
+        tsv_row = matched_iso.get("raw_genotype_row", {})
+        ast_rows = matched_iso.get("ast_records", [])
+        comps = compare([tsv_row], ast_rows)
+        metrics = calculate_concordance_metrics(comps)
+
+        return jsonify({
+            "status": "success",
+            "data_source": "validation_fixture",
+            "data_source_label": "DNA Analyzer Validation Dataset",
+            "biosample_accession": matched_iso.get("biosample_accession"),
+            "assembly_accession": matched_iso.get("assembly_accession"),
+            "organism": matched_iso.get("organism"),
+            "amr_genotypes": matched_iso.get("amr_genotypes"),
+            "ast_records": ast_rows,
+            "comparisons": comps,
+            "summary_metrics": metrics,
+        }), 200
+
+    # Gate 3: If accession does not match standard NCBI accession pattern (e.g. UNKNOWN_BIOSAMPLE)
+    ncbi_prov = _get_ncbi_provider()
+    if not ncbi_prov.validate_accession(acc_clean):
+        return jsonify({
+            "error": f"BioSample {acc_clean} not found in NCBI Pathogen Detection",
+            "availability_state": "not_in_pathogen_detection",
+            "biosample": biosample_accession,
         }), 404
 
-    tsv_row = matched_iso.get("raw_genotype_row", {})
-    ast_rows = matched_iso.get("ast_records", [])
+    # Gate 4: Dynamic NCBI lookup
+    try:
+        provider_result = ncbi_prov.lookup_biosample(acc_clean)
+    except Exception as e:
+        return jsonify({
+            "error": "Unexpected error during NCBI lookup",
+            "details": str(e),
+            "biosample": acc_clean,
+        }), 500
 
-    comps = compare([tsv_row], ast_rows)
+    state = provider_result.get("state", "ncbi_unavailable")
+    pdg_release = provider_result.get("pdg_release")
+    data_source_label = "NCBI Pathogen Detection"
+    if pdg_release:
+        data_source_label += f" (release {pdg_release})"
+
+    if state in ("no_amr_genotype", "no_ast_data"):
+        return jsonify({
+            "status": "partial",
+            "data_source": "ncbi_pathogen_detection",
+            "data_source_label": data_source_label,
+            "pdg_release": pdg_release,
+            "availability_state": state,
+            "availability_message": provider_result.get("availability_message", ""),
+            "biosample_accession": acc_clean,
+            "assembly_accession": provider_result.get("assembly_accession", ""),
+            "organism": provider_result.get("organism", ""),
+            "amr_genotypes": provider_result.get("amr_genotypes", ""),
+            "amrfinder_version": provider_result.get("amrfinder_version", ""),
+        }), 200
+
+    if state != "ok":
+        http_code = _AVAILABILITY_STATE_HTTP.get(state, 500)
+        error_msg = provider_result.get(
+            "availability_message",
+            f"NCBI lookup returned state: {state}",
+        )
+        return jsonify({
+            "error": error_msg,
+            "availability_state": state,
+            "biosample": acc_clean,
+            "data_source": "ncbi_pathogen_detection",
+            "pdg_release": pdg_release,
+        }), http_code
+
+    raw_genotype_row = provider_result.get("raw_genotype_row", {})
+    ast_records = provider_result.get("ast_records", [])
+
+    comps = compare([raw_genotype_row], ast_records)
     metrics = calculate_concordance_metrics(comps)
 
     return jsonify({
         "status": "success",
-        "biosample_accession": matched_iso.get("biosample_accession"),
-        "assembly_accession": matched_iso.get("assembly_accession"),
-        "organism": matched_iso.get("organism"),
-        "amr_genotypes": matched_iso.get("amr_genotypes"),
-        "ast_records": ast_rows,
+        "data_source": "ncbi_pathogen_detection",
+        "data_source_label": data_source_label,
+        "pdg_release": pdg_release,
+        "amrfinder_version": provider_result.get("amrfinder_version", ""),
+        "biosample_accession": acc_clean,
+        "assembly_accession": provider_result.get("assembly_accession", ""),
+        "organism": provider_result.get("organism", ""),
+        "amr_genotypes": provider_result.get("amr_genotypes", ""),
+        "ast_records": ast_records,
         "comparisons": comps,
-        "summary_metrics": metrics
+        "summary_metrics": metrics,
     }), 200
+
 
 
 @amr_bp.route("/compare", methods=["POST"])

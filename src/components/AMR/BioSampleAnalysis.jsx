@@ -36,7 +36,7 @@ export default function BioSampleAnalysis() {
       const endpointUrl = `${API_ENDPOINTS.amrIsolate}/${encodeURIComponent(cleanAcc)}`;
       const response = await axios.get(endpointUrl, API_CONFIG);
 
-      if (response.data && response.data.status === 'success') {
+      if (response.data && (response.data.status === 'success' || response.data.status === 'partial')) {
         setResult(response.data);
       } else {
         setError('Unexpected API response format.');
@@ -44,7 +44,21 @@ export default function BioSampleAnalysis() {
     } catch (err) {
       if (err.response) {
         if (err.response.status === 404) {
-          setError('BioSample not available in the current validation dataset.');
+          setError(
+            err.response.data?.error ||
+            'BioSample not found in NCBI Pathogen Detection or validation fixture.'
+          );
+        } else if (err.response.status === 503) {
+          setError(
+            err.response.data?.error ||
+            'NCBI Pathogen Detection or BioSample service is currently unreachable. Please retry shortly.'
+          );
+        } else if (err.response.status === 400) {
+          setError(
+            err.response.data?.details ||
+            err.response.data?.error ||
+            'Invalid BioSample accession format.'
+          );
         } else {
           setError(
             err.response.data?.error ||
@@ -79,7 +93,7 @@ export default function BioSampleAnalysis() {
       <div className="analysis-header-section">
         <h2 className="analysis-main-title">BioSample AMR Analysis</h2>
         <p className="analysis-sub-text">
-          Evaluate documented genotype–phenotype relationships for NCBI BioSample isolates against observed antibiograms.
+          Evaluate documented genotype–phenotype relationships for NCBI BioSample isolates against observed antibiograms. Supports live NCBI Pathogen Detection lookups for arbitrary BioSample accessions.
         </p>
       </div>
 
@@ -91,7 +105,7 @@ export default function BioSampleAnalysis() {
               <input
                 type="text"
                 className="biosample-text-input"
-                placeholder="Enter NCBI BioSample accession (e.g. SAMN03177675)"
+                placeholder="Enter NCBI BioSample accession (e.g. SAMN03177675 or any E. coli BioSample)"
                 value={accession}
                 onChange={(e) => setAccession(e.target.value)}
                 disabled={loading}
@@ -130,7 +144,7 @@ export default function BioSampleAnalysis() {
         {/* Validated Examples Section */}
         <div className="examples-section">
           <div className="examples-header-label">
-            Five-Isolate Preliminary Validation Set
+            Five-Isolate Preliminary Validation Benchmarks
           </div>
           <div className="example-chips-list">
             {VALIDATION_EXAMPLES.map((ex) => (
@@ -154,7 +168,7 @@ export default function BioSampleAnalysis() {
         <div className="amr-alert error slide-down">
           <span style={{ fontSize: '1.2rem', fontWeight: 700 }}>!</span>
           <div>
-            <strong>Validation Error:</strong> {error}
+            <strong>Error:</strong> {error}
           </div>
         </div>
       )}
@@ -164,7 +178,9 @@ export default function BioSampleAnalysis() {
         <div className="amr-loading-container">
           <div className="amr-loading-spinner" />
           <div className="amr-loading-text">
-            Evaluating genomic determinants against AST records for isolate...
+            {VALIDATION_EXAMPLES.some((v) => v.accession === (accession || '').trim().toUpperCase())
+              ? 'Evaluating genomic determinants against AST records for validation isolate...'
+              : 'Querying NCBI Pathogen Detection and BioSample database...'}
           </div>
         </div>
       )}

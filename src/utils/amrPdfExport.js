@@ -24,7 +24,11 @@ export function exportAmrReportPdf(isolateData) {
     organism = 'Escherichia coli',
     amr_genotypes = '',
     comparisons = [],
-    summary_metrics = {}
+    summary_metrics = {},
+    data_source = '',
+    data_source_label = '',
+    pdg_release = '',
+    amrfinder_version = ''
   } = isolateData;
 
   const totalAst = summary_metrics.total_ast_records ?? comparisons.length;
@@ -51,6 +55,10 @@ export function exportAmrReportPdf(isolateData) {
     (biosample_accession || '').trim().toUpperCase()
   );
 
+  const provenanceStr = data_source_label || (
+    isValidationIsolate ? 'DNA Analyzer Validation Dataset' : 'NCBI Pathogen Detection'
+  );
+
   const doc = new jsPDF({
     orientation: 'portrait',
     unit: 'mm',
@@ -63,7 +71,6 @@ export function exportAmrReportPdf(isolateData) {
   let currentY = 14;
 
   // --- 1. HEADER SECTION ---
-  // Background Header Banner
   doc.setFillColor(15, 23, 42); // #0f172a
   doc.rect(margin, currentY, pageWidth - margin * 2, 22, 'F');
 
@@ -92,15 +99,15 @@ export function exportAmrReportPdf(isolateData) {
   // --- 2. BIOSAMPLE METADATA & GENOTYPES ---
   doc.setFillColor(248, 250, 252); // #f8fafc
   doc.setDrawColor(226, 232, 240); // #e2e8f0
-  doc.rect(margin, currentY, pageWidth - margin * 2, 26, 'FD');
+  doc.rect(margin, currentY, pageWidth - margin * 2, 32, 'FD');
 
   doc.setTextColor(71, 85, 105);
   doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
-  doc.text('SAMPLE METADATA', margin + 4, currentY + 6);
+  doc.text('SAMPLE METADATA & PROVENANCE', margin + 4, currentY + 6);
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
+  doc.setFontSize(8.5);
   doc.setTextColor(30, 41, 59);
 
   // Col 1: BioSample
@@ -121,15 +128,29 @@ export function exportAmrReportPdf(isolateData) {
   doc.setFont('helvetica', 'normal');
   doc.text(`${assembly_accession || 'N/A'}`, margin + 148, currentY + 12);
 
-  // Row 2: Genomic AMR Determinants
+  // Row 2: Data Source & AMRFinderPlus version
   doc.setFont('helvetica', 'bold');
-  doc.text('Genotypes:', margin + 4, currentY + 20);
+  doc.text('Source:', margin + 4, currentY + 18);
+  doc.setFont('helvetica', 'normal');
+  const sourceText = pdg_release ? `${provenanceStr}` : provenanceStr;
+  doc.text(sourceText, margin + 25, currentY + 18);
+
+  if (amrfinder_version) {
+    doc.setFont('helvetica', 'bold');
+    doc.text('AMRFinder+:', margin + 130, currentY + 18);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`v${amrfinder_version}`, margin + 154, currentY + 18);
+  }
+
+  // Row 3: Genomic AMR Determinants
+  doc.setFont('helvetica', 'bold');
+  doc.text('Genotypes:', margin + 4, currentY + 25);
   doc.setFont('helvetica', 'normal');
   const genesText = genotypeList.length > 0 ? genotypeList.join(', ') : 'None detected';
   const splitGenes = doc.splitTextToSize(genesText, pageWidth - margin * 2 - 28);
-  doc.text(splitGenes, margin + 25, currentY + 20);
+  doc.text(splitGenes, margin + 25, currentY + 25);
 
-  currentY += 30;
+  currentY += 36;
 
   // --- 3. AST SUMMARY METRICS ---
   doc.setTextColor(15, 23, 42);

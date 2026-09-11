@@ -15,7 +15,14 @@ export default function ConcordanceDashboard({ isolateData }) {
     organism,
     amr_genotypes,
     comparisons = [],
-    summary_metrics = {}
+    summary_metrics = {},
+    status = 'success',
+    availability_state,
+    availability_message,
+    data_source,
+    data_source_label,
+    pdg_release,
+    amrfinder_version
   } = isolateData;
 
   const totalAstRecords = summary_metrics.total_ast_records ?? comparisons.length;
@@ -42,8 +49,23 @@ export default function ConcordanceDashboard({ isolateData }) {
     ? amr_genotypes.split(',').map((g) => g.trim()).filter(Boolean)
     : [];
 
-  // Whole-isolate empty state check (Total AST Records == 0)
-  if (totalAstRecords === 0) {
+  const sourceBadgeText = data_source_label || (
+    data_source === 'validation_fixture' ? 'DNA Analyzer Validation Dataset' : 'NCBI Pathogen Detection'
+  );
+
+  // Partial availability state handling (e.g. no_amr_genotype or no_ast_data)
+  if (status === 'partial' || totalAstRecords === 0) {
+    const isPartial = status === 'partial';
+    const emptyTitle = isPartial && availability_state === 'no_amr_genotype'
+      ? 'No AMR Genotype Data Available'
+      : isPartial && availability_state === 'no_ast_data'
+      ? 'No Eligible AST Phenotype Records Available'
+      : 'No Eligible AST Data Available';
+
+    const emptyDesc = availability_message || (
+      'Genomic AMR information may be available for this BioSample, but no eligible S/I/R AST records were found for genotype–phenotype comparison.'
+    );
+
     return (
       <div className="concordance-dashboard fade-in">
         {/* Isolate Header */}
@@ -52,6 +74,9 @@ export default function ConcordanceDashboard({ isolateData }) {
             <div className="isolate-title-area">
               <span style={{ fontSize: '1.2rem' }}>🔬</span>
               <span className="isolate-accession-badge">{biosample_accession}</span>
+              <span className={`isolate-source-tag ${data_source === 'validation_fixture' ? 'fixture' : 'ncbi'}`}>
+                {sourceBadgeText}
+              </span>
             </div>
             <div className="isolate-header-actions">
               <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
@@ -75,21 +100,42 @@ export default function ConcordanceDashboard({ isolateData }) {
               <span className="isolate-meta-val">{assembly_accession || 'N/A'}</span>
             </div>
             <div className="isolate-meta-item">
+              <span className="isolate-meta-label">Data Source</span>
+              <span className="isolate-meta-val" style={{ fontSize: '0.84rem' }}>{sourceBadgeText}</span>
+            </div>
+            {pdg_release && (
+              <div className="isolate-meta-item">
+                <span className="isolate-meta-label">Pathogen Detection Release</span>
+                <span className="isolate-meta-val" style={{ fontSize: '0.84rem' }}>{pdg_release}</span>
+              </div>
+            )}
+            <div className="isolate-meta-item">
               <span className="isolate-meta-label">Total AST Records</span>
-              <span className="isolate-meta-val">0</span>
+              <span className="isolate-meta-val">{totalAstRecords}</span>
             </div>
           </div>
+
+          {genotypeList.length > 0 && (
+            <div className="isolate-genotypes-box">
+              <span className="isolate-meta-label">Detected Genomic AMR Determinants ({genotypeList.length})</span>
+              <div className="genotype-tags-list">
+                {genotypeList.map((g, idx) => (
+                  <span key={idx} className="genotype-tag">{g}</span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Whole Isolate Not Evaluable Notice */}
+        {/* Informational Empty / Partial Notice */}
         <div className="whole-isolate-empty-state">
-          <div className="empty-state-icon">⚠️</div>
-          <h3 className="empty-state-title">No eligible AST data available</h3>
-          <p className="empty-state-text">
-            Genomic AMR information may be available for this BioSample, but no eligible S/I/R AST records were found for genotype–phenotype comparison.
-          </p>
+          <div className="empty-state-icon">
+            {availability_state === 'no_amr_genotype' ? '🧬' : '⚠️'}
+          </div>
+          <h3 className="empty-state-title">{emptyTitle}</h3>
+          <p className="empty-state-text">{emptyDesc}</p>
           <div className="empty-state-status-badge">
-            Comparison status: Not evaluable
+            Status: {availability_state ? availability_state.replace(/_/g, ' ') : 'Not evaluable'}
           </div>
         </div>
       </div>
@@ -110,6 +156,9 @@ export default function ConcordanceDashboard({ isolateData }) {
           <div className="isolate-title-area">
             <span style={{ fontSize: '1.25rem' }}>🔬</span>
             <span className="isolate-accession-badge">{biosample_accession}</span>
+            <span className={`isolate-source-tag ${data_source === 'validation_fixture' ? 'fixture' : 'ncbi'}`}>
+              {sourceBadgeText}
+            </span>
           </div>
           <div className="isolate-header-actions">
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
@@ -142,6 +191,12 @@ export default function ConcordanceDashboard({ isolateData }) {
           <div className="isolate-meta-item">
             <span className="isolate-meta-label">Assembly Accession</span>
             <span className="isolate-meta-val">{assembly_accession || '—'}</span>
+          </div>
+          <div className="isolate-meta-item">
+            <span className="isolate-meta-label">Data Source</span>
+            <span className="isolate-meta-val" style={{ fontSize: '0.84rem' }}>
+              {sourceBadgeText}
+            </span>
           </div>
           <div className="isolate-meta-item">
             <span className="isolate-meta-label">Total AST Records</span>
