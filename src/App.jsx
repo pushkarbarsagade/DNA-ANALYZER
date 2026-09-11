@@ -8,6 +8,8 @@ import MutationFinder from './components/MutationFinder';
 import SequenceAlignment from './components/SequenceAlignment';
 import CRISPRFinder from './components/CRISPRFinder';
 import PrimerDesigner from './components/PrimerDesigner';
+import LandingPage from './components/LandingPage';
+import AMROverview from './components/AMR/AMROverview';
 
 
 // Loading Spinner Component
@@ -34,6 +36,9 @@ const SAMPLE_SEQUENCES = {
 const ONBOARDING_PREF_KEY = 'dna_analyzer_onboarding_opt_out';
 
 function App() {
+  // Navigation branch state ('landing' | 'dna' | 'amr')
+  const [currentBranch, setCurrentBranch] = useState('landing');
+
   // Input state
   const [dna, setDna] = useState("");
   const [error, setError] = useState("");
@@ -156,14 +161,14 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (tourOptOut || showOnboarding || didAutoLaunchTour) return;
+    if (tourOptOut || showOnboarding || didAutoLaunchTour || currentBranch !== 'dna') return;
     const timer = setTimeout(() => {
       setTourStep(0);
       setShowOnboarding(true);
       setDidAutoLaunchTour(true);
     }, 1100);
     return () => clearTimeout(timer);
-  }, [tourOptOut, showOnboarding, didAutoLaunchTour]);
+  }, [tourOptOut, showOnboarding, didAutoLaunchTour, currentBranch]);
 
   useEffect(() => {
     if (!showOnboarding) {
@@ -245,6 +250,7 @@ function App() {
   }, [showOnboarding, tourStep]);
 
   const startOnboarding = () => {
+    setCurrentBranch('dna');
     setShowHelp(false);
     setDidAutoLaunchTour(true);
     setTourStep(0);
@@ -837,15 +843,27 @@ function App() {
       <div className="container">
         <header className="header fade-in">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
-            <div>
-              <h1 className="title" style={{ fontFamily: 'Montserrat, sans-serif', margin: 0 }}>
-                DNA Sequence Analyzer
+            <button
+              onClick={() => setCurrentBranch('landing')}
+              className="platform-brand-btn"
+              title="Return to Platform Hub"
+            >
+              <h1 className="title" style={{ fontFamily: 'Montserrat, sans-serif', margin: 0, textAlign: 'left' }}>
+                DNA Analyzer
               </h1>
-              <p className="subtitle" style={{ margin: '0.5rem 0 0 0' }}>
-                Professional Bioinformatics Analysis Tool
+              <p className="subtitle" style={{ margin: '0.5rem 0 0 0', textAlign: 'left' }}>
+                Integrated Bioinformatics &amp; AMR Research Platform
               </p>
-            </div>
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            </button>
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              {currentBranch !== 'landing' && (
+                <button
+                  onClick={() => setCurrentBranch('landing')}
+                  className="platform-back-home-btn"
+                >
+                  <span>🏠</span> Platform Hub
+                </button>
+              )}
               <button
                 onClick={startOnboarding}
                 className="quick-action-btn"
@@ -864,225 +882,264 @@ function App() {
           </div>
         </header>
 
-        <div className="input-section fade-in" style={{ animationDelay: '0.1s' }}>
-          <div className="input-header">
-            <label className="input-label" style={{ fontFamily: 'Inter, sans-serif' }}>
-              DNA Sequence Input
-            </label>
-            <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
+        {currentBranch !== 'landing' && (
+          <div className="platform-workspace-bar fade-in">
+            <div className="platform-workspace-tabs">
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowSampleMenu(!showSampleMenu);
-                }}
-                className="quick-action-btn sample-shine"
-                data-tour="load-sample"
+                className={`workspace-nav-tab ${currentBranch === 'dna' ? 'active dna' : ''}`}
+                onClick={() => setCurrentBranch('dna')}
               >
-                Load Sample
+                <span>🧬</span> DNA &amp; Genomic Analysis
               </button>
-              {showSampleMenu && (
-                <div className="sample-menu slide-down" onClick={(e) => e.stopPropagation()}>
-                  {Object.entries(SAMPLE_SEQUENCES).map(([key, sample]) => (
-                    <div
-                      key={key}
-                      className="sample-menu-item"
-                      onClick={() => loadSampleSequence(key)}
-                    >
-                      {sample.name}
+              <button
+                className={`workspace-nav-tab ${currentBranch === 'amr' ? 'active amr' : ''}`}
+                onClick={() => setCurrentBranch('amr')}
+              >
+                <span>🔬</span> AMR Research
+              </button>
+            </div>
+            <button
+              className="platform-back-home-btn"
+              onClick={() => setCurrentBranch('landing')}
+            >
+              <span>←</span> Platform Hub
+            </button>
+          </div>
+        )}
+
+        {currentBranch === 'landing' && (
+          <LandingPage onSelectBranch={(branch) => setCurrentBranch(branch)} />
+        )}
+
+        {currentBranch === 'amr' && (
+          <AMROverview
+            onNavigateHome={() => setCurrentBranch('landing')}
+            onNavigateDna={() => setCurrentBranch('dna')}
+          />
+        )}
+
+        {currentBranch === 'dna' && (
+          <>
+            <div className="input-section fade-in" style={{ animationDelay: '0.1s' }}>
+              <div className="input-header">
+                <label className="input-label" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  DNA Sequence Input
+                </label>
+                <div style={{ display: 'flex', gap: '0.5rem', position: 'relative' }}>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowSampleMenu(!showSampleMenu);
+                    }}
+                    className="quick-action-btn sample-shine"
+                    data-tour="load-sample"
+                  >
+                    Load Sample
+                  </button>
+                  {showSampleMenu && (
+                    <div className="sample-menu slide-down" onClick={(e) => e.stopPropagation()}>
+                      {Object.entries(SAMPLE_SEQUENCES).map(([key, sample]) => (
+                        <div
+                          key={key}
+                          className="sample-menu-item"
+                          onClick={() => loadSampleSequence(key)}
+                        >
+                          {sample.name}
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
+                  <label htmlFor="file-upload" className="upload-btn">
+                    Upload FASTA
+                    <input
+                      id="file-upload"
+                      type="file"
+                      accept=".fasta,.fa,.txt"
+                      onChange={handleFileUpload}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <textarea
+                value={dna}
+                onChange={(e) => setDna(e.target.value)}
+                placeholder="Paste your DNA sequence here (A, T, G, C)..."
+                className="dna-input"
+                data-tour="dna-input"
+                rows={6}
+                disabled={loading}
+                style={{ fontFamily: 'monospace' }}
+              />
+
+              {dna && (
+                <div className="stats-bar slide-down" data-tour="quick-insights">
+                  <div className="stat-item">
+                    <strong>Length:</strong> {stats.length} bp
+                  </div>
+                  <div className="stat-item" style={{ color: '#10B981' }}>
+                    <strong>A:</strong> {stats.a}
+                  </div>
+                  <div className="stat-item" style={{ color: '#F59E0B' }}>
+                    <strong>T:</strong> {stats.t}
+                  </div>
+                  <div className="stat-item" style={{ color: '#3B82F6' }}>
+                    <strong>G:</strong> {stats.g}
+                  </div>
+                  <div className="stat-item" style={{ color: '#EF4444' }}>
+                    <strong>C:</strong> {stats.c}
+                  </div>
                 </div>
               )}
-              <label htmlFor="file-upload" className="upload-btn">
-                Upload FASTA
-                <input
-                  id="file-upload"
-                  type="file"
-                  accept=".fasta,.fa,.txt"
-                  onChange={handleFileUpload}
-                  style={{ display: 'none' }}
-                />
-              </label>
-            </div>
-          </div>
 
-          <textarea
-            value={dna}
-            onChange={(e) => setDna(e.target.value)}
-            placeholder="Paste your DNA sequence here (A, T, G, C)..."
-            className="dna-input"
-            data-tour="dna-input"
-            rows={6}
-            disabled={loading}
-            style={{ fontFamily: 'monospace' }}
-          />
-
-          {dna && (
-            <div className="stats-bar slide-down" data-tour="quick-insights">
-              <div className="stat-item">
-                <strong>Length:</strong> {stats.length} bp
-              </div>
-              <div className="stat-item" style={{ color: '#10B981' }}>
-                <strong>A:</strong> {stats.a}
-              </div>
-              <div className="stat-item" style={{ color: '#F59E0B' }}>
-                <strong>T:</strong> {stats.t}
-              </div>
-              <div className="stat-item" style={{ color: '#3B82F6' }}>
-                <strong>G:</strong> {stats.g}
-              </div>
-              <div className="stat-item" style={{ color: '#EF4444' }}>
-                <strong>C:</strong> {stats.c}
+              <div className="input-footer" style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+                <button
+                  onClick={handleAnalyze}
+                  className="analyze-btn"
+                  data-tour="analyze-btn"
+                  disabled={loading}
+                  style={{ flex: 1, minWidth: '200px' }}
+                >
+                  {loading && <LoadingSpinner />}
+                  {loading ? 'Analyzing Sequence...' : 'Analyze Sequence'}
+                </button>
+                {dna && (
+                  <>
+                    <button
+                      onClick={copySequence}
+                      className="quick-action-btn"
+                      title="Copy to clipboard"
+                    >
+                      Copy
+                    </button>
+                    <button
+                      onClick={downloadSequence}
+                      className="quick-action-btn"
+                      title="Download sequence"
+                    >
+                      Download
+                    </button>
+                    <button
+                      onClick={clearSequence}
+                      className="quick-action-btn"
+                      title="Clear sequence and all results"
+                      style={{ color: '#EF4444' }}
+                    >
+                      Clear All
+                    </button>
+                  </>
+                )}
               </div>
             </div>
-          )}
 
-          <div className="input-footer" style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-            <button
-              onClick={handleAnalyze}
-              className="analyze-btn"
-              data-tour="analyze-btn"
-              disabled={loading}
-              style={{ flex: 1, minWidth: '200px' }}
-            >
-              {loading && <LoadingSpinner />}
-              {loading ? 'Analyzing Sequence...' : 'Analyze Sequence'}
-            </button>
-            {dna && (
-              <>
-                <button
-                  onClick={copySequence}
-                  className="quick-action-btn"
-                  title="Copy to clipboard"
-                >
-                  Copy
-                </button>
-                <button
-                  onClick={downloadSequence}
-                  className="quick-action-btn"
-                  title="Download sequence"
-                >
-                  Download
-                </button>
-                <button
-                  onClick={clearSequence}
-                  className="quick-action-btn"
-                  title="Clear sequence and all results"
-                  style={{ color: '#EF4444' }}
-                >
-                  Clear All
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-
-        {error && (
-          <div className="error-alert slide-down">
-            <span className="error-icon">!</span>
-            {error}
-          </div>
-        )}
-
-        {showSuccessMessage && (
-          <div className="success-toast">
-            <span>✓</span>
-            <span>Analysis completed successfully!</span>
-          </div>
-        )}
-
-        {/* Tools Section - Always Visible */}
-        <div className="results-section fade-in" style={{ animationDelay: '0.2s' }}>
-          <div className="tab-nav">
-            <button
-              onClick={() => setActiveTab("overview")}
-              data-tour="overview-tab"
-              className={`tab-btn ${activeTab === "overview" ? "active" : ""}`}
-              disabled={!overviewResult}
-            >
-              Overview
-            </button>
-            <button
-              onClick={() => setActiveTab("mutations")}
-              data-tour="mutations-tab"
-              className={`tab-btn ${activeTab === "mutations" ? "active" : ""}`}
-            >
-              Mutations
-            </button>
-            <button
-              onClick={() => setActiveTab("alignment")}
-              className={`tab-btn ${activeTab === "alignment" ? "active" : ""}`}
-            >
-              Alignment
-            </button>
-            <button
-              onClick={() => setActiveTab("crispr")}
-              className={`tab-btn ${activeTab === "crispr" ? "active" : ""}`}
-            >
-              CRISPR
-            </button>
-            <button
-              onClick={() => setActiveTab("primers")}
-              className={`tab-btn ${activeTab === "primers" ? "active" : ""}`}
-            >
-              Primers
-            </button>
-
-          </div>
-
-          {/* ============================================================ */}
-          {/* PERSISTENT RESULT RENDERING */}
-          {/* All tool components receive their result state and setter */}
-          {/* as props. This ensures results persist across tab switches. */}
-          {/* ============================================================ */}
-          <div className="tab-content" data-tour="tab-content">
-            {activeTab === "overview" && overviewResult && (
-              <OverviewTab
-                result={overviewResult}
-                originalSequence={dna}
-                onClear={() => clearToolResult('overview')}
-              />
-            )}
-            {activeTab === "overview" && !overviewResult && (
-              <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>
-                <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>
-                  Analyze a DNA sequence to view overview
-                </p>
-                <p style={{ fontSize: '0.9rem' }}>
-                  Enter a sequence above and click "Analyze Sequence"
-                </p>
+            {error && (
+              <div className="error-alert slide-down">
+                <span className="error-icon">!</span>
+                {error}
               </div>
             )}
-            {activeTab === "mutations" && (
-              <MutationFinder
-                result={mutationResult}
-                setResult={setMutationResult}
-                onClear={() => clearToolResult('mutations')}
-              />
+
+            {showSuccessMessage && (
+              <div className="success-toast">
+                <span>✓</span>
+                <span>Analysis completed successfully!</span>
+              </div>
             )}
-            {activeTab === "alignment" && (
-              <SequenceAlignment
-                result={alignmentResult}
-                setResult={setAlignmentResult}
-                onClear={() => clearToolResult('alignment')}
-              />
-            )}
-            {activeTab === "crispr" && (
-              <CRISPRFinder
-                result={crisprResult}
-                setResult={setCrisprResult}
-                onClear={() => clearToolResult('crispr')}
-              />
-            )}
-            {activeTab === "primers" && (
-              <PrimerDesigner
-                result={primerResult}
-                setResult={setPrimerResult}
-                onClear={() => clearToolResult('primers')}
-              />
-            )}
-          </div>
-        </div>
+
+            {/* Tools Section - Always Visible in DNA branch */}
+            <div className="results-section fade-in" style={{ animationDelay: '0.2s' }}>
+              <div className="tab-nav">
+                <button
+                  onClick={() => setActiveTab("overview")}
+                  data-tour="overview-tab"
+                  className={`tab-btn ${activeTab === "overview" ? "active" : ""}`}
+                  disabled={!overviewResult}
+                >
+                  Overview
+                </button>
+                <button
+                  onClick={() => setActiveTab("mutations")}
+                  data-tour="mutations-tab"
+                  className={`tab-btn ${activeTab === "mutations" ? "active" : ""}`}
+                >
+                  Mutations
+                </button>
+                <button
+                  onClick={() => setActiveTab("alignment")}
+                  className={`tab-btn ${activeTab === "alignment" ? "active" : ""}`}
+                >
+                  Alignment
+                </button>
+                <button
+                  onClick={() => setActiveTab("crispr")}
+                  className={`tab-btn ${activeTab === "crispr" ? "active" : ""}`}
+                >
+                  CRISPR
+                </button>
+                <button
+                  onClick={() => setActiveTab("primers")}
+                  className={`tab-btn ${activeTab === "primers" ? "active" : ""}`}
+                >
+                  Primers
+                </button>
+              </div>
+
+              {/* ============================================================ */}
+              {/* PERSISTENT RESULT RENDERING */}
+              {/* All tool components receive their result state and setter */}
+              {/* as props. This ensures results persist across tab switches. */}
+              {/* ============================================================ */}
+              <div className="tab-content" data-tour="tab-content">
+                {activeTab === "overview" && overviewResult && (
+                  <OverviewTab
+                    result={overviewResult}
+                    originalSequence={dna}
+                    onClear={() => clearToolResult('overview')}
+                  />
+                )}
+                {activeTab === "overview" && !overviewResult && (
+                  <div style={{ padding: '3rem', textAlign: 'center', color: '#94a3b8' }}>
+                    <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem' }}>
+                      Analyze a DNA sequence to view overview
+                    </p>
+                    <p style={{ fontSize: '0.9rem' }}>
+                      Enter a sequence above and click "Analyze Sequence"
+                    </p>
+                  </div>
+                )}
+                {activeTab === "mutations" && (
+                  <MutationFinder
+                    result={mutationResult}
+                    setResult={setMutationResult}
+                    onClear={() => clearToolResult('mutations')}
+                  />
+                )}
+                {activeTab === "alignment" && (
+                  <SequenceAlignment
+                    result={alignmentResult}
+                    setResult={setAlignmentResult}
+                    onClear={() => clearToolResult('alignment')}
+                  />
+                )}
+                {activeTab === "crispr" && (
+                  <CRISPRFinder
+                    result={crisprResult}
+                    setResult={setCrisprResult}
+                    onClear={() => clearToolResult('crispr')}
+                  />
+                )}
+                {activeTab === "primers" && (
+                  <PrimerDesigner
+                    result={primerResult}
+                    setResult={setPrimerResult}
+                    onClear={() => clearToolResult('primers')}
+                  />
+                )}
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Help Modal - UPDATED */}
         {showHelp && (
