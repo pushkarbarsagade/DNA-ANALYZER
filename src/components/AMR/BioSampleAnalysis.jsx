@@ -43,29 +43,42 @@ export default function BioSampleAnalysis() {
       }
     } catch (err) {
       if (err.response) {
+        const respData = err.response.data || {};
         if (err.response.status === 404) {
           setError(
-            err.response.data?.error ||
+            respData.error ||
             'BioSample not found in NCBI Pathogen Detection or validation fixture.'
+          );
+        } else if (err.response.status === 504 || respData.availability_state === 'ncbi_timeout') {
+          setError(
+            respData.error ||
+            'NCBI lookup timed out. The upstream data query took too long to complete. Please try again.'
+          );
+        } else if (respData.availability_state === 'dynamic_provider_not_configured') {
+          setError(
+            respData.error ||
+            'Live multi-organism NCBI lookup requires Google BigQuery provider configuration. The five validation isolates remain accessible.'
           );
         } else if (err.response.status === 503) {
           setError(
-            err.response.data?.error ||
-            'NCBI Pathogen Detection or BioSample service is currently unreachable. Please retry shortly.'
+            respData.error ||
+            'NCBI Pathogen Detection or BigQuery service is currently unreachable. Please retry shortly.'
           );
         } else if (err.response.status === 400) {
           setError(
-            err.response.data?.details ||
-            err.response.data?.error ||
+            respData.details ||
+            respData.error ||
             'Invalid BioSample accession format.'
           );
         } else {
           setError(
-            err.response.data?.error ||
-            err.response.data?.details ||
+            respData.error ||
+            respData.details ||
             `Server returned error (${err.response.status}).`
           );
         }
+      } else if (err.code === 'ECONNABORTED' || (err.message && err.message.includes('timeout'))) {
+        setError('Request timed out while waiting for NCBI data. Please verify your connection or try again.');
       } else if (err.request) {
         setError('Unable to connect to the backend server. Please verify the backend service is active.');
       } else {
@@ -93,7 +106,7 @@ export default function BioSampleAnalysis() {
       <div className="analysis-header-section">
         <h2 className="analysis-main-title">BioSample AMR Analysis</h2>
         <p className="analysis-sub-text">
-          Evaluate documented genotype–phenotype relationships for NCBI BioSample isolates against observed antibiograms. Supports live NCBI Pathogen Detection lookups for arbitrary BioSample accessions.
+          Evaluate documented genotype–phenotype relationships for NCBI Pathogen Detection isolates across bacterial organisms. Organism and assembly metadata are detected automatically from NCBI.
         </p>
       </div>
 
@@ -105,7 +118,7 @@ export default function BioSampleAnalysis() {
               <input
                 type="text"
                 className="biosample-text-input"
-                placeholder="Enter NCBI BioSample accession (e.g. SAMN03177675 or any E. coli BioSample)"
+                placeholder="Enter NCBI BioSample accession (e.g. SAMN03177675, SAMN02138670, or any pathogen BioSample)"
                 value={accession}
                 onChange={(e) => setAccession(e.target.value)}
                 disabled={loading}
@@ -180,7 +193,7 @@ export default function BioSampleAnalysis() {
           <div className="amr-loading-text">
             {VALIDATION_EXAMPLES.some((v) => v.accession === (accession || '').trim().toUpperCase())
               ? 'Evaluating genomic determinants against AST records for validation isolate...'
-              : 'Querying NCBI Pathogen Detection and BioSample database...'}
+              : 'Searching NCBI Pathogen Detection and retrieving isolate metadata...'}
           </div>
         </div>
       )}

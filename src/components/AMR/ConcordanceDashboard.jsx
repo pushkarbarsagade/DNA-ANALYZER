@@ -80,7 +80,7 @@ export default function ConcordanceDashboard({ isolateData }) {
             </div>
             <div className="isolate-header-actions">
               <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>
-                Organism: <strong style={{ color: '#f1f5f9' }}>{organism || 'Escherichia coli'}</strong>
+                Organism: <strong style={{ color: '#f1f5f9' }}>{organism || 'Unknown'}</strong>
               </span>
               <button
                 type="button"
@@ -164,7 +164,7 @@ export default function ConcordanceDashboard({ isolateData }) {
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
               <span className="isolate-meta-label" style={{ margin: 0 }}>Organism:</span>
               <span style={{ fontSize: '0.92rem', color: '#f1f5f9', fontWeight: 600 }}>
-                {organism || 'Escherichia coli'}
+                {organism || 'Unknown'}
               </span>
             </div>
             <button
@@ -211,9 +211,9 @@ export default function ConcordanceDashboard({ isolateData }) {
           <div className="isolate-meta-item">
             <span className="isolate-meta-label">Concordance Rate</span>
             <span className="isolate-meta-val" style={{ color: '#10b981' }}>
-              {summary_metrics.concordance_percentage !== undefined
+              {summary_metrics.concordance_percentage !== undefined && summary_metrics.concordance_percentage !== null
                 ? `${summary_metrics.concordance_percentage}%`
-                : '—'}
+                : 'N/A'}
             </span>
           </div>
         </div>

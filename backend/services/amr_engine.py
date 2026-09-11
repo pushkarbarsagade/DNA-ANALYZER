@@ -126,17 +126,29 @@ def compare(
         evidence_str = "; ".join(mapped_genes) if mapped_genes else "(none)"
         basis_str = mapping_basis if mapping_basis else "(none)"
 
-        ph_lower = phenotype.lower()
-        is_defined = ph_lower not in ('not defined', '')
+        ph_upper = phenotype.upper()
+        # Phenotype eligibility: Must be an explicit categorical call (S, I, R, NS, SSD)
+        # Undefined, blank, null, unknown, or MIC-only records are NOT EVALUABLE
+        is_eligible_phenotype = ph_upper in (
+            'R', 'RESISTANT', 'NS', 'NON-SUSCEPTIBLE',
+            'S', 'SUSCEPTIBLE', 'SSD',
+            'I', 'INTERMEDIATE'
+        )
 
-        if not mapped_genes:
+        # Scientific Hierarchy:
+        # 1. Is phenotype explicit S/I/R? NO -> Not Evaluable
+        # 2. YES -> Is there validated genotype-antibiotic mapping? NO -> Not Comparable
+        # 3. YES -> Compare -> Concordant / Discordant
+        if not is_eligible_phenotype:
+            classification = "Not evaluable"
+            if not phenotype or phenotype.lower() in ('not defined', 'unknown', 'none'):
+                reason = "Phenotype is 'not defined' in NCBI BioSample XML"
+            else:
+                reason = f"Phenotype '{phenotype}' is not an eligible S/I/R categorical determination"
+        elif not mapped_genes:
             classification = "Not comparable"
             reason = "No validated genotype-to-antibiotic mapping"
-        elif not is_defined:
-            classification = "Not evaluable"
-            reason = "Phenotype is 'not defined' in NCBI BioSample XML"
         else:
-            ph_upper = phenotype.upper()
             if ph_upper in ('R', 'NS', 'RESISTANT', 'NON-SUSCEPTIBLE'):
                 classification = "Concordant"
                 reason = f"Mapped gene(s) present ({evidence_str}) and observed phenotype is resistant ({phenotype})"
@@ -172,11 +184,19 @@ def calculate_concordance_metrics(comparisons: List[Dict[str, str]]) -> Dict[str
     Calculate summary validation metrics over a collection of comparison records.
     """
     total_ast = len(comparisons)
+    eligible_sir = sum(
+        1 for c in comparisons
+        if c.get('phenotype', '').upper() in (
+            'R', 'RESISTANT', 'NS', 'NON-SUSCEPTIBLE',
+            'S', 'SUSCEPTIBLE', 'SSD',
+            'I', 'INTERMEDIATE'
+        )
+    )
     defined_ph = sum(1 for c in comparisons if c.get('phenotype', '').lower() not in ('not defined', ''))
     rec_mapped = sum(1 for c in comparisons if c.get('genotype_evidence') != '(none)')
     gen_comp = sum(
         1 for c in comparisons
-        if c.get('genotype_evidence') != '(none)' and c.get('phenotype', '').lower() not in ('not defined', '')
+        if c.get('classification') in ('Concordant', 'Discordant')
     )
     conc = sum(1 for c in comparisons if c.get('classification') == 'Concordant')
     disc = sum(1 for c in comparisons if c.get('classification') == 'Discordant')
@@ -187,6 +207,7 @@ def calculate_concordance_metrics(comparisons: List[Dict[str, str]]) -> Dict[str
 
     return {
         'total_ast_records': total_ast,
+        'eligible_sir_records': eligible_sir,
         'defined_phenotypes': defined_ph,
         'records_with_validated_mapping': rec_mapped,
         'comparable_pairs': gen_comp,
@@ -194,8 +215,8 @@ def calculate_concordance_metrics(comparisons: List[Dict[str, str]]) -> Dict[str
         'discordant': disc,
         'not_comparable': not_comp,
         'not_evaluable': not_eval,
-        'concordance_percentage': round(concordance_rate, 1),
-        'concordance_raw': concordance_rate,
+        'concordance_percentage': round(concordance_rate, 1) if gen_comp > 0 else None,
+        'concordance_raw': concordance_rate if gen_comp > 0 else None,
     }
 
 

@@ -368,9 +368,16 @@ def _fetch_biosample_ast(
 
     sample = samples[0]
 
-    # Organism
-    org_el = sample.find(".//OrganismName")
-    organism = org_el.text.strip() if org_el is not None and org_el.text else "Unknown"
+    # Organism extraction from BioSample XML
+    org_el = sample.find(".//Organism")
+    org_name_el = sample.find(".//OrganismName")
+    organism = "Unknown"
+    if org_el is not None:
+        organism = org_el.attrib.get("taxonomy_name") or (org_el.text.strip() if org_el.text else "")
+    if (not organism or organism == "Unknown") and org_name_el is not None and org_name_el.text:
+        organism = org_name_el.text.strip()
+    if not organism:
+        organism = "Unknown"
 
     # Antibiogram table
     ast_rows: List[Dict[str, str]] = []

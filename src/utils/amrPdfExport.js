@@ -21,7 +21,7 @@ export function exportAmrReportPdf(isolateData) {
   const {
     biosample_accession = 'UNKNOWN',
     assembly_accession = '—',
-    organism = 'Escherichia coli',
+    organism = 'Unknown',
     amr_genotypes = '',
     comparisons = [],
     summary_metrics = {},
@@ -232,13 +232,22 @@ export function exportAmrReportPdf(isolateData) {
     currentY += 12;
   }
 
-  // --- 5. COMPLETE COMPARISON TABLE ---
+  // --- 5. AST RECORDS TABLE ---
   doc.setTextColor(15, 23, 42);
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text(`Complete AST Genotype–Phenotype Comparison (${comparisons.length} records)`, margin, currentY);
+  doc.text(`AST Records Retrieved (${comparisons.length} records)`, margin, currentY);
 
-  currentY += 2;
+  if (comparable === 0 && comparisons.length > 0) {
+    currentY += 4;
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 116, 139);
+    doc.text('AST records retrieved, but no eligible S/I/R phenotype records were available. Concordance was not calculated.', margin, currentY);
+    currentY += 2;
+  } else {
+    currentY += 2;
+  }
 
   const tableBody = comparisons.map(row => {
     const abx = row.antibiotic || '—';
