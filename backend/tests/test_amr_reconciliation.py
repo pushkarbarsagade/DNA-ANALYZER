@@ -10,6 +10,7 @@ import unittest
 import json
 import sys
 from pathlib import Path
+from unittest.mock import patch, MagicMock
 
 # Ensure backend directory is in python search path
 BACKEND_DIR = Path(__file__).resolve().parent.parent
@@ -206,6 +207,173 @@ class TestAMREvidenceReconciliation(unittest.TestCase):
         self.assertEqual(data["status"], "success")
         self.assertTrue("explanation" in data)
         self.assertIn("Research interpretation only", data["disclaimer"])
+
+    # 12. Live BigQuery BioSample SAMN04014975 + Ampicillin + user lab = Susceptible -> Conflict
+    def test_12_reconcile_live_bigquery_biosample_conflict(self):
+        try:
+            import routes.amr_routes as amr_routes_mod
+        except ImportError:
+            from backend.routes import amr_routes as amr_routes_mod
+
+        mock_client = MagicMock()
+        mock_job = MagicMock()
+        mock_row = {
+            "biosample_acc": "SAMN04014975",
+            "taxgroup_name": "Escherichia coli",
+            "scientific_name": "Escherichia coli",
+            "asm_acc": "GCA_001234567.1",
+            "amr_genotypes": ["blaTEM-1", "tet(A)"],
+            "amr_genotypes_core": ["blaTEM-1"],
+            "amrfinderplus_version": "3.12.8",
+            "amrfinderplus_analysis_type": "COMBINED",
+            "ast_phenotypes": [
+                {
+                    "antibiotic": "ampicillin",
+                    "phenotype": "resistant",
+                    "mic": "> 32",
+                    "units": "mg/L",
+                    "method": "MIC",
+                    "guideline": "CLSI",
+                }
+            ],
+        }
+        mock_job.result.return_value = [mock_row]
+        mock_client.query.return_value = mock_job
+
+        bq_module = amr_routes_mod._get_bigquery_provider()
+        with patch.dict("os.environ", {"BIGQUERY_PROJECT_ID": "test-project", "BIGQUERY_CREDENTIALS_JSON": '{"project_id": "test"}'}):
+            with patch.object(bq_module, "_create_bigquery_client", return_value=mock_client):
+                bq_module.clear_caches()
+                payload = {
+                    "biosample": "SAMN04014975",
+                    "user_lab": [
+                        {
+                            "antibiotic": "ampicillin",
+                            "phenotype": "Susceptible",
+                            "mic": "<= 2 ug/mL"
+                        }
+                    ]
+                }
+                resp = self.client.post(
+                    "/api/amr/reconcile",
+                    data=json.dumps(payload),
+                    content_type="application/json"
+                )
+                self.assertEqual(resp.status_code, 200)
+                data = resp.get_json()
+                self.assertEqual(data.get("status"), "success")
+                self.assertEqual(data.get("biosample_accession"), "SAMN04014975")
+
+                # Find ampicillin finding
+                amp_finding = next((f for f in data.get("findings", []) if f.get("antibiotic", "").lower() == "ampicillin"), None)
+                self.assertIsNotNone(amp_finding)
+                # Expected:
+                # genomic evidence: blaTEM/blaTEM-1
+                # NCBI AST: Resistant
+                # user lab: Susceptible
+                # reconciliation: Conflict
+                self.assertTrue(amp_finding["genomic_evidence"]["has_determinant"])
+                self.assertIn("blaTEM-1", amp_finding["genomic_evidence"]["genes"])
+                self.assertEqual(amp_finding["ncbi_ast"]["phenotype"], "Resistant")
+                self.assertEqual(amp_finding["user_lab"]["phenotype"], "Susceptible")
+                self.assertTrue(amp_finding["has_conflict"])
+                self.assertEqual(amp_finding["reconciliation_category"], "conflict")
+                self.assertEqual(amp_finding["reconciliation_status"], "Conflict between evidence sources")
+
+    # 13. Live BigQuery BioSample SAMN04014975 + Ampicillin + user lab = Resistant -> Concordant
+    def test_13_reconcile_live_bigquery_biosample_concordant(self):
+        try:
+            import routes.amr_routes as amr_routes_mod
+        except ImportError:
+            from backend.routes import amr_routes as amr_routes_mod
+
+        mock_client = MagicMock()
+        mock_job = MagicMock()
+        mock_row = {
+            "biosample_acc": "SAMN04014975",
+            "taxgroup_name": "Escherichia coli",
+            "scientific_name": "Escherichia coli",
+            "asm_acc": "GCA_001234567.1",
+            "amr_genotypes": ["blaTEM-1", "tet(A)"],
+            "amr_genotypes_core": ["blaTEM-1"],
+            "amrfinderplus_version": "3.12.8",
+            "amrfinderplus_analysis_type": "COMBINED",
+            "ast_phenotypes": [
+                {
+                    "antibiotic": "ampicillin",
+                    "phenotype": "resistant",
+                    "mic": "> 32",
+                    "units": "mg/L",
+                    "method": "MIC",
+                    "guideline": "CLSI",
+                }
+            ],
+        }
+        mock_job.result.return_value = [mock_row]
+        mock_client.query.return_value = mock_job
+
+        bq_module = amr_routes_mod._get_bigquery_provider()
+        with patch.dict("os.environ", {"BIGQUERY_PROJECT_ID": "test-project", "BIGQUERY_CREDENTIALS_JSON": '{"project_id": "test"}'}):
+            with patch.object(bq_module, "_create_bigquery_client", return_value=mock_client):
+                bq_module.clear_caches()
+                payload = {
+                    "biosample": "SAMN04014975",
+                    "user_lab": [
+                        {
+                            "antibiotic": "ampicillin",
+                            "phenotype": "Resistant",
+                            "mic": ">= 32 ug/mL"
+                        }
+                    ]
+                }
+                resp = self.client.post(
+                    "/api/amr/reconcile",
+                    data=json.dumps(payload),
+                    content_type="application/json"
+                )
+                self.assertEqual(resp.status_code, 200)
+                data = resp.get_json()
+                self.assertEqual(data.get("status"), "success")
+                self.assertEqual(data.get("biosample_accession"), "SAMN04014975")
+
+                # Find ampicillin finding
+                amp_finding = next((f for f in data.get("findings", []) if f.get("antibiotic", "").lower() == "ampicillin"), None)
+                self.assertIsNotNone(amp_finding)
+                # Expected:
+                # genomic evidence agrees (blaTEM-1)
+                # NCBI AST agrees (Resistant)
+                # user lab agrees (Resistant)
+                # reconciliation: Concordant across available evidence
+                self.assertTrue(amp_finding["genomic_evidence"]["has_determinant"])
+                self.assertIn("blaTEM-1", amp_finding["genomic_evidence"]["genes"])
+                self.assertEqual(amp_finding["ncbi_ast"]["phenotype"], "Resistant")
+                self.assertEqual(amp_finding["user_lab"]["phenotype"], "Resistant")
+                self.assertFalse(amp_finding["has_conflict"])
+                self.assertEqual(amp_finding["reconciliation_category"], "concordant_all")
+                self.assertEqual(amp_finding["reconciliation_status"], "Concordant across available evidence")
+
+    # 14. Frozen validation isolate workflow intact
+    def test_14_reconcile_frozen_validation_isolate(self):
+        payload = {
+            "biosample": "SAMN03177659",
+            "user_lab": [
+                {
+                    "antibiotic": "ampicillin",
+                    "phenotype": "Susceptible",
+                    "mic": "<= 2"
+                }
+            ]
+        }
+        resp = self.client.post(
+            "/api/amr/reconcile",
+            data=json.dumps(payload),
+            content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()
+        self.assertEqual(data.get("status"), "success")
+        self.assertEqual(data.get("biosample_accession"), "SAMN03177659")
+        self.assertEqual(data.get("data_source"), "validation_fixture")
 
 
 if __name__ == "__main__":

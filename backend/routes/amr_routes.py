@@ -12,9 +12,10 @@ Endpoints:
 from __future__ import annotations
 
 import json
+import os
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from flask import Blueprint, jsonify, request
 
@@ -172,40 +173,39 @@ def get_provider_status():
     }), 200
 
 
-@amr_bp.route("/isolate/<biosample_accession>", methods=["GET"])
-def get_isolate(biosample_accession: str):
+def resolve_biosample_record(
+    biosample_accession: str
+) -> Tuple[Optional[Dict[str, Any]], Optional[Dict[str, Any]], int]:
     """
-    GET /api/amr/isolate/<biosample_accession>
+    Unified BioSample data resolver shared by /api/amr/isolate/<accession> and
+    /api/amr/reconcile.
 
-    Phase 6 — Dynamic NCBI BioSample Lookup.
+    Priority:
+      1. Validation fixture (the five frozen benchmark isolates)
+      2. Dynamic BigQuery provider (or test mock / opt-in legacy FTP)
 
-    Routing rules:
-      1. Validate accession format.
-      2. If accession is one of the five frozen validation BioSamples:
-         → return the exact frozen validation result from fixture.
-      3. Otherwise:
-         → call NCBI provider (Pathogen Detection TSV + BioSample efetch).
-         → run the existing AMR comparison engine on the retrieved data.
-         → return the result with provenance metadata.
+    Returns:
+      (isolate_data, error_payload, http_status_code)
+      If error_payload is not None, an error occurred and should be returned to the client.
     """
     acc_clean = (biosample_accession or "").strip().upper()
     if not acc_clean:
-        return jsonify({"error": "BioSample accession is required"}), 400
+        return None, {"error": "BioSample accession is required"}, 400
 
     # Gate 1: Security & malformed input check (alphanumeric, hyphen, underscore, dot only, 3-50 chars)
     if not re.match(r'^[A-Z0-9_.-]{3,50}$', acc_clean):
-        return jsonify({
+        return None, {
             "error": "Invalid BioSample accession format",
             "details": "Accession must be 3-50 alphanumeric characters (hyphens/underscores/dots allowed).",
             "biosample": biosample_accession,
-        }), 400
+        }, 400
 
     # Gate 2: Frozen validation fixture (exact five BioSamples)
     if acc_clean in _VALIDATION_ACCESSIONS:
         try:
             fixture_data = _load_validation_fixture()
         except Exception as e:
-            return jsonify({"error": "Failed to read validation fixture", "details": str(e)}), 500
+            return None, {"error": "Failed to read validation fixture", "details": str(e)}, 500
 
         matched_iso = next(
             (i for i in fixture_data.get("isolates", [])
@@ -213,41 +213,37 @@ def get_isolate(biosample_accession: str):
             None,
         )
         if not matched_iso:
-            return jsonify({
+            return None, {
                 "error": "Validation fixture missing expected BioSample",
                 "biosample": acc_clean,
-            }), 500
+            }, 500
 
-        tsv_row = matched_iso.get("raw_genotype_row", {})
-        ast_rows = matched_iso.get("ast_records", [])
-        comps = compare([tsv_row], ast_rows)
-        metrics = calculate_concordance_metrics(comps)
-
-        return jsonify({
-            "status": "success",
-            "data_source": "validation_fixture",
-            "data_source_label": "DNA Analyzer Validation Dataset",
+        isolate_dict = {
             "biosample_accession": matched_iso.get("biosample_accession"),
             "assembly_accession": matched_iso.get("assembly_accession"),
             "organism": matched_iso.get("organism"),
             "amr_genotypes": matched_iso.get("amr_genotypes"),
-            "ast_records": ast_rows,
-            "comparisons": comps,
-            "summary_metrics": metrics,
-        }), 200
+            "raw_genotype_row": matched_iso.get("raw_genotype_row", {}),
+            "ast_records": matched_iso.get("ast_records", []),
+            "data_source": "validation_fixture",
+            "data_source_label": "DNA Analyzer Validation Dataset",
+            "pdg_release": None,
+            "amrfinder_version": None,
+            "availability_state": "ok",
+        }
+        return isolate_dict, None, 200
 
     # Gate 3: If accession does not match standard NCBI accession pattern (e.g. UNKNOWN_BIOSAMPLE)
     ncbi_prov = _get_ncbi_provider()
     if not ncbi_prov.validate_accession(acc_clean):
-        return jsonify({
+        return None, {
             "error": f"BioSample {acc_clean} not found in NCBI Pathogen Detection",
             "availability_state": "not_in_pathogen_detection",
             "biosample": biosample_accession,
-        }), 404
+        }, 404
 
     # Gate 4: Dynamic NCBI lookup (Phase 7 Priority: BigQuery -> Optional Legacy FTP)
     ncbi_prov = _get_ncbi_provider()
-    # Check if _get_ncbi_provider was explicitly mocked by testing harnesses
     from unittest.mock import Mock
     is_ncbi_mocked = isinstance(ncbi_prov, Mock)
 
@@ -261,20 +257,20 @@ def get_isolate(biosample_accession: str):
         try:
             provider_result = ncbi_prov.lookup_biosample(acc_clean)
         except Exception as e:
-            return jsonify({
+            return None, {
                 "error": "Unexpected error during NCBI lookup",
                 "details": str(e),
                 "biosample": acc_clean,
-            }), 500
+            }, 500
     elif bq_status["configured"]:
         try:
             provider_result = bq_mod.query_biosample_bigquery(acc_clean)
         except Exception as e:
-            return jsonify({
+            return None, {
                 "error": "Unexpected error during BigQuery lookup",
                 "details": str(e),
                 "biosample": acc_clean,
-            }), 500
+            }, 500
     else:
         # Check if legacy FTP fallback is explicitly enabled for development/testing
         legacy_ftp_enabled = os.getenv("ENABLE_LEGACY_FTP_FALLBACK", "").strip().lower() in ("1", "true", "yes")
@@ -282,11 +278,11 @@ def get_isolate(biosample_accession: str):
             try:
                 provider_result = ncbi_prov.lookup_biosample(acc_clean)
             except Exception as e:
-                return jsonify({
+                return None, {
                     "error": "Unexpected error during NCBI FTP lookup",
                     "details": str(e),
                     "biosample": acc_clean,
-                }), 500
+                }, 500
         else:
             # Truthful structured state when BigQuery is not configured
             provider_result = {
@@ -307,51 +303,80 @@ def get_isolate(biosample_accession: str):
     if pdg_release and "release" not in data_source_label:
         data_source_label += f" (release {pdg_release})"
 
-    if state in ("no_amr_genotype", "no_ast_data"):
-        return jsonify({
-            "status": "partial",
-            "data_source": provider_result.get("data_source", "ncbi_pathogen_detection"),
-            "data_source_label": data_source_label,
-            "pdg_release": pdg_release,
-            "availability_state": state,
-            "availability_message": provider_result.get("availability_message", ""),
-            "biosample_accession": acc_clean,
-            "assembly_accession": provider_result.get("assembly_accession", ""),
-            "organism": provider_result.get("organism", ""),
-            "amr_genotypes": provider_result.get("amr_genotypes", ""),
-            "amrfinder_version": provider_result.get("amrfinder_version", ""),
-        }), 200
-
-    if state != "ok":
+    if state not in ("ok", "no_amr_genotype", "no_ast_data"):
         http_code = _AVAILABILITY_STATE_HTTP.get(state, 500)
         error_msg = provider_result.get(
             "availability_message",
             f"NCBI lookup returned state: {state}",
         )
-        return jsonify({
+        return None, {
             "error": error_msg,
             "availability_state": state,
             "biosample": acc_clean,
             "data_source": provider_result.get("data_source", "ncbi_pathogen_detection"),
             "pdg_release": pdg_release,
-        }), http_code
+        }, http_code
 
-    raw_genotype_row = provider_result.get("raw_genotype_row", {})
-    ast_records = provider_result.get("ast_records", [])
+    isolate_dict = {
+        "biosample_accession": acc_clean,
+        "assembly_accession": provider_result.get("assembly_accession", ""),
+        "organism": provider_result.get("organism", ""),
+        "amr_genotypes": provider_result.get("amr_genotypes", ""),
+        "raw_genotype_row": provider_result.get("raw_genotype_row", {}),
+        "ast_records": provider_result.get("ast_records", []),
+        "data_source": provider_result.get("data_source", "ncbi_pathogen_detection"),
+        "data_source_label": data_source_label,
+        "pdg_release": pdg_release,
+        "amrfinder_version": provider_result.get("amrfinder_version", ""),
+        "availability_state": state,
+        "availability_message": provider_result.get("availability_message", ""),
+    }
+    return isolate_dict, None, 200
+
+
+@amr_bp.route("/isolate/<biosample_accession>", methods=["GET"])
+def get_isolate(biosample_accession: str):
+    """
+    GET /api/amr/isolate/<biosample_accession>
+
+    Phase 6/7 — Dynamic NCBI BioSample Lookup.
+    """
+    isolate_data, err_resp, code = resolve_biosample_record(biosample_accession)
+    if err_resp:
+        return jsonify(err_resp), code
+
+    state = isolate_data.get("availability_state", "ok")
+    if state in ("no_amr_genotype", "no_ast_data"):
+        return jsonify({
+            "status": "partial",
+            "data_source": isolate_data.get("data_source"),
+            "data_source_label": isolate_data.get("data_source_label"),
+            "pdg_release": isolate_data.get("pdg_release"),
+            "availability_state": state,
+            "availability_message": isolate_data.get("availability_message", ""),
+            "biosample_accession": isolate_data.get("biosample_accession"),
+            "assembly_accession": isolate_data.get("assembly_accession"),
+            "organism": isolate_data.get("organism"),
+            "amr_genotypes": isolate_data.get("amr_genotypes"),
+            "amrfinder_version": isolate_data.get("amrfinder_version", ""),
+        }), 200
+
+    raw_genotype_row = isolate_data.get("raw_genotype_row", {})
+    ast_records = isolate_data.get("ast_records", [])
 
     comps = compare([raw_genotype_row], ast_records)
     metrics = calculate_concordance_metrics(comps)
 
     return jsonify({
         "status": "success",
-        "data_source": provider_result.get("data_source", "ncbi_pathogen_detection"),
-        "data_source_label": data_source_label,
-        "pdg_release": pdg_release,
-        "amrfinder_version": provider_result.get("amrfinder_version", ""),
-        "biosample_accession": acc_clean,
-        "assembly_accession": provider_result.get("assembly_accession", ""),
-        "organism": provider_result.get("organism", ""),
-        "amr_genotypes": provider_result.get("amr_genotypes", ""),
+        "data_source": isolate_data.get("data_source"),
+        "data_source_label": isolate_data.get("data_source_label"),
+        "pdg_release": isolate_data.get("pdg_release"),
+        "amrfinder_version": isolate_data.get("amrfinder_version", ""),
+        "biosample_accession": isolate_data.get("biosample_accession"),
+        "assembly_accession": isolate_data.get("assembly_accession"),
+        "organism": isolate_data.get("organism"),
+        "amr_genotypes": isolate_data.get("amr_genotypes"),
         "ast_records": ast_records,
         "comparisons": comps,
         "summary_metrics": metrics,
@@ -513,28 +538,19 @@ def reconcile_evidence():
                 "details": f"User lab record at index {idx} missing 'antibiotic' field"
             }), 400
 
-    acc_clean = biosample.strip().upper()
-    try:
-        fixture_data = _load_validation_fixture()
-    except Exception as e:
-        return jsonify({"error": "Failed to read validation fixture", "details": str(e)}), 500
-
-    matched_iso = next(
-        (i for i in fixture_data.get("isolates", []) if i.get("biosample_accession", "").upper() == acc_clean),
-        None
-    )
-
-    if not matched_iso:
-        return jsonify({
-            "error": "BioSample not available in frozen validation dataset",
-            "biosample": biosample
-        }), 404
+    # Resolve isolate record using the unified provider architecture
+    isolate_data, err_resp, code = resolve_biosample_record(biosample)
+    if err_resp:
+        return jsonify(err_resp), code
 
     # Execute deterministic evidence reconciliation
-    reconciliation_result = reconcile_isolate_evidence(matched_iso, user_lab)
+    reconciliation_result = reconcile_isolate_evidence(isolate_data, user_lab)
 
     return jsonify({
         "status": "success",
+        "data_source": isolate_data.get("data_source"),
+        "data_source_label": isolate_data.get("data_source_label"),
+        "pdg_release": isolate_data.get("pdg_release"),
         **reconciliation_result
     }), 200
 

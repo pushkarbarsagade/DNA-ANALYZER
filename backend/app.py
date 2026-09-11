@@ -156,9 +156,9 @@ def validate_dna_sequence(sequence):
 
 @app.before_request
 def apply_rate_limiting():
-    """Apply rate limiting to all requests (except health check)"""
-    # Skip rate limiting for health check and OPTIONS requests
-    if request.endpoint in ['health', 'handle_preflight'] or request.method == "OPTIONS":
+    """Apply rate limiting to all requests (except health check and testing)"""
+    # Skip rate limiting for testing, health check and OPTIONS requests
+    if app.testing or app.config.get("TESTING") or request.endpoint in ['health', 'handle_preflight'] or request.method == "OPTIONS":
         return None
     
     client_ip = request.remote_addr
