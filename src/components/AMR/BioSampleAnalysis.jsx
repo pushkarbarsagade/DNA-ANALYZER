@@ -12,7 +12,7 @@ const VALIDATION_EXAMPLES = [
   { accession: 'SAMN03177664', note: 'Multidrug resistance profile' },
 ];
 
-export default function BioSampleAnalysis() {
+export default function BioSampleAnalysis({ onNavigateReconciliation }) {
   const [accession, setAccession] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -200,7 +200,10 @@ export default function BioSampleAnalysis() {
 
       {/* Concordance Dashboard Result */}
       {result && !loading && (
-        <ConcordanceDashboard isolateData={result} />
+        <ConcordanceDashboard
+          isolateData={result}
+          onNavigateReconciliation={onNavigateReconciliation}
+        />
       )}
     </div>
   );

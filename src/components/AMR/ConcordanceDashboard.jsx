@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { exportAmrReportPdf } from '../../utils/amrPdfExport';
+import { formatGenotypeEntries, formatConcordanceMetrics } from '../../utils/amrFormatters';
 import './ConcordanceDashboard.css';
 
-export default function ConcordanceDashboard({ isolateData }) {
+export default function ConcordanceDashboard({ isolateData, onNavigateReconciliation }) {
   const [activeFilter, setActiveFilter] = useState('ALL');
   const [exportingPdf, setExportingPdf] = useState(false);
   const [pdfError, setPdfError] = useState('');
@@ -30,6 +31,14 @@ export default function ConcordanceDashboard({ isolateData }) {
   const discordantCount = summary_metrics.discordant ?? 0;
   const notComparableCount = summary_metrics.not_comparable ?? 0;
   const notEvaluableCount = summary_metrics.not_evaluable ?? 0;
+  const comparablePairs = summary_metrics.comparable_pairs ?? (concordantCount + discordantCount);
+
+  const {
+    displayStr: concordanceDisplayStr,
+    percentageStr: concordancePctStr,
+    formula: concordanceFormula,
+    note: concordanceNote,
+  } = formatConcordanceMetrics(concordantCount, comparablePairs, summary_metrics.concordance_percentage);
 
   const handleExportPdf = () => {
     try {
@@ -44,10 +53,8 @@ export default function ConcordanceDashboard({ isolateData }) {
     }
   };
 
-  // Split genotype string into clean array for visual tags
-  const genotypeList = amr_genotypes
-    ? amr_genotypes.split(',').map((g) => g.trim()).filter(Boolean)
-    : [];
+  // Clean structured entries for visual tags (e.g. "aac(6')-Ib — Complete")
+  const genotypeList = formatGenotypeEntries(amr_genotypes);
 
   const sourceBadgeText = data_source_label || (
     data_source === 'validation_fixture' ? 'DNA Analyzer Validation Dataset' : 'NCBI Pathogen Detection'
@@ -210,10 +217,8 @@ export default function ConcordanceDashboard({ isolateData }) {
           </div>
           <div className="isolate-meta-item">
             <span className="isolate-meta-label">Concordance Rate</span>
-            <span className="isolate-meta-val" style={{ color: '#10b981' }}>
-              {summary_metrics.concordance_percentage !== undefined && summary_metrics.concordance_percentage !== null
-                ? `${summary_metrics.concordance_percentage}%`
-                : 'N/A'}
+            <span className="isolate-meta-val" style={{ color: '#10b981', fontSize: '0.88rem' }}>
+              {concordanceDisplayStr}
             </span>
           </div>
         </div>
@@ -299,6 +304,22 @@ export default function ConcordanceDashboard({ isolateData }) {
           <span className="formula-op">=</span>
           <span className="formula-part total">Total AST: {totalAstRecords}</span>
         </div>
+      </div>
+
+      {/* 3b. EXPLICIT CONCORDANCE FORMULA & EXPLANATORY NOTE */}
+      <div className="concordance-formula-card">
+        <div className="formula-header-line">
+          <span className="formula-chip">Formula</span>
+          <span className="formula-text"><strong>{concordanceFormula}</strong></span>
+          {comparablePairs > 0 && summary_metrics.concordance_percentage !== null && (
+            <span className="formula-eval">
+              = {concordantCount} / {comparablePairs} = <strong style={{ color: '#10b981' }}>{summary_metrics.concordance_percentage}%</strong>
+            </span>
+          )}
+        </div>
+        <p className="formula-explanatory-text">
+          {concordanceNote}
+        </p>
       </div>
 
       {/* 4. COMPARISON TABLE WITH FILTERS */}
@@ -424,6 +445,29 @@ export default function ConcordanceDashboard({ isolateData }) {
           This metric represents preliminary research concordance across frozen validation data and is not representative of all clinical isolates.
         </p>
       </div>
+
+      {/* 6. NEXT WORKFLOW STEP: EVIDENCE RECONCILIATION */}
+      {onNavigateReconciliation && (
+        <div className="workflow-next-card">
+          <div className="workflow-next-content">
+            <span className="workflow-next-icon">⚖️</span>
+            <div>
+              <h4 className="workflow-next-title">Multi-Source Evidence Reconciliation &amp; AI Interpretation</h4>
+              <p className="workflow-next-desc">
+                Reconcile this isolate ({biosample_accession}) against optional laboratory AST evidence and generate a deterministic synthesis with AI-Assisted Research Interpretation.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="workflow-next-btn"
+            onClick={() => onNavigateReconciliation(biosample_accession)}
+          >
+            <span>Proceed to Evidence Reconciliation</span>
+            <span>→</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

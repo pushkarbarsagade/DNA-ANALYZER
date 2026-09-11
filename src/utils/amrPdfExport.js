@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { formatGenotypeEntries, formatConcordanceMetrics } from './amrFormatters';
 
 const VALIDATION_ISOLATES = [
   'SAMN03177674',
@@ -38,18 +39,14 @@ export function exportAmrReportPdf(isolateData) {
   const notEvaluable = summary_metrics.not_evaluable ?? 0;
   const comparable = summary_metrics.comparable_pairs ?? (concordant + discordant);
 
-  let concordanceRateStr = 'N/A';
-  if (comparable > 0) {
-    if (summary_metrics.concordance_percentage !== undefined && summary_metrics.concordance_percentage !== null) {
-      concordanceRateStr = `${summary_metrics.concordance_percentage}%`;
-    } else {
-      concordanceRateStr = `${((concordant / comparable) * 100).toFixed(1)}%`;
-    }
-  }
+  const {
+    displayStr: concordanceRateStr,
+    percentageStr: concordancePctStr,
+    formula: concordanceFormula,
+    note: concordanceNote,
+  } = formatConcordanceMetrics(concordant, comparable, summary_metrics.concordance_percentage);
 
-  const genotypeList = amr_genotypes
-    ? amr_genotypes.split(',').map(g => g.trim()).filter(Boolean)
-    : [];
+  const genotypeList = formatGenotypeEntries(amr_genotypes);
 
   const isValidationIsolate = VALIDATION_ISOLATES.includes(
     (biosample_accession || '').trim().toUpperCase()
@@ -166,7 +163,7 @@ export function exportAmrReportPdf(isolateData) {
     { label: 'Concordant', val: String(concordant), color: [236, 253, 245], border: [167, 243, 208], textCol: [4, 120, 87] },
     { label: 'Discordant', val: String(discordant), color: [254, 242, 242], border: [254, 202, 202], textCol: [185, 28, 28] },
     { label: 'Not Comparable', val: String(notComparable), color: [248, 250, 252], border: [226, 232, 240], textCol: [71, 85, 105] },
-    { label: 'Concordance', val: concordanceRateStr, color: [240, 253, 250], border: [153, 246, 228], textCol: [13, 148, 136] }
+    { label: 'Concordance', val: comparable > 0 ? `${concordancePctStr}` : 'N/A', color: [240, 253, 250], border: [153, 246, 228], textCol: [13, 148, 136] }
   ];
 
   const totalWidth = pageWidth - margin * 2;
@@ -191,7 +188,25 @@ export function exportAmrReportPdf(isolateData) {
     doc.text(m.label, x + boxWidth / 2, currentY + 11.5, { align: 'center' });
   });
 
-  currentY += boxHeight + 6;
+  currentY += boxHeight + 4;
+
+  // Explicit Concordance Formula & Explanatory Note Banner
+  doc.setFillColor(248, 250, 252);
+  doc.setDrawColor(226, 232, 240);
+  doc.rect(margin, currentY, pageWidth - margin * 2, 12, 'FD');
+
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(30, 41, 59);
+  doc.text(`Concordance: ${concordanceRateStr}   |   ${concordanceFormula}`, margin + 4, currentY + 4.5);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(6.8);
+  doc.setTextColor(100, 116, 139);
+  const splitNote = doc.splitTextToSize(`Explanatory Note: ${concordanceNote}`, pageWidth - margin * 2 - 8);
+  doc.text(splitNote, margin + 4, currentY + 8.5);
+
+  currentY += 15;
 
   // --- 4. DISCORDANCE HIGHLIGHT SECTION ---
   const discordantRows = comparisons.filter(

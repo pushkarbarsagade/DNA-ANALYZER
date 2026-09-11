@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_ENDPOINTS, API_CONFIG } from '../../utils/config';
+import { formatGenotypeEntries } from '../../utils/amrFormatters';
 import './EvidenceReconciliation.css';
 
 const COMMON_ANTIBIOTICS = [
@@ -28,6 +29,14 @@ const VALIDATION_BIOSAMPLES = [
 
 export default function EvidenceReconciliation({ activeBioSample, onNavigateAnalysis }) {
   const [currentBioSample, setCurrentBioSample] = useState(activeBioSample || 'SAMN03177675');
+
+  // Synchronize when activeBioSample prop changes from parent navigation
+  useEffect(() => {
+    if (activeBioSample && activeBioSample !== currentBioSample) {
+      setCurrentBioSample(activeBioSample);
+    }
+  }, [activeBioSample]);
+
   const [isolateDetails, setIsolateDetails] = useState(null);
   const [userLabRecords, setUserLabRecords] = useState([]);
   
@@ -221,6 +230,19 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
         <p className="reconciliation-sub-text">
           Evaluate consistency across Genomic AMR Determinants, NCBI Reference AST observations, and optional User Laboratory results.
         </p>
+
+        {/* Deterministic Architecture Flow */}
+        <div className="reconciliation-architecture-pipeline">
+          <span className="pipeline-step active">Data</span>
+          <span className="pipeline-arrow">→</span>
+          <span className="pipeline-step active">Rules</span>
+          <span className="pipeline-arrow">→</span>
+          <span className="pipeline-step active">Evidence</span>
+          <span className="pipeline-arrow">→</span>
+          <span className="pipeline-step active">Conflict</span>
+          <span className="pipeline-arrow">→</span>
+          <span className="pipeline-step ai">AI Explanation</span>
+        </div>
       </div>
 
       {/* TOP DISCLAIMER */}
@@ -320,8 +342,8 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
             </span>
             <div className="genotype-tags-list" style={{ marginTop: '0.5rem' }}>
               {isolateDetails.amr_genotypes ? (
-                isolateDetails.amr_genotypes.split(',').map((g, i) => (
-                  <span key={i} className="genotype-tag">{g.trim()}</span>
+                formatGenotypeEntries(isolateDetails.amr_genotypes).map((g, i) => (
+                  <span key={i} className="genotype-tag">{g}</span>
                 ))
               ) : (
                 <span className="gene-evidence-none">No mapped determinants</span>
@@ -543,7 +565,9 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
                       <span className="evidence-source-label">GENOMIC EVIDENCE</span>
                       <span className="evidence-source-val">
                         {f.genomic_evidence?.has_determinant ? (
-                          <span className="gene-evidence-code">{f.genomic_evidence.evidence_str}</span>
+                          <span className="gene-evidence-code">
+                            {formatGenotypeEntries(f.genomic_evidence.evidence_str).join(', ') || f.genomic_evidence.evidence_str}
+                          </span>
                         ) : (
                           <span className="gene-evidence-none">—</span>
                         )}
@@ -616,11 +640,11 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
               {explaining ? (
                 <>
                   <span className="loading-spinner" style={{ width: 16, height: 16 }} />
-                  Synthesizing Research Explanation...
+                  Synthesizing Research Interpretation...
                 </>
               ) : (
                 <>
-                  <span>🤖 Generate AI-Assisted Research Explanation</span>
+                  <span>🤖 Generate AI-Assisted Research Interpretation</span>
                   <span>→</span>
                 </>
               )}
@@ -631,7 +655,7 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
 
       {aiError && (
         <div className="amr-alert error slide-down">
-          <strong>AI Explanation Error:</strong> {aiError}
+          <strong>AI Interpretation Error:</strong> {aiError}
         </div>
       )}
 
@@ -640,7 +664,7 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
         <div className="ai-explanation-card fade-in">
           <div className="section-card-header">
             <span className="section-card-title">
-              <span>🤖</span> AI-Assisted Scientific Interpretation
+              <span>🤖</span> AI-Assisted Research Interpretation
             </span>
             <span style={{ fontSize: '0.78rem', color: '#00BFA5', background: 'rgba(0,163,137,0.15)', padding: '0.2rem 0.5rem', borderRadius: 4 }}>
               Provider: {aiExplanation.ai_provider || 'Groq Llama-3.3'}
@@ -652,7 +676,7 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
           </div>
 
           <div className="ai-disclaimer-strip">
-            {aiExplanation.disclaimer || 'Research interpretation only — not a clinical or diagnostic result.'}
+            {aiExplanation.disclaimer || 'AI-generated interpretation is based on the structured evidence shown above and is intended for educational and preliminary research use. It does not constitute a clinical diagnosis or treatment recommendation.'}
           </div>
         </div>
       )}

@@ -40,8 +40,9 @@ const ONBOARDING_PREF_KEY = 'dna_analyzer_onboarding_opt_out';
 function App() {
   // Navigation branch state ('landing' | 'dna' | 'amr')
   const [currentBranch, setCurrentBranch] = useState('landing');
-  // AMR workspace sub-tab ('overview' | 'analysis')
+  // AMR workspace sub-tab ('overview' | 'analysis' | 'reconciliation')
   const [amrActiveTab, setAmrActiveTab] = useState('analysis');
+  const [selectedBioSample, setSelectedBioSample] = useState('SAMN03177675');
 
   // Input state
   const [dna, setDna] = useState("");
@@ -947,11 +948,17 @@ function App() {
             )}
 
             {amrActiveTab === 'analysis' && (
-              <BioSampleAnalysis />
+              <BioSampleAnalysis
+                onNavigateReconciliation={(acc) => {
+                  if (acc) setSelectedBioSample(acc);
+                  setAmrActiveTab('reconciliation');
+                }}
+              />
             )}
 
             {amrActiveTab === 'reconciliation' && (
               <EvidenceReconciliation
+                activeBioSample={selectedBioSample}
                 onNavigateAnalysis={() => setAmrActiveTab('analysis')}
               />
             )}

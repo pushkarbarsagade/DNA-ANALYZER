@@ -632,7 +632,7 @@ def explain_reconciliation():
         lines.append("#### Limitations")
         lines.append("- Analysis is limited to validated reference determinants and supplied antibiograms.")
         lines.append("- User-provided laboratory results are evaluated as supplied without independent verification.")
-        lines.append("\n---\n*Research interpretation only — not a clinical or diagnostic result.*")
+        lines.append("\n---\n*AI-generated interpretation is based on the structured evidence shown above and is intended for educational and preliminary research use. It does not constitute a clinical diagnosis or treatment recommendation.*")
         return "\n".join(lines)
 
     # Attempt AI call via Groq if API key is available
@@ -646,7 +646,7 @@ def explain_reconciliation():
             "3. Do NOT invent genes, AST values, or clinical breakpoints.\n"
             "4. Do NOT infer susceptibility from the absence of a resistance gene.\n"
             "5. Clearly distinguish observed evidence from possible research explanations.\n"
-            "6. Always conclude with: 'Research interpretation only — not a clinical or diagnostic result.'"
+            "6. Always conclude with: 'AI-generated interpretation is based on the structured evidence shown above and is intended for educational and preliminary research use. It does not constitute a clinical diagnosis or treatment recommendation.'"
         )
 
         user_content = (
@@ -682,7 +682,7 @@ def explain_reconciliation():
                     return jsonify({
                         "status": "success",
                         "explanation": ai_text,
-                        "disclaimer": "Research interpretation only — not a clinical or diagnostic result.",
+                        "disclaimer": "Research interpretation only. AI-generated interpretation is based on the structured evidence shown above and is intended for educational and preliminary research use. It does not constitute a clinical diagnosis or treatment recommendation.",
                         "ai_provider": "groq"
                     }), 200
         except Exception as e:
@@ -694,7 +694,7 @@ def explain_reconciliation():
     return jsonify({
         "status": "success",
         "explanation": fallback_text,
-        "disclaimer": "Research interpretation only — not a clinical or diagnostic result.",
+        "disclaimer": "Research interpretation only. AI-generated interpretation is based on the structured evidence shown above and is intended for educational and preliminary research use. It does not constitute a clinical diagnosis or treatment recommendation.",
         "ai_provider": "deterministic_fallback"
     }), 200
 

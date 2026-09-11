@@ -600,3 +600,120 @@
     align-items: flex-start;
   }
 }
+
+/* CONCORDANCE FORMULA & EXPLANATORY NOTE CARD */
+.concordance-formula-card {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-left: 3px solid #10b981;
+  border-radius: 8px;
+  padding: 0.85rem 1.25rem;
+  margin-top: -0.25rem;
+}
+
+.formula-header-line {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  font-size: 0.88rem;
+  color: #f1f5f9;
+  font-family: 'Inter', sans-serif;
+}
+
+.formula-chip {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+}
+
+.formula-text {
+  color: #cbd5e1;
+}
+
+.formula-eval {
+  color: #94a3b8;
+  font-size: 0.85rem;
+}
+
+.formula-explanatory-text {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: #94a3b8;
+  margin: 0.4rem 0 0 0;
+  font-family: 'Inter', sans-serif;
+}
+
+/* WORKFLOW NEXT STEP CARD */
+.workflow-next-card {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(2, 132, 199, 0.05) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  margin-top: 1rem;
+}
+
+.workflow-next-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 260px;
+}
+
+.workflow-next-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.workflow-next-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.workflow-next-desc {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.84rem;
+  color: #94a3b8;
+  line-height: 1.45;
+  font-family: 'Inter', sans-serif;
+}
+
+.workflow-next-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.4rem;
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: white;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.workflow-next-btn:hover {
+  background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+  border-color: #38bdf8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
+}
+

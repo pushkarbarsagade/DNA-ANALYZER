@@ -127,11 +127,17 @@ def _normalize_string_or_list(val: Any, delimiter: str = ", ") -> str:
                 if gene_val is not None:
                     s = str(gene_val).strip().strip("\"'")
                 else:
-                    s = ", ".join(
-                        str(v).strip().strip("\"'")
-                        for v in getattr(item, "values", lambda: [])()
-                        if v is not None and str(v).strip().strip("\"'")
-                    )
+                    vals = list(getattr(item, "values", lambda: [])())
+                    if len(vals) >= 2 and str(vals[1]).strip().upper() in ("COMPLETE", "PARTIAL", "HMM", "INTERNAL_STOP", "EXACT", "ALLELE"):
+                        gene_name = str(vals[0]).strip().strip("\"'")
+                        condition = str(vals[1]).strip().capitalize()
+                        s = f"{gene_name} — {condition}"
+                    else:
+                        s = ", ".join(
+                            str(v).strip().strip("\"'")
+                            for v in vals
+                            if v is not None and not isinstance(v, bool) and str(v).strip().strip("\"'")
+                        )
                 if s:
                     items.append(s)
             else:
@@ -143,6 +149,14 @@ def _normalize_string_or_list(val: Any, delimiter: str = ", ") -> str:
     s = str(val).strip()
     if (s.startswith('"') and s.endswith('"')) or (s.startswith("'") and s.endswith("'")):
         s = s[1:-1].strip()
+
+    # Clean raw BigQuery triplet strings e.g. "aac(6')-Ib, COMPLETE, False"
+    if "COMPLETE" in s or "PARTIAL" in s or "False" in s:
+        pattern = re.compile(r"([^,]+),\s*(COMPLETE|PARTIAL|HMM|INTERNAL_STOP|EXACT|ALLELE),\s*(?:True|False)(?:,\s*)?", re.IGNORECASE)
+        matches = pattern.findall(s)
+        if matches:
+            s = ", ".join(f"{m[0].strip()} — {m[1].strip().capitalize()}" for m in matches)
+
     return s
 
 
