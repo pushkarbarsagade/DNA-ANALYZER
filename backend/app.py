@@ -33,6 +33,14 @@ load_dotenv()
 # Initialize Flask app
 app = Flask(__name__)
 
+# Register AMR Blueprint (Phase 2)
+try:
+    from routes.amr_routes import amr_bp
+except ImportError:
+    from backend.routes.amr_routes import amr_bp
+
+app.register_blueprint(amr_bp, url_prefix="/api/amr")
+
 # ===== FIXED CORS CONFIGURATION =====
 # More specific CORS setup to handle preflight requests properly
 CORS(app,
