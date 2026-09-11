@@ -6,7 +6,7 @@ const isDevelopment =
   window.location.hostname === '127.0.0.1';
 
 const LOCAL_URL = "http://localhost:5000";
-const RENDER_URL = "https://dna-analyzer-1-ipxr.onrender.com";
+const RENDER_URL = "https://dna-analyzer-ousa.onrender.com";
 
 // Use local backend when on localhost, Render when deployed
 export const API_BASE_URL = isDevelopment ? LOCAL_URL : RENDER_URL;

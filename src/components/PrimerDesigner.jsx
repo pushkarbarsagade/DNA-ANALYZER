@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { evaluatePrimerPair, calcSecondaryStructureScore, calcTmNN, calcGC, calc3PrimeDG, calcHairpinDG, calcSelfDimerDG, calcCrossDimerDG, assessCrossDimerInteraction, revComp } from '../utils/primerEvalEngine';
 
 /* ─── API CONFIG ─────────────────────────────────────────────────────────── */
-const API_URL = import.meta.env?.VITE_API_URL || 'https://dna-analyzer-1-ipxr.onrender.com';
+const API_URL = import.meta.env?.VITE_API_URL || 'https://dna-analyzer-ousa.onrender.com';
 
 /* ─── CURATED SAMPLES ──────────────────────────────────────────────────────── */
 const CURATED_SAMPLES = [

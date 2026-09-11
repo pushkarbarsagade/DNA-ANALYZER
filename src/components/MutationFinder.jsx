@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
-const API_URL = import.meta.env?.VITE_API_URL || 'https://dna-analyzer-1-ipxr.onrender.com';
+const API_URL = import.meta.env?.VITE_API_URL || 'https://dna-analyzer-ousa.onrender.com';
 
 const EMBEDDED_PDB = {
   TP53: "REMARK  TP53 DNA Binding Domain - Domain-accurate CA trace\nREMARK  Based on PDB 2OCJ structural topology\nATOM      1  CA  GLY A 113       3.459  -1.900  -0.675  1.00 30.00           C\nATOM      2  CA  SER A 114       6.294  -0.954  -0.145  1.00 30.00           C\nEND",

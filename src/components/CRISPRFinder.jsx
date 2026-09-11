@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 /* ─── API CONFIG ─────────────────────────────────────────────────────────── */
-const API_URL = import.meta.env?.VITE_API_URL || 'https://dna-analyzer-1-ipxr.onrender.com';
+const API_URL = import.meta.env?.VITE_API_URL || 'https://dna-analyzer-ousa.onrender.com';
 
 // ─── SAMPLE SEQUENCE ────────────────────────────────────────────────────────
 const SAMPLE_SEQUENCE = [
