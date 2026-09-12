@@ -23,5 +23,11 @@ gunicorn==21.2.0
 # Security
 MarkupSafe==2.1.3
 
+# Machine Learning Research Framework (Phase 9-11)
+scikit-learn>=1.4.0
+joblib>=1.3.0
+scipy>=1.11.0
+numpy>=1.26.0
+
 # Optional: Enhanced functionality
 # biopython==1.81  # Uncomment if using BioPython features

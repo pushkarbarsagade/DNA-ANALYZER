@@ -320,3 +320,50 @@
     font-size: 1.75rem;
   }
 }
+
+@media (max-width: 520px) {
+  .amr-overview-container {
+    padding: 1rem 0.5rem 2rem 0.5rem;
+  }
+
+  .amr-overview-header {
+    padding: 1.5rem 0.5rem 1.5rem 0.5rem;
+  }
+
+  .amr-overview-title {
+    font-size: clamp(1.3rem, 5vw, 1.6rem);
+  }
+
+  .amr-diagram-card {
+    padding: 1.25rem 0.85rem;
+  }
+
+  .amr-flow-outcomes {
+    grid-template-columns: 1fr;
+  }
+
+  .amr-features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .amr-nav-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .amr-nav-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 360px) {
+  .amr-diagram-card {
+    padding: 0.85rem 0.5rem;
+  }
+
+  .amr-flow-box {
+    padding: 0.65rem 0.75rem;
+    font-size: 0.84rem;
+  }
+}

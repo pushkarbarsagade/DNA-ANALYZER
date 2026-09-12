@@ -454,8 +454,452 @@
   text-align: center;
 }
 
+/* PHASE 9: ML RESEARCH PREDICTION PANEL */
+.ml-prediction-panel {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ml-research-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: rgba(139, 92, 246, 0.18);
+  color: #c084fc;
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+.ml-prediction-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.ml-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  background: rgba(11, 18, 32, 0.6);
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.ml-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.ml-info-label {
+  font-size: 0.74rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.ml-info-val {
+  font-size: 0.85rem;
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.ml-prediction-result {
+  background: rgba(11, 18, 32, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.ml-prediction-class-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.ml-pred-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.ml-pred-class {
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.ml-pred-class.resistant {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.ml-pred-class.susceptible {
+  background: rgba(16, 185, 129, 0.2);
+  color: #6ee7b7;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.ml-prob-bar-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  position: relative;
+}
+
+.ml-prob-bar-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.76rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.ml-prob-bar {
+  display: flex;
+  height: 10px;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ml-prob-bar-fill.susceptible {
+  background: #10b981;
+  transition: width 0.3s ease;
+}
+
+.ml-prob-bar-fill.resistant {
+  background: #ef4444;
+  transition: width 0.3s ease;
+}
+
+.ml-threshold-marker {
+  font-size: 0.7rem;
+  color: #64748b;
+  text-align: center;
+  margin-top: 0.2rem;
+}
+
+.ml-features-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+}
+
+.ml-disclaimer-box {
+  background: rgba(139, 92, 246, 0.06);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 6px;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.76rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+  font-style: italic;
+}
+
 @media (max-width: 860px) {
   .evidence-sources-row {
     grid-template-columns: 1fr;
+  }
+  .ml-info-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Phase 11: Dynamic Multi-Drug ML Predictions Grid */
+.ml-drug-predictions-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ml-drug-card {
+  background: rgba(11, 18, 32, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  transition: border-color 0.2s ease;
+}
+
+.ml-drug-card.available {
+  border-left: 3px solid #8b5cf6;
+}
+
+.ml-drug-card.unavailable {
+  opacity: 0.75;
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.ml-drug-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ml-drug-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.ml-model-badge {
+  font-size: 0.72rem;
+  color: #c084fc;
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* PDF Export Header Row & Toast */
+.reconciliation-title-action-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.reconciliation-header-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+}
+
+.export-pdf-btn.compact {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+}
+
+.pdf-status-toast {
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.pdf-status-toast.success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.pdf-status-toast.error {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Mobile Responsiveness for Evidence Reconciliation (320px - 768px) */
+@media (max-width: 768px) {
+  .reconciliation-container {
+    padding: 1rem 0.5rem 2rem 0.5rem;
+    gap: 1.5rem;
+  }
+
+  .reconciliation-title-action-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.85rem;
+  }
+
+  .reconciliation-header-actions {
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .export-pdf-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    font-size: 0.88rem;
+  }
+
+  .reconciliation-architecture-pipeline {
+    width: 100%;
+    max-width: 100%;
+    justify-content: center;
+    padding: 0.4rem 0.5rem;
+    gap: 0.25rem;
+    border-radius: 10px;
+  }
+
+  .pipeline-step {
+    font-size: 0.72rem;
+    padding: 0.15rem 0.4rem;
+  }
+
+  .pipeline-arrow {
+    font-size: 0.75rem;
+  }
+
+  .reconciliation-section-card {
+    padding: 1.15rem 0.85rem;
+    border-radius: 10px;
+    gap: 1rem;
+  }
+
+  .section-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .presets-strip {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.45rem;
+  }
+
+  .preset-chip-btn {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 0.6rem 0.85rem;
+    font-size: 0.84rem;
+  }
+
+  .isolate-meta-grid {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  .form-grid-user-lab {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .user-lab-record-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+    padding: 0.75rem;
+  }
+
+  .reconciliation-metrics-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+  }
+
+  .finding-card {
+    padding: 0.85rem 0.65rem;
+  }
+
+  .finding-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.45rem;
+  }
+
+  .finding-card-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .finding-card-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .ml-info-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .ml-prob-bar-label-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .ml-drug-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+
+  .ml-drug-card {
+    padding: 0.85rem 0.65rem;
+  }
+
+  .ai-summary-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.45rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .reconciliation-container {
+    padding: 0.75rem 0.25rem 2rem 0.25rem;
+    gap: 1.15rem;
+  }
+
+  .reconciliation-main-title {
+    font-size: clamp(1.25rem, 5vw, 1.55rem);
+  }
+
+  .reconciliation-metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+  }
+
+  .reconciliation-section-card {
+    padding: 0.9rem 0.6rem;
+  }
+
+  .pipeline-step {
+    font-size: 0.66rem;
+    padding: 0.12rem 0.3rem;
+  }
+
+  .pipeline-arrow {
+    font-size: 0.66rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .reconciliation-section-card {
+    padding: 0.75rem 0.4rem;
+  }
+
+  .reconciliation-main-title {
+    font-size: 1.15rem;
+  }
+
+  .pipeline-step {
+    font-size: 0.62rem;
+    padding: 0.1rem 0.2rem;
   }
 }

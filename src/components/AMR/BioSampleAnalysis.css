@@ -216,3 +216,67 @@
   color: #94a3b8;
   font-family: 'Inter', sans-serif;
 }
+
+@media (max-width: 640px) {
+  .biosample-analysis-container {
+    padding: 1rem 0.5rem 2rem 0.5rem;
+  }
+
+  .analysis-main-title {
+    font-size: clamp(1.3rem, 5vw, 1.7rem);
+  }
+
+  .analysis-sub-text {
+    font-size: 0.88rem;
+  }
+
+  .biosample-search-card {
+    padding: 1.15rem 0.85rem;
+    border-radius: 10px;
+  }
+
+  .search-form-group {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+  }
+
+  .search-input-wrapper {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .biosample-text-input {
+    font-size: 0.92rem;
+    padding: 0.75rem 0.85rem;
+  }
+
+  .biosample-submit-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .biosample-clear-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .example-chips-list {
+    flex-direction: column;
+  }
+
+  .example-chip-btn {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 360px) {
+  .biosample-search-card {
+    padding: 0.85rem 0.5rem;
+  }
+
+  .analysis-main-title {
+    font-size: 1.2rem;
+  }
+}

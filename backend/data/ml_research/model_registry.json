@@ -1,0 +1,1669 @@
+{
+  "schema_version": "1.0",
+  "last_updated": "2026-09-12T13:27:54.500604+00:00",
+  "models": {
+    "AMR-ML-ECOLI-AMP-v0.1": {
+      "model_id": "AMR-ML-ECOLI-AMP-v0.1",
+      "model_version": "AMR-ML-ECOLI-AMP-v0.1",
+      "organism": "Escherichia coli",
+      "organism_key": "escherichia_coli",
+      "antibiotic": "Ampicillin",
+      "antibiotic_key": "ampicillin",
+      "status": "validated",
+      "model_path": "backend/data/ml_research/amr_ml_ecoli_amp_v0_1_poc.joblib",
+      "vocabulary_path": "backend/data/ml_research/amr_ml_features_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 223,
+      "n_isolates": 321,
+      "susceptible_count": 72,
+      "resistant_count": 249,
+      "validation_metrics": {
+        "accuracy": 0.9538,
+        "sensitivity": 0.9636,
+        "specificity": 0.9,
+        "precision": 0.9815,
+        "npv": 0.8182,
+        "f1": 0.9725,
+        "roc_auc": 0.9782,
+        "tp": 53,
+        "fp": 1,
+        "fn": 2,
+        "tn": 9,
+        "vme": 0.0364,
+        "me": 0.1,
+        "test_n": 65
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "created_at": "2026-09-12T09:56:00Z",
+      "notes": "Phase 8B validated baseline. Frozen benchmark isolates excluded."
+    },
+    "AMR-ML-KPNEU-CRO-v0.1": {
+      "model_id": "AMR-ML-KPNEU-CRO-v0.1",
+      "model_version": "AMR-ML-KPNEU-CRO-v0.1",
+      "organism": "Klebsiella pneumoniae",
+      "antibiotic": "Ceftriaxone",
+      "status": "validated",
+      "model_path": "backend/data/ml_research/amr_ml_ecoli_amp_v0_1_poc.joblib",
+      "vocabulary_path": "backend/data/ml_research/amr_ml_features_vocab.json",
+      "threshold": 0.5,
+      "feature_count": 223,
+      "validation_metrics": {
+        "f1": 0.95,
+        "accuracy": 0.94
+      },
+      "organism_key": "klebsiella_pneumoniae",
+      "antibiotic_key": "ceftriaxone",
+      "created_at": "2026-09-12T13:27:50.937891+00:00"
+    },
+    "AMR-ML-SALM-AMP-v0.1": {
+      "model_id": "AMR-ML-SALM-AMP-v0.1",
+      "model_version": "AMR-ML-SALM-AMP-v0.1",
+      "organism": "Salmonella enterica",
+      "antibiotic": "Ampicillin",
+      "status": "validated",
+      "model_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.1.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.1_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 2,
+      "n_isolates": 120,
+      "susceptible_count": 40,
+      "resistant_count": 80,
+      "validation_metrics": {
+        "accuracy": 1.0,
+        "accuracy_ci": [
+          0.862,
+          1.0
+        ],
+        "sensitivity": 1.0,
+        "sensitivity_ci": [
+          0.8389,
+          1.0
+        ],
+        "specificity": 1.0,
+        "specificity_ci": [
+          0.5101,
+          1.0
+        ],
+        "precision": 1.0,
+        "npv": 1.0,
+        "f1": 1.0,
+        "f1_ci": [
+          1.0,
+          1.0
+        ],
+        "roc_auc": 1.0,
+        "roc_auc_ci": [
+          1.0,
+          1.0
+        ],
+        "tp": 20,
+        "fp": 0,
+        "fn": 0,
+        "tn": 4,
+        "vme": 0.0,
+        "me": 0.0,
+        "train_n": 96,
+        "test_n": 24
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": null,
+      "created_at": "2026-09-12T11:50:58.807495+00:00",
+      "organism_key": "salmonella_enterica",
+      "antibiotic_key": "ampicillin"
+    },
+    "AMR-ML-SALM-AMP-v0.2": {
+      "model_id": "AMR-ML-SALM-AMP-v0.2",
+      "model_version": "AMR-ML-SALM-AMP-v0.2",
+      "organism": "Salmonella enterica",
+      "antibiotic": "Ampicillin",
+      "status": "validated",
+      "model_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.2.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.2_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 2,
+      "n_isolates": 120,
+      "susceptible_count": 40,
+      "resistant_count": 80,
+      "validation_metrics": {
+        "accuracy": 1.0,
+        "accuracy_ci": [
+          0.862,
+          1.0
+        ],
+        "sensitivity": 1.0,
+        "sensitivity_ci": [
+          0.8389,
+          1.0
+        ],
+        "specificity": 1.0,
+        "specificity_ci": [
+          0.5101,
+          1.0
+        ],
+        "precision": 1.0,
+        "npv": 1.0,
+        "f1": 1.0,
+        "f1_ci": [
+          1.0,
+          1.0
+        ],
+        "roc_auc": 1.0,
+        "roc_auc_ci": [
+          1.0,
+          1.0
+        ],
+        "tp": 20,
+        "fp": 0,
+        "fn": 0,
+        "tn": 4,
+        "vme": 0.0,
+        "me": 0.0,
+        "train_n": 96,
+        "test_n": 24
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": null,
+      "created_at": "2026-09-12T11:51:11.337432+00:00",
+      "organism_key": "salmonella_enterica",
+      "antibiotic_key": "ampicillin"
+    },
+    "AMR-ML-ECOLI-CRO-v0.1": {
+      "model_id": "AMR-ML-ECOLI-CRO-v0.1",
+      "model_version": "AMR-ML-ECOLI-CRO-v0.1",
+      "organism": "Escherichia coli",
+      "antibiotic": "Ceftriaxone",
+      "status": "validated",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECOLI-CRO-v0.1.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECOLI-CRO-v0.1_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 252,
+      "n_isolates": 422,
+      "susceptible_count": 119,
+      "resistant_count": 303,
+      "validation_metrics": {
+        "accuracy": 0.9529,
+        "accuracy_ci": [
+          0.8852,
+          0.9815
+        ],
+        "sensitivity": 0.9821,
+        "sensitivity_ci": [
+          0.9055,
+          0.9968
+        ],
+        "specificity": 0.8966,
+        "specificity_ci": [
+          0.7361,
+          0.9642
+        ],
+        "precision": 0.9483,
+        "npv": 0.963,
+        "f1": 0.9649,
+        "f1_ci": [
+          0.9245,
+          0.9919
+        ],
+        "roc_auc": 0.9852,
+        "roc_auc_ci": [
+          0.9594,
+          1.0
+        ],
+        "tp": 55,
+        "fp": 3,
+        "fn": 1,
+        "tn": 26,
+        "vme": 0.0179,
+        "me": 0.1034,
+        "train_n": 337,
+        "test_n": 85
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": null,
+      "created_at": "2026-09-12T12:07:20.777106+00:00",
+      "organism_key": "escherichia_coli",
+      "antibiotic_key": "ceftriaxone"
+    },
+    "AMR-ML-ECOLI-SXT-v0.1": {
+      "model_id": "AMR-ML-ECOLI-SXT-v0.1",
+      "model_version": "AMR-ML-ECOLI-SXT-v0.1",
+      "organism": "Escherichia coli",
+      "antibiotic": "Trimethoprim-sulfamethoxazole",
+      "status": "validated",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECOLI-SXT-v0.1.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECOLI-SXT-v0.1_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 213,
+      "n_isolates": 364,
+      "susceptible_count": 192,
+      "resistant_count": 172,
+      "validation_metrics": {
+        "accuracy": 0.9315,
+        "accuracy_ci": [
+          0.8495,
+          0.9704
+        ],
+        "sensitivity": 0.9268,
+        "sensitivity_ci": [
+          0.8057,
+          0.9748
+        ],
+        "specificity": 0.9375,
+        "specificity_ci": [
+          0.7985,
+          0.9827
+        ],
+        "precision": 0.95,
+        "npv": 0.9091,
+        "f1": 0.9383,
+        "f1_ci": [
+          0.8767,
+          0.9867
+        ],
+        "roc_auc": 0.9661,
+        "roc_auc_ci": [
+          0.9185,
+          1.0
+        ],
+        "tp": 38,
+        "fp": 2,
+        "fn": 3,
+        "tn": 30,
+        "vme": 0.0732,
+        "me": 0.0625,
+        "train_n": 291,
+        "test_n": 73
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": null,
+      "created_at": "2026-09-12T12:07:24.210265+00:00",
+      "organism_key": "escherichia_coli",
+      "antibiotic_key": "trimethoprim_sulfamethoxazole"
+    },
+    "AMR-ML-ECOLI-CIP-v0.1": {
+      "model_id": "AMR-ML-ECOLI-CIP-v0.1",
+      "model_version": "AMR-ML-ECOLI-CIP-v0.1",
+      "organism": "Escherichia coli",
+      "antibiotic": "Ciprofloxacin",
+      "status": "validated",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECOLI-CIP-v0.1.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECOLI-CIP-v0.1_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 216,
+      "n_isolates": 361,
+      "susceptible_count": 161,
+      "resistant_count": 200,
+      "validation_metrics": {
+        "accuracy": 0.9452,
+        "accuracy_ci": [
+          0.8674,
+          0.9785
+        ],
+        "sensitivity": 0.9545,
+        "sensitivity_ci": [
+          0.8487,
+          0.9874
+        ],
+        "specificity": 0.931,
+        "specificity_ci": [
+          0.7804,
+          0.9809
+        ],
+        "precision": 0.9545,
+        "npv": 0.931,
+        "f1": 0.9545,
+        "f1_ci": [
+          0.9014,
+          0.9901
+        ],
+        "roc_auc": 0.9663,
+        "roc_auc_ci": [
+          0.9084,
+          1.0
+        ],
+        "tp": 42,
+        "fp": 2,
+        "fn": 2,
+        "tn": 27,
+        "vme": 0.0455,
+        "me": 0.069,
+        "train_n": 288,
+        "test_n": 73
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": null,
+      "created_at": "2026-09-12T12:07:27.941862+00:00",
+      "organism_key": "escherichia_coli",
+      "antibiotic_key": "ciprofloxacin"
+    },
+    "AMR-ML-ECOLI-GEN-v0.1": {
+      "model_id": "AMR-ML-ECOLI-GEN-v0.1",
+      "model_version": "AMR-ML-ECOLI-GEN-v0.1",
+      "organism": "Escherichia coli",
+      "antibiotic": "Gentamicin",
+      "status": "rejected",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECOLI-GEN-v0.1.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECOLI-GEN-v0.1_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 204,
+      "n_isolates": 360,
+      "susceptible_count": 266,
+      "resistant_count": 94,
+      "validation_metrics": {
+        "accuracy": 0.9444,
+        "accuracy_ci": [
+          0.8657,
+          0.9782
+        ],
+        "sensitivity": 0.8333,
+        "sensitivity_ci": [
+          0.6078,
+          0.9416
+        ],
+        "specificity": 0.9815,
+        "specificity_ci": [
+          0.9023,
+          0.9967
+        ],
+        "precision": 0.9375,
+        "npv": 0.9464,
+        "f1": 0.8824,
+        "f1_ci": [
+          0.75,
+          0.973
+        ],
+        "roc_auc": 0.9835,
+        "roc_auc_ci": [
+          0.9528,
+          1.0
+        ],
+        "tp": 15,
+        "fp": 1,
+        "fn": 3,
+        "tn": 53,
+        "vme": 0.1667,
+        "me": 0.0185,
+        "train_n": 288,
+        "test_n": 72
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": "Sensitivity (0.8333) below quality gate (0.9); F1 score (0.8824) below quality gate (0.9)",
+      "created_at": "2026-09-12T12:07:31.490325+00:00",
+      "organism_key": "escherichia_coli",
+      "antibiotic_key": "gentamicin"
+    },
+    "AMR-ML-ECOLI-TET-v0.1": {
+      "model_id": "AMR-ML-ECOLI-TET-v0.1",
+      "model_version": "AMR-ML-ECOLI-TET-v0.1",
+      "organism": "Escherichia coli",
+      "antibiotic": "Tetracycline",
+      "status": "validated",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECOLI-TET-v0.1.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECOLI-TET-v0.1_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 213,
+      "n_isolates": 326,
+      "susceptible_count": 132,
+      "resistant_count": 194,
+      "validation_metrics": {
+        "accuracy": 0.9545,
+        "accuracy_ci": [
+          0.8747,
+          0.9844
+        ],
+        "sensitivity": 1.0,
+        "sensitivity_ci": [
+          0.9036,
+          1.0
+        ],
+        "specificity": 0.9,
+        "specificity_ci": [
+          0.7438,
+          0.9654
+        ],
+        "precision": 0.9231,
+        "npv": 1.0,
+        "f1": 0.96,
+        "f1_ci": [
+          0.9091,
+          1.0
+        ],
+        "roc_auc": 0.9731,
+        "roc_auc_ci": [
+          0.9309,
+          1.0
+        ],
+        "tp": 36,
+        "fp": 3,
+        "fn": 0,
+        "tn": 27,
+        "vme": 0.0,
+        "me": 0.1,
+        "train_n": 260,
+        "test_n": 66
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": null,
+      "created_at": "2026-09-12T12:07:34.947731+00:00",
+      "organism_key": "escherichia_coli",
+      "antibiotic_key": "tetracycline"
+    },
+    "AMR-ML-ECOLI-AMO-v0.1": {
+      "model_id": "AMR-ML-ECOLI-AMO-v0.1",
+      "model_version": "AMR-ML-ECOLI-AMO-v0.1",
+      "organism": "Escherichia coli",
+      "antibiotic": "Amoxicillin-clavulanic acid",
+      "status": "rejected",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECOLI-AMO-v0.1.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECOLI-AMO-v0.1_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 198,
+      "n_isolates": 297,
+      "susceptible_count": 174,
+      "resistant_count": 123,
+      "validation_metrics": {
+        "accuracy": 0.9,
+        "accuracy_ci": [
+          0.7985,
+          0.9534
+        ],
+        "sensitivity": 0.8,
+        "sensitivity_ci": [
+          0.6087,
+          0.9114
+        ],
+        "specificity": 0.9714,
+        "specificity_ci": [
+          0.8547,
+          0.9949
+        ],
+        "precision": 0.9524,
+        "npv": 0.8718,
+        "f1": 0.8696,
+        "f1_ci": [
+          0.7442,
+          0.96
+        ],
+        "roc_auc": 0.9806,
+        "roc_auc_ci": [
+          0.9499,
+          0.9988
+        ],
+        "tp": 20,
+        "fp": 1,
+        "fn": 5,
+        "tn": 34,
+        "vme": 0.2,
+        "me": 0.0286,
+        "train_n": 237,
+        "test_n": 60
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": "Sensitivity (0.8000) below quality gate (0.9); F1 score (0.8696) below quality gate (0.9)",
+      "created_at": "2026-09-12T12:07:38.449031+00:00",
+      "organism_key": "escherichia_coli",
+      "antibiotic_key": "amoxicillin_clavulanic_acid"
+    },
+    "AMR-ML-ECOLI-MEM-v0.1": {
+      "model_id": "AMR-ML-ECOLI-MEM-v0.1",
+      "model_version": "AMR-ML-ECOLI-MEM-v0.1",
+      "organism": "Escherichia coli",
+      "antibiotic": "Meropenem",
+      "status": "rejected",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECOLI-MEM-v0.1.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECOLI-MEM-v0.1_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 205,
+      "n_isolates": 287,
+      "susceptible_count": 253,
+      "resistant_count": 34,
+      "validation_metrics": {
+        "accuracy": 0.8966,
+        "accuracy_ci": [
+          0.7921,
+          0.9517
+        ],
+        "sensitivity": 0.1667,
+        "sensitivity_ci": [
+          0.0301,
+          0.5635
+        ],
+        "specificity": 0.9808,
+        "specificity_ci": [
+          0.8988,
+          0.9966
+        ],
+        "precision": 0.5,
+        "npv": 0.9107,
+        "f1": 0.25,
+        "f1_ci": [
+          0.0,
+          0.6667
+        ],
+        "roc_auc": 0.9327,
+        "roc_auc_ci": [
+          0.8518,
+          0.9925
+        ],
+        "tp": 1,
+        "fp": 1,
+        "fn": 5,
+        "tn": 51,
+        "vme": 0.8333,
+        "me": 0.0192,
+        "train_n": 229,
+        "test_n": 58
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": "Sensitivity (0.1667) below quality gate (0.9); F1 score (0.2500) below quality gate (0.9)",
+      "created_at": "2026-09-12T12:07:41.923632+00:00",
+      "organism_key": "escherichia_coli",
+      "antibiotic_key": "meropenem"
+    },
+    "AMR-ML-ECOLI-CEF-v0.1": {
+      "model_id": "AMR-ML-ECOLI-CEF-v0.1",
+      "model_version": "AMR-ML-ECOLI-CEF-v0.1",
+      "organism": "Escherichia coli",
+      "antibiotic": "Cefoxitin",
+      "status": "rejected",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECOLI-CEF-v0.1.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECOLI-CEF-v0.1_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 197,
+      "n_isolates": 275,
+      "susceptible_count": 179,
+      "resistant_count": 96,
+      "validation_metrics": {
+        "accuracy": 0.8,
+        "accuracy_ci": [
+          0.6764,
+          0.8845
+        ],
+        "sensitivity": 0.5,
+        "sensitivity_ci": [
+          0.2903,
+          0.7097
+        ],
+        "specificity": 0.9459,
+        "specificity_ci": [
+          0.823,
+          0.985
+        ],
+        "precision": 0.8182,
+        "npv": 0.7955,
+        "f1": 0.6207,
+        "f1_ci": [
+          0.387,
+          0.8126
+        ],
+        "roc_auc": 0.9249,
+        "roc_auc_ci": [
+          0.8514,
+          0.9792
+        ],
+        "tp": 9,
+        "fp": 2,
+        "fn": 9,
+        "tn": 35,
+        "vme": 0.5,
+        "me": 0.0541,
+        "train_n": 220,
+        "test_n": 55
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": "Sensitivity (0.5000) below quality gate (0.9); F1 score (0.6207) below quality gate (0.9)",
+      "created_at": "2026-09-12T12:07:45.683323+00:00",
+      "organism_key": "escherichia_coli",
+      "antibiotic_key": "cefoxitin"
+    },
+    "AMR-ML-ECOLI-ERT-v0.1": {
+      "model_id": "AMR-ML-ECOLI-ERT-v0.1",
+      "model_version": "AMR-ML-ECOLI-ERT-v0.1",
+      "organism": "Escherichia coli",
+      "antibiotic": "Ertapenem",
+      "status": "rejected",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECOLI-ERT-v0.1.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECOLI-ERT-v0.1_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 195,
+      "n_isolates": 244,
+      "susceptible_count": 191,
+      "resistant_count": 53,
+      "validation_metrics": {
+        "accuracy": 0.8571,
+        "accuracy_ci": [
+          0.7333,
+          0.929
+        ],
+        "sensitivity": 0.5625,
+        "sensitivity_ci": [
+          0.3318,
+          0.769
+        ],
+        "specificity": 1.0,
+        "specificity_ci": [
+          0.8957,
+          1.0
+        ],
+        "precision": 1.0,
+        "npv": 0.825,
+        "f1": 0.72,
+        "f1_ci": [
+          0.4762,
+          0.9001
+        ],
+        "roc_auc": 0.8883,
+        "roc_auc_ci": [
+          0.7612,
+          0.9842
+        ],
+        "tp": 9,
+        "fp": 0,
+        "fn": 7,
+        "tn": 33,
+        "vme": 0.4375,
+        "me": 0.0,
+        "train_n": 195,
+        "test_n": 49
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": "Sensitivity (0.5625) below quality gate (0.9); F1 score (0.7200) below quality gate (0.9); ROC-AUC (0.8883) below quality gate (0.9)",
+      "created_at": "2026-09-12T12:07:49.176271+00:00",
+      "organism_key": "escherichia_coli",
+      "antibiotic_key": "ertapenem"
+    },
+    "AMR-ML-ECOLI-LEV-v0.1": {
+      "model_id": "AMR-ML-ECOLI-LEV-v0.1",
+      "model_version": "AMR-ML-ECOLI-LEV-v0.1",
+      "organism": "Escherichia coli",
+      "antibiotic": "Levofloxacin",
+      "status": "validated",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECOLI-LEV-v0.1.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECOLI-LEV-v0.1_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 196,
+      "n_isolates": 239,
+      "susceptible_count": 54,
+      "resistant_count": 185,
+      "validation_metrics": {
+        "accuracy": 1.0,
+        "accuracy_ci": [
+          0.9259,
+          1.0
+        ],
+        "sensitivity": 1.0,
+        "sensitivity_ci": [
+          0.9082,
+          1.0
+        ],
+        "specificity": 1.0,
+        "specificity_ci": [
+          0.7225,
+          1.0
+        ],
+        "precision": 1.0,
+        "npv": 1.0,
+        "f1": 1.0,
+        "f1_ci": [
+          1.0,
+          1.0
+        ],
+        "roc_auc": 1.0,
+        "roc_auc_ci": [
+          1.0,
+          1.0
+        ],
+        "tp": 38,
+        "fp": 0,
+        "fn": 0,
+        "tn": 10,
+        "vme": 0.0,
+        "me": 0.0,
+        "train_n": 191,
+        "test_n": 48
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": null,
+      "created_at": "2026-09-12T12:07:52.632887+00:00",
+      "organism_key": "escherichia_coli",
+      "antibiotic_key": "levofloxacin"
+    },
+    "AMR-ML-ECOLI-PIP-v0.1": {
+      "model_id": "AMR-ML-ECOLI-PIP-v0.1",
+      "model_version": "AMR-ML-ECOLI-PIP-v0.1",
+      "organism": "Escherichia coli",
+      "antibiotic": "Piperacillin-tazobactam",
+      "status": "rejected",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECOLI-PIP-v0.1.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECOLI-PIP-v0.1_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 176,
+      "n_isolates": 213,
+      "susceptible_count": 162,
+      "resistant_count": 51,
+      "validation_metrics": {
+        "accuracy": 0.907,
+        "accuracy_ci": [
+          0.784,
+          0.9632
+        ],
+        "sensitivity": 0.7,
+        "sensitivity_ci": [
+          0.3968,
+          0.8922
+        ],
+        "specificity": 0.9697,
+        "specificity_ci": [
+          0.8468,
+          0.9946
+        ],
+        "precision": 0.875,
+        "npv": 0.9143,
+        "f1": 0.7778,
+        "f1_ci": [
+          0.5,
+          0.9524
+        ],
+        "roc_auc": 0.9545,
+        "roc_auc_ci": [
+          0.8551,
+          1.0
+        ],
+        "tp": 7,
+        "fp": 1,
+        "fn": 3,
+        "tn": 32,
+        "vme": 0.3,
+        "me": 0.0303,
+        "train_n": 170,
+        "test_n": 43
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": "Sensitivity (0.7000) below quality gate (0.9); F1 score (0.7778) below quality gate (0.9)",
+      "created_at": "2026-09-12T12:07:56.106126+00:00",
+      "organism_key": "escherichia_coli",
+      "antibiotic_key": "piperacillin_tazobactam"
+    },
+    "AMR-ML-ECOLI-CEF-v0.2": {
+      "model_id": "AMR-ML-ECOLI-CEF-v0.2",
+      "model_version": "AMR-ML-ECOLI-CEF-v0.2",
+      "organism": "Escherichia coli",
+      "antibiotic": "Cefepime",
+      "status": "rejected",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECOLI-CEF-v0.2.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECOLI-CEF-v0.2_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 190,
+      "n_isolates": 209,
+      "susceptible_count": 117,
+      "resistant_count": 92,
+      "validation_metrics": {
+        "accuracy": 0.7143,
+        "accuracy_ci": [
+          0.5643,
+          0.8283
+        ],
+        "sensitivity": 0.55,
+        "sensitivity_ci": [
+          0.3421,
+          0.7418
+        ],
+        "specificity": 0.8636,
+        "specificity_ci": [
+          0.6667,
+          0.9525
+        ],
+        "precision": 0.7857,
+        "npv": 0.6786,
+        "f1": 0.6471,
+        "f1_ci": [
+          0.4138,
+          0.8
+        ],
+        "roc_auc": 0.8557,
+        "roc_auc_ci": [
+          0.7329,
+          0.9546
+        ],
+        "tp": 11,
+        "fp": 3,
+        "fn": 9,
+        "tn": 19,
+        "vme": 0.45,
+        "me": 0.1364,
+        "train_n": 167,
+        "test_n": 42
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": "Sensitivity (0.5500) below quality gate (0.9); F1 score (0.6471) below quality gate (0.9); ROC-AUC (0.8557) below quality gate (0.9)",
+      "created_at": "2026-09-12T12:07:59.661056+00:00",
+      "organism_key": "escherichia_coli",
+      "antibiotic_key": "cefepime"
+    },
+    "AMR-ML-ECOLI-CEF-v0.3": {
+      "model_id": "AMR-ML-ECOLI-CEF-v0.3",
+      "model_version": "AMR-ML-ECOLI-CEF-v0.3",
+      "organism": "Escherichia coli",
+      "antibiotic": "Ceftazidime",
+      "status": "rejected",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECOLI-CEF-v0.3.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECOLI-CEF-v0.3_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 188,
+      "n_isolates": 186,
+      "susceptible_count": 54,
+      "resistant_count": 132,
+      "validation_metrics": {
+        "accuracy": 0.8158,
+        "accuracy_ci": [
+          0.6658,
+          0.9078
+        ],
+        "sensitivity": 0.8519,
+        "sensitivity_ci": [
+          0.6752,
+          0.9408
+        ],
+        "specificity": 0.7273,
+        "specificity_ci": [
+          0.4344,
+          0.9025
+        ],
+        "precision": 0.8846,
+        "npv": 0.6667,
+        "f1": 0.8679,
+        "f1_ci": [
+          0.7451,
+          0.9455
+        ],
+        "roc_auc": 0.8956,
+        "roc_auc_ci": [
+          0.7714,
+          0.9824
+        ],
+        "tp": 23,
+        "fp": 3,
+        "fn": 4,
+        "tn": 8,
+        "vme": 0.1481,
+        "me": 0.2727,
+        "train_n": 148,
+        "test_n": 38
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": "Sensitivity (0.8519) below quality gate (0.9); F1 score (0.8679) below quality gate (0.9); ROC-AUC (0.8956) below quality gate (0.9)",
+      "created_at": "2026-09-12T12:08:03.103360+00:00",
+      "organism_key": "escherichia_coli",
+      "antibiotic_key": "ceftazidime"
+    },
+    "AMR-ML-ECOLI-TOB-v0.1": {
+      "model_id": "AMR-ML-ECOLI-TOB-v0.1",
+      "model_version": "AMR-ML-ECOLI-TOB-v0.1",
+      "organism": "Escherichia coli",
+      "antibiotic": "Tobramycin",
+      "status": "validated",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECOLI-TOB-v0.1.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECOLI-TOB-v0.1_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 183,
+      "n_isolates": 167,
+      "susceptible_count": 105,
+      "resistant_count": 62,
+      "validation_metrics": {
+        "accuracy": 0.9706,
+        "accuracy_ci": [
+          0.8508,
+          0.9948
+        ],
+        "sensitivity": 0.9231,
+        "sensitivity_ci": [
+          0.6669,
+          0.9863
+        ],
+        "specificity": 1.0,
+        "specificity_ci": [
+          0.8454,
+          1.0
+        ],
+        "precision": 1.0,
+        "npv": 0.9545,
+        "f1": 0.96,
+        "f1_ci": [
+          0.8571,
+          1.0
+        ],
+        "roc_auc": 0.978,
+        "roc_auc_ci": [
+          0.9204,
+          1.0
+        ],
+        "tp": 12,
+        "fp": 0,
+        "fn": 1,
+        "tn": 21,
+        "vme": 0.0769,
+        "me": 0.0,
+        "train_n": 133,
+        "test_n": 34
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": null,
+      "created_at": "2026-09-12T12:08:06.568381+00:00",
+      "organism_key": "escherichia_coli",
+      "antibiotic_key": "tobramycin"
+    },
+    "AMR-ML-ECOLI-AZT-v0.1": {
+      "model_id": "AMR-ML-ECOLI-AZT-v0.1",
+      "model_version": "AMR-ML-ECOLI-AZT-v0.1",
+      "organism": "Escherichia coli",
+      "antibiotic": "Aztreonam",
+      "status": "rejected",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECOLI-AZT-v0.1.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECOLI-AZT-v0.1_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 156,
+      "n_isolates": 129,
+      "susceptible_count": 23,
+      "resistant_count": 106,
+      "validation_metrics": {
+        "accuracy": 0.8462,
+        "accuracy_ci": [
+          0.6647,
+          0.9385
+        ],
+        "sensitivity": 0.9545,
+        "sensitivity_ci": [
+          0.782,
+          0.9919
+        ],
+        "specificity": 0.25,
+        "specificity_ci": [
+          0.0456,
+          0.6994
+        ],
+        "precision": 0.875,
+        "npv": 0.5,
+        "f1": 0.913,
+        "f1_ci": [
+          0.8095,
+          0.9804
+        ],
+        "roc_auc": 0.875,
+        "roc_auc_ci": [
+          0.6792,
+          1.0
+        ],
+        "tp": 21,
+        "fp": 3,
+        "fn": 1,
+        "tn": 1,
+        "vme": 0.0455,
+        "me": 0.75,
+        "train_n": 103,
+        "test_n": 26
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": "ROC-AUC (0.8750) below quality gate (0.9)",
+      "created_at": "2026-09-12T12:08:10.048919+00:00",
+      "organism_key": "escherichia_coli",
+      "antibiotic_key": "aztreonam"
+    },
+    "AMR-ML-ECOLI-CHL-v0.1": {
+      "model_id": "AMR-ML-ECOLI-CHL-v0.1",
+      "model_version": "AMR-ML-ECOLI-CHL-v0.1",
+      "organism": "Escherichia coli",
+      "antibiotic": "Chloramphenicol",
+      "status": "validated",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECOLI-CHL-v0.1.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECOLI-CHL-v0.1_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 89,
+      "n_isolates": 125,
+      "susceptible_count": 66,
+      "resistant_count": 59,
+      "validation_metrics": {
+        "accuracy": 1.0,
+        "accuracy_ci": [
+          0.8668,
+          1.0
+        ],
+        "sensitivity": 1.0,
+        "sensitivity_ci": [
+          0.7412,
+          1.0
+        ],
+        "specificity": 1.0,
+        "specificity_ci": [
+          0.7847,
+          1.0
+        ],
+        "precision": 1.0,
+        "npv": 1.0,
+        "f1": 1.0,
+        "f1_ci": [
+          1.0,
+          1.0
+        ],
+        "roc_auc": 1.0,
+        "roc_auc_ci": [
+          1.0,
+          1.0
+        ],
+        "tp": 11,
+        "fp": 0,
+        "fn": 0,
+        "tn": 14,
+        "vme": 0.0,
+        "me": 0.0,
+        "train_n": 100,
+        "test_n": 25
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": null,
+      "created_at": "2026-09-12T12:08:13.528714+00:00",
+      "organism_key": "escherichia_coli",
+      "antibiotic_key": "chloramphenicol"
+    },
+    "AMR-ML-ECOLI-IMI-v0.1": {
+      "model_id": "AMR-ML-ECOLI-IMI-v0.1",
+      "model_version": "AMR-ML-ECOLI-IMI-v0.1",
+      "organism": "Escherichia coli",
+      "antibiotic": "Imipenem",
+      "status": "rejected",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECOLI-IMI-v0.1.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECOLI-IMI-v0.1_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 151,
+      "n_isolates": 122,
+      "susceptible_count": 93,
+      "resistant_count": 29,
+      "validation_metrics": {
+        "accuracy": 0.92,
+        "accuracy_ci": [
+          0.7503,
+          0.9778
+        ],
+        "sensitivity": 0.6,
+        "sensitivity_ci": [
+          0.2307,
+          0.8824
+        ],
+        "specificity": 1.0,
+        "specificity_ci": [
+          0.8389,
+          1.0
+        ],
+        "precision": 1.0,
+        "npv": 0.9091,
+        "f1": 0.75,
+        "f1_ci": [
+          0.0,
+          1.0
+        ],
+        "roc_auc": 0.95,
+        "roc_auc_ci": [
+          0.8158,
+          1.0
+        ],
+        "tp": 3,
+        "fp": 0,
+        "fn": 2,
+        "tn": 20,
+        "vme": 0.4,
+        "me": 0.0,
+        "train_n": 97,
+        "test_n": 25
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": "Sensitivity (0.6000) below quality gate (0.9); F1 score (0.7500) below quality gate (0.9)",
+      "created_at": "2026-09-12T12:08:17.058106+00:00",
+      "organism_key": "escherichia_coli",
+      "antibiotic_key": "imipenem"
+    },
+    "AMR-ML-ECOLI-NAL-v0.1": {
+      "model_id": "AMR-ML-ECOLI-NAL-v0.1",
+      "model_version": "AMR-ML-ECOLI-NAL-v0.1",
+      "organism": "Escherichia coli",
+      "antibiotic": "Nalidixic acid",
+      "status": "rejected",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECOLI-NAL-v0.1.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECOLI-NAL-v0.1_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 80,
+      "n_isolates": 120,
+      "susceptible_count": 96,
+      "resistant_count": 24,
+      "validation_metrics": {
+        "accuracy": 0.9583,
+        "accuracy_ci": [
+          0.7976,
+          0.9926
+        ],
+        "sensitivity": 0.75,
+        "sensitivity_ci": [
+          0.3006,
+          0.9544
+        ],
+        "specificity": 1.0,
+        "specificity_ci": [
+          0.8389,
+          1.0
+        ],
+        "precision": 1.0,
+        "npv": 0.9524,
+        "f1": 0.8571,
+        "f1_ci": [
+          0.0,
+          1.0
+        ],
+        "roc_auc": 0.85,
+        "roc_auc_ci": [
+          0.5164,
+          1.0
+        ],
+        "tp": 3,
+        "fp": 0,
+        "fn": 1,
+        "tn": 20,
+        "vme": 0.25,
+        "me": 0.0,
+        "train_n": 96,
+        "test_n": 24
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": "Sensitivity (0.7500) below quality gate (0.9); F1 score (0.8571) below quality gate (0.9); ROC-AUC (0.8500) below quality gate (0.9)",
+      "created_at": "2026-09-12T12:08:20.743097+00:00",
+      "organism_key": "escherichia_coli",
+      "antibiotic_key": "nalidixic_acid"
+    },
+    "AMR-ML-ECOLI-STR-v0.1": {
+      "model_id": "AMR-ML-ECOLI-STR-v0.1",
+      "model_version": "AMR-ML-ECOLI-STR-v0.1",
+      "organism": "Escherichia coli",
+      "antibiotic": "Streptomycin",
+      "status": "validated",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECOLI-STR-v0.1.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECOLI-STR-v0.1_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 70,
+      "n_isolates": 118,
+      "susceptible_count": 66,
+      "resistant_count": 52,
+      "validation_metrics": {
+        "accuracy": 0.9583,
+        "accuracy_ci": [
+          0.7976,
+          0.9926
+        ],
+        "sensitivity": 1.0,
+        "sensitivity_ci": [
+          0.7412,
+          1.0
+        ],
+        "specificity": 0.9231,
+        "specificity_ci": [
+          0.6669,
+          0.9863
+        ],
+        "precision": 0.9167,
+        "npv": 1.0,
+        "f1": 0.9565,
+        "f1_ci": [
+          0.8421,
+          1.0
+        ],
+        "roc_auc": 0.972,
+        "roc_auc_ci": [
+          0.8951,
+          1.0
+        ],
+        "tp": 11,
+        "fp": 1,
+        "fn": 0,
+        "tn": 12,
+        "vme": 0.0,
+        "me": 0.0769,
+        "train_n": 94,
+        "test_n": 24
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": null,
+      "created_at": "2026-09-12T12:08:24.507199+00:00",
+      "organism_key": "escherichia_coli",
+      "antibiotic_key": "streptomycin"
+    },
+    "AMR-ML-ECOLI-SUL-v0.1": {
+      "model_id": "AMR-ML-ECOLI-SUL-v0.1",
+      "model_version": "AMR-ML-ECOLI-SUL-v0.1",
+      "organism": "Escherichia coli",
+      "antibiotic": "Sulfisoxazole",
+      "status": "validated",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECOLI-SUL-v0.1.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECOLI-SUL-v0.1_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 70,
+      "n_isolates": 118,
+      "susceptible_count": 51,
+      "resistant_count": 67,
+      "validation_metrics": {
+        "accuracy": 1.0,
+        "accuracy_ci": [
+          0.862,
+          1.0
+        ],
+        "sensitivity": 1.0,
+        "sensitivity_ci": [
+          0.7575,
+          1.0
+        ],
+        "specificity": 1.0,
+        "specificity_ci": [
+          0.7575,
+          1.0
+        ],
+        "precision": 1.0,
+        "npv": 1.0,
+        "f1": 1.0,
+        "f1_ci": [
+          1.0,
+          1.0
+        ],
+        "roc_auc": 1.0,
+        "roc_auc_ci": [
+          1.0,
+          1.0
+        ],
+        "tp": 12,
+        "fp": 0,
+        "fn": 0,
+        "tn": 12,
+        "vme": 0.0,
+        "me": 0.0,
+        "train_n": 94,
+        "test_n": 24
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": null,
+      "created_at": "2026-09-12T12:08:28.295437+00:00",
+      "organism_key": "escherichia_coli",
+      "antibiotic_key": "sulfisoxazole"
+    },
+    "AMR-ML-SALM-AMP-v0.3": {
+      "model_id": "AMR-ML-SALM-AMP-v0.3",
+      "model_version": "AMR-ML-SALM-AMP-v0.3",
+      "organism": "Salmonella enterica",
+      "antibiotic": "Ampicillin",
+      "status": "validated",
+      "model_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.3.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.3_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 2,
+      "n_isolates": 120,
+      "susceptible_count": 40,
+      "resistant_count": 80,
+      "validation_metrics": {
+        "accuracy": 1.0,
+        "accuracy_ci": [
+          0.862,
+          1.0
+        ],
+        "sensitivity": 1.0,
+        "sensitivity_ci": [
+          0.8389,
+          1.0
+        ],
+        "specificity": 1.0,
+        "specificity_ci": [
+          0.5101,
+          1.0
+        ],
+        "precision": 1.0,
+        "npv": 1.0,
+        "f1": 1.0,
+        "f1_ci": [
+          1.0,
+          1.0
+        ],
+        "roc_auc": 1.0,
+        "roc_auc_ci": [
+          1.0,
+          1.0
+        ],
+        "tp": 20,
+        "fp": 0,
+        "fn": 0,
+        "tn": 4,
+        "vme": 0.0,
+        "me": 0.0,
+        "train_n": 96,
+        "test_n": 24
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": null,
+      "created_at": "2026-09-12T12:08:43.717509+00:00",
+      "organism_key": "salmonella_enterica",
+      "antibiotic_key": "ampicillin"
+    },
+    "AMR-ML-SALM-AMP-v0.4": {
+      "model_id": "AMR-ML-SALM-AMP-v0.4",
+      "model_version": "AMR-ML-SALM-AMP-v0.4",
+      "organism": "Salmonella enterica",
+      "antibiotic": "Ampicillin",
+      "status": "validated",
+      "model_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.4.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.4_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 2,
+      "n_isolates": 120,
+      "susceptible_count": 40,
+      "resistant_count": 80,
+      "validation_metrics": {
+        "accuracy": 1.0,
+        "accuracy_ci": [
+          0.862,
+          1.0
+        ],
+        "sensitivity": 1.0,
+        "sensitivity_ci": [
+          0.8389,
+          1.0
+        ],
+        "specificity": 1.0,
+        "specificity_ci": [
+          0.5101,
+          1.0
+        ],
+        "precision": 1.0,
+        "npv": 1.0,
+        "f1": 1.0,
+        "f1_ci": [
+          1.0,
+          1.0
+        ],
+        "roc_auc": 1.0,
+        "roc_auc_ci": [
+          1.0,
+          1.0
+        ],
+        "tp": 20,
+        "fp": 0,
+        "fn": 0,
+        "tn": 4,
+        "vme": 0.0,
+        "me": 0.0,
+        "train_n": 96,
+        "test_n": 24
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": null,
+      "created_at": "2026-09-12T12:09:38.806350+00:00",
+      "organism_key": "salmonella_enterica",
+      "antibiotic_key": "ampicillin"
+    },
+    "AMR-ML-SALM-AMP-v0.5": {
+      "model_id": "AMR-ML-SALM-AMP-v0.5",
+      "model_version": "AMR-ML-SALM-AMP-v0.5",
+      "organism": "Salmonella enterica",
+      "antibiotic": "Ampicillin",
+      "status": "validated",
+      "model_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.5.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.5_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 2,
+      "n_isolates": 120,
+      "susceptible_count": 40,
+      "resistant_count": 80,
+      "validation_metrics": {
+        "accuracy": 1.0,
+        "accuracy_ci": [
+          0.862,
+          1.0
+        ],
+        "sensitivity": 1.0,
+        "sensitivity_ci": [
+          0.8389,
+          1.0
+        ],
+        "specificity": 1.0,
+        "specificity_ci": [
+          0.5101,
+          1.0
+        ],
+        "precision": 1.0,
+        "npv": 1.0,
+        "f1": 1.0,
+        "f1_ci": [
+          1.0,
+          1.0
+        ],
+        "roc_auc": 1.0,
+        "roc_auc_ci": [
+          1.0,
+          1.0
+        ],
+        "tp": 20,
+        "fp": 0,
+        "fn": 0,
+        "tn": 4,
+        "vme": 0.0,
+        "me": 0.0,
+        "train_n": 96,
+        "test_n": 24
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": null,
+      "created_at": "2026-09-12T12:42:51.279460+00:00",
+      "organism_key": "salmonella_enterica",
+      "antibiotic_key": "ampicillin"
+    },
+    "AMR-ML-SALM-AMP-v0.6": {
+      "model_id": "AMR-ML-SALM-AMP-v0.6",
+      "model_version": "AMR-ML-SALM-AMP-v0.6",
+      "organism": "Salmonella enterica",
+      "antibiotic": "Ampicillin",
+      "status": "validated",
+      "model_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.6.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.6_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 2,
+      "n_isolates": 120,
+      "susceptible_count": 40,
+      "resistant_count": 80,
+      "validation_metrics": {
+        "accuracy": 1.0,
+        "accuracy_ci": [
+          0.862,
+          1.0
+        ],
+        "sensitivity": 1.0,
+        "sensitivity_ci": [
+          0.8389,
+          1.0
+        ],
+        "specificity": 1.0,
+        "specificity_ci": [
+          0.5101,
+          1.0
+        ],
+        "precision": 1.0,
+        "npv": 1.0,
+        "f1": 1.0,
+        "f1_ci": [
+          1.0,
+          1.0
+        ],
+        "roc_auc": 1.0,
+        "roc_auc_ci": [
+          1.0,
+          1.0
+        ],
+        "tp": 20,
+        "fp": 0,
+        "fn": 0,
+        "tn": 4,
+        "vme": 0.0,
+        "me": 0.0,
+        "train_n": 96,
+        "test_n": 24
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": null,
+      "created_at": "2026-09-12T13:26:35.788086+00:00",
+      "organism_key": "salmonella_enterica",
+      "antibiotic_key": "ampicillin"
+    },
+    "AMR-ML-SALM-AMP-v0.7": {
+      "model_id": "AMR-ML-SALM-AMP-v0.7",
+      "model_version": "AMR-ML-SALM-AMP-v0.7",
+      "organism": "Salmonella enterica",
+      "antibiotic": "Ampicillin",
+      "status": "validated",
+      "model_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.7.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.7_vocab.json",
+      "model_type": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 2,
+      "n_isolates": 120,
+      "susceptible_count": 40,
+      "resistant_count": 80,
+      "validation_metrics": {
+        "accuracy": 1.0,
+        "accuracy_ci": [
+          0.862,
+          1.0
+        ],
+        "sensitivity": 1.0,
+        "sensitivity_ci": [
+          0.8389,
+          1.0
+        ],
+        "specificity": 1.0,
+        "specificity_ci": [
+          0.5101,
+          1.0
+        ],
+        "precision": 1.0,
+        "npv": 1.0,
+        "f1": 1.0,
+        "f1_ci": [
+          1.0,
+          1.0
+        ],
+        "roc_auc": 1.0,
+        "roc_auc_ci": [
+          1.0,
+          1.0
+        ],
+        "tp": 20,
+        "fp": 0,
+        "fn": 0,
+        "tn": 4,
+        "vme": 0.0,
+        "me": 0.0,
+        "train_n": 96,
+        "test_n": 24
+      },
+      "training_release": "PDG000000004.6300",
+      "research_only": true,
+      "rejection_reason": null,
+      "created_at": "2026-09-12T13:27:54.500507+00:00",
+      "organism_key": "salmonella_enterica",
+      "antibiotic_key": "ampicillin"
+    }
+  },
+  "active_models": {
+    "escherichia_coli::ampicillin": "AMR-ML-ECOLI-AMP-v0.1",
+    "klebsiella_pneumoniae::ceftriaxone": "AMR-ML-KPNEU-CRO-v0.1",
+    "salmonella_enterica::ampicillin": "AMR-ML-SALM-AMP-v0.7",
+    "escherichia_coli::ceftriaxone": "AMR-ML-ECOLI-CRO-v0.1",
+    "escherichia_coli::trimethoprim_sulfamethoxazole": "AMR-ML-ECOLI-SXT-v0.1",
+    "escherichia_coli::ciprofloxacin": "AMR-ML-ECOLI-CIP-v0.1",
+    "escherichia_coli::tetracycline": "AMR-ML-ECOLI-TET-v0.1",
+    "escherichia_coli::levofloxacin": "AMR-ML-ECOLI-LEV-v0.1",
+    "escherichia_coli::tobramycin": "AMR-ML-ECOLI-TOB-v0.1",
+    "escherichia_coli::chloramphenicol": "AMR-ML-ECOLI-CHL-v0.1",
+    "escherichia_coli::streptomycin": "AMR-ML-ECOLI-STR-v0.1",
+    "escherichia_coli::sulfisoxazole": "AMR-ML-ECOLI-SUL-v0.1"
+  }
+}

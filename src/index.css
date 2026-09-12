@@ -20,11 +20,17 @@
     }
 }
 
-/* Ensure the root elements stretch for centering */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+/* Ensure the root elements stretch for centering and prevent horizontal overflow */
 html, body, #root {
-    height: 100%;
+    min-height: 100%;
     margin: 0;
     padding: 0;
+    max-width: 100vw;
+    overflow-x: hidden;
 }
 
 /* Set a dark gradient background on body to make the grid visible and look cool */
@@ -32,6 +38,8 @@ body {
     background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
     font-family: 'Inter', sans-serif;
     color: #ffffff; /* Ensure text is white for contrast on dark BG */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* Center text in textareas and inputs for better alignment */

@@ -27,6 +27,8 @@ export const API_ENDPOINTS = {
   amrCompare: `${API_BASE_URL}/api/amr/compare`,
   amrReconcile: `${API_BASE_URL}/api/amr/reconcile`,
   amrExplain: `${API_BASE_URL}/api/amr/explain`,
+  amrMlPredict: `${API_BASE_URL}/api/amr/ml-predict`,
+  amrMlProvenance: `${API_BASE_URL}/api/amr/ml-provenance`,
 };
 
 export const API_CONFIG = {

@@ -1,0 +1,162 @@
+{
+  "dataset_metadata": {
+    "source": "NCBI Pathogen Detection (pdbrowser.isolates mirror)",
+    "selected_release": "PDG000000004.6300",
+    "total_isolates_profiled": 25000,
+    "isolates_with_amr_genotypes": 25000,
+    "isolates_with_ast": 363,
+    "total_ast_observations": 6133,
+    "usable_binary_sr_observations": 5354
+  },
+  "phenotype_distribution": {
+    "ND": 568,
+    "R": 2329,
+    "S": 3025,
+    "I": 211
+  },
+  "top_antibiotics": {
+    "ciprofloxacin": 359,
+    "ampicillin": 357,
+    "gentamicin": 357,
+    "trimethoprim-sulfamethoxazole": 349,
+    "ceftriaxone": 347,
+    "amoxicillin-clavulanic acid": 323,
+    "tetracycline": 294,
+    "meropenem": 282,
+    "cefoxitin": 276,
+    "cefepime": 219,
+    "amikacin": 214,
+    "ertapenem": 214,
+    "piperacillin-tazobactam": 213,
+    "levofloxacin": 203,
+    "cefazolin": 176
+  },
+  "candidate_tasks": [
+    {
+      "antibiotic": "Ampicillin",
+      "abx_id": "ampicillin",
+      "isolates": 326,
+      "s_count": 74,
+      "r_count": 253,
+      "total": 327,
+      "r_percent": 77.37003058103976,
+      "feasibility": "GOOD CANDIDATE"
+    },
+    {
+      "antibiotic": "Tetracycline",
+      "abx_id": "tetracycline",
+      "isolates": 290,
+      "s_count": 117,
+      "r_count": 173,
+      "total": 290,
+      "r_percent": 59.6551724137931,
+      "feasibility": "GOOD CANDIDATE"
+    },
+    {
+      "antibiotic": "Streptomycin",
+      "abx_id": "streptomycin",
+      "isolates": 123,
+      "s_count": 69,
+      "r_count": 54,
+      "total": 123,
+      "r_percent": 43.90243902439025,
+      "feasibility": "POSSIBLE BUT LIMITED (Small sample)"
+    },
+    {
+      "antibiotic": "Ceftriaxone",
+      "abx_id": "ceftriaxone",
+      "isolates": 325,
+      "s_count": 122,
+      "r_count": 203,
+      "total": 325,
+      "r_percent": 62.46153846153846,
+      "feasibility": "GOOD CANDIDATE"
+    },
+    {
+      "antibiotic": "Ciprofloxacin",
+      "abx_id": "ciprofloxacin",
+      "isolates": 324,
+      "s_count": 158,
+      "r_count": 166,
+      "total": 324,
+      "r_percent": 51.23456790123457,
+      "feasibility": "GOOD CANDIDATE"
+    },
+    {
+      "antibiotic": "Gentamicin",
+      "abx_id": "gentamicin",
+      "isolates": 324,
+      "s_count": 242,
+      "r_count": 82,
+      "total": 324,
+      "r_percent": 25.308641975308642,
+      "feasibility": "GOOD CANDIDATE"
+    },
+    {
+      "antibiotic": "Trimethoprim-Sulfamethoxazole",
+      "abx_id": "trimethoprim-sulfamethoxazole",
+      "isolates": 328,
+      "s_count": 182,
+      "r_count": 146,
+      "total": 328,
+      "r_percent": 44.51219512195122,
+      "feasibility": "GOOD CANDIDATE"
+    },
+    {
+      "antibiotic": "Chloramphenicol",
+      "abx_id": "chloramphenicol",
+      "isolates": 127,
+      "s_count": 67,
+      "r_count": 60,
+      "total": 127,
+      "r_percent": 47.24409448818898,
+      "feasibility": "POSSIBLE BUT LIMITED (Small sample)"
+    }
+  ],
+  "selected_task": {
+    "task_id": "AMR-ML-ECOLI-AMP-v0.1",
+    "organism": "Escherichia coli",
+    "antibiotic": "Ampicillin",
+    "n_samples": 321,
+    "n_features": 223,
+    "sparsity": 0.9382534959417739,
+    "train_samples": 256,
+    "test_samples": 65,
+    "leakage_isolates": 0,
+    "frozen_validation_leakage": 0,
+    "models": {
+      "logistic_regression": {
+        "accuracy": 0.9538461538461539,
+        "sensitivity": 0.9636363636363636,
+        "specificity": 0.9,
+        "ppv": 0.9814814814814815,
+        "npv": 0.8181818181818182,
+        "f1": 0.9724770642201835,
+        "roc_auc": 0.9781818181818183,
+        "vme": 0.03636363636363636,
+        "me": 0.1,
+        "confusion_matrix": {
+          "tp": 53,
+          "fp": 1,
+          "fn": 2,
+          "tn": 9
+        },
+        "train_time_sec": 0.01152801513671875
+      },
+      "random_forest": {
+        "accuracy": 0.9384615384615385,
+        "sensitivity": 0.9454545454545454,
+        "specificity": 0.9,
+        "f1": 0.9629629629629629,
+        "roc_auc": 0.9654545454545455,
+        "confusion_matrix": {
+          "tp": 52,
+          "fp": 1,
+          "fn": 3,
+          "tn": 9
+        },
+        "train_time_sec": 0.24007201194763184
+      }
+    }
+  }
+}

@@ -122,6 +122,37 @@ def _get_bigquery_provider():
     return _bq_provider
 
 
+_ml_service = None
+
+
+def _get_ml_service():
+    """Lazily import amr_ml_service."""
+    global _ml_service
+    if _ml_service is None:
+        try:
+            from backend.services import amr_ml_service as _mod
+        except ImportError:
+            from services import amr_ml_service as _mod
+        _ml_service = _mod
+    return _ml_service
+
+
+def _safe_ml_prediction(
+    organism: str,
+    genotype_str: str,
+    ast_records: Optional[List[Dict[str, Any]]] = None
+) -> Optional[Dict[str, Any]]:
+    """
+    Attempt dynamic ML prediction across tested antibiotics; return None on any failure
+    so that ML errors never break deterministic endpoints.
+    """
+    try:
+        ml_svc = _get_ml_service()
+        return ml_svc.predict_for_biosample(organism, genotype_str, ast_records)
+    except Exception:
+        return None
+
+
 _VALIDATION_ACCESSIONS = frozenset({
     "SAMN03177674",
     "SAMN03177676",
@@ -367,7 +398,14 @@ def get_isolate(biosample_accession: str):
     comps = compare([raw_genotype_row], ast_records)
     metrics = calculate_concordance_metrics(comps)
 
-    return jsonify({
+    # Phase 9/11: Optional dynamic ML research prediction (non-breaking addition)
+    ml_pred = _safe_ml_prediction(
+        isolate_data.get("organism", ""),
+        isolate_data.get("amr_genotypes", ""),
+        ast_records,
+    )
+
+    response_data = {
         "status": "success",
         "data_source": isolate_data.get("data_source"),
         "data_source_label": isolate_data.get("data_source_label"),
@@ -380,7 +418,11 @@ def get_isolate(biosample_accession: str):
         "ast_records": ast_records,
         "comparisons": comps,
         "summary_metrics": metrics,
-    }), 200
+    }
+    if ml_pred is not None:
+        response_data["ml_prediction"] = ml_pred
+
+    return jsonify(response_data), 200
 
 
 
@@ -546,13 +588,24 @@ def reconcile_evidence():
     # Execute deterministic evidence reconciliation
     reconciliation_result = reconcile_isolate_evidence(isolate_data, user_lab)
 
-    return jsonify({
+    # Phase 9/11: Optional dynamic ML research prediction (non-breaking, informational only)
+    ml_pred = _safe_ml_prediction(
+        isolate_data.get("organism", ""),
+        isolate_data.get("amr_genotypes", ""),
+        isolate_data.get("ast_records", []),
+    )
+
+    response_data = {
         "status": "success",
         "data_source": isolate_data.get("data_source"),
         "data_source_label": isolate_data.get("data_source_label"),
         "pdg_release": isolate_data.get("pdg_release"),
         **reconciliation_result
-    }), 200
+    }
+    if ml_pred is not None:
+        response_data["ml_prediction"] = ml_pred
+
+    return jsonify(response_data), 200
 
 
 @amr_bp.route("/explain", methods=["POST"])
@@ -714,3 +767,97 @@ def explain_reconciliation():
         "ai_provider": "deterministic_fallback"
     }), 200
 
+
+# ==============================================================================
+# PHASE 9 & 11: DYNAMIC ML RESEARCH PREDICTION ENDPOINTS
+# ==============================================================================
+
+@amr_bp.route("/ml-predict/<biosample_accession>", methods=["GET"])
+def ml_predict(biosample_accession: str):
+    """
+    GET /api/amr/ml-predict/<biosample_accession>
+
+    Phase 11 — Dynamic multi-organism / multi-antibiotic ML research prediction endpoint.
+    Returns ML predictions for all tested antibiotics where a validated model is registered,
+    or for a specifically requested drug via ?antibiotic=<name>.
+    """
+    isolate_data, err_resp, code = resolve_biosample_record(biosample_accession)
+    if err_resp:
+        return jsonify(err_resp), code
+
+    state = isolate_data.get("availability_state", "ok")
+    if state not in ("ok", "no_ast_data"):
+        return jsonify({
+            "available": False,
+            "reason": "ISOLATE_DATA_UNAVAILABLE",
+            "biosample": biosample_accession,
+            "availability_state": state,
+        }), 200
+
+    organism = isolate_data.get("organism", "")
+    genotype_str = isolate_data.get("amr_genotypes", "")
+    ast_records = isolate_data.get("ast_records", [])
+    requested_abx = request.args.get("antibiotic")
+
+    try:
+        ml_svc = _get_ml_service()
+        result = ml_svc.predict_for_biosample(
+            organism=organism,
+            genotype_str=genotype_str,
+            ast_records=ast_records,
+            requested_antibiotic=requested_abx
+        )
+        result["biosample"] = biosample_accession
+    except Exception as e:
+        result = {
+            "biosample": biosample_accession,
+            "available": False,
+            "reason": "ML_SERVICE_ERROR",
+            "error": str(e),
+        }
+
+    return jsonify(result), 200
+
+
+@amr_bp.route("/ml-provenance", methods=["GET"])
+def ml_provenance():
+    """
+    GET /api/amr/ml-provenance
+
+    Returns model provenance metadata for registered ML research models.
+    Supports ?organism=<name>&antibiotic=<name> query parameters.
+    """
+    organism = request.args.get("organism", "Escherichia coli")
+    antibiotic = request.args.get("antibiotic", "Ampicillin")
+    try:
+        ml_svc = _get_ml_service()
+        provenance = ml_svc.get_model_provenance(organism, antibiotic)
+    except Exception as e:
+        provenance = {
+            "model": "AMR-ML-REGISTRY",
+            "status": "unavailable",
+            "error": str(e),
+        }
+
+    return jsonify(provenance), 200
+
+
+@amr_bp.route("/ml-models", methods=["GET"])
+def list_ml_models():
+    """
+    GET /api/amr/ml-models
+
+    Phase 11 — Lists all validated and candidate models in the model registry.
+    """
+    try:
+        from backend.services.amr_model_registry import list_models, load_registry
+        reg = load_registry()
+        models = list_models(status=None)
+        return jsonify({
+            "status": "success",
+            "active_models": reg.get("active_models", {}),
+            "total_models": len(models),
+            "models": models
+        }), 200
+    except Exception as e:
+        return jsonify({"status": "error", "error": str(e)}), 500

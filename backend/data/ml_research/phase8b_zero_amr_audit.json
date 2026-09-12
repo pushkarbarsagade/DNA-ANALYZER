@@ -1,0 +1,334 @@
+{
+  "audit_phase": "PHASE8B_ZERO_AMR_SELECTION_BIAS_CORRECTION",
+  "verdict": "PASS",
+  "verdict_description": "PASS \u2014 Zero-AMR selection bias resolved. High performance (F1=0.9725, ROC-AUC=0.9782) and biological validity maintained. Suitable for cautious research-facing integration with disclaimers.",
+  "dataset_statistics": {
+    "metadata_release": "PDG000000004.6300",
+    "total_evaluated_isolates": 25000,
+    "isolates_with_amr_determinants": 25000,
+    "isolates_with_zero_amr_determinants": 0,
+    "target_ecoli_ampicillin_n": 321,
+    "target_zero_amr_count": 0,
+    "target_zero_amr_susceptible": 0,
+    "target_zero_amr_resistant": 0,
+    "target_susceptible_count": 72,
+    "target_resistant_count": 249,
+    "raw_phenotype_observations": 6133,
+    "usable_sr_observations": 5354,
+    "excluded_i_nd_observations": 779
+  },
+  "leakage_audit": {
+    "frozen_benchmark_leakage_count": 0,
+    "train_test_isolate_overlap_count": 0
+  },
+  "model_metrics": {
+    "logistic_regression": {
+      "name": "Logistic Regression (L2)",
+      "n": 65,
+      "accuracy": 0.9538461538461539,
+      "accuracy_ci": [
+        0.8728615273666118,
+        0.9841801595864875
+      ],
+      "sensitivity": 0.9636363636363636,
+      "sensitivity_ci": [
+        0.8767653602534898,
+        0.9899704587106664
+      ],
+      "specificity": 0.9,
+      "specificity_ci": [
+        0.5958499732047616,
+        0.9821237869049271
+      ],
+      "precision": 0.9814814814814815,
+      "precision_ci": [
+        0.9022856251121807,
+        0.996723512281771
+      ],
+      "npv": 0.8181818181818182,
+      "npv_ci": [
+        0.5230194380391558,
+        0.948632310253915
+      ],
+      "f1": 0.9724770642201835,
+      "f1_ci": [
+        0.9333333333333333,
+        1.0
+      ],
+      "roc_auc": 0.9781818181818183,
+      "roc_auc_ci": [
+        0.916256157635468,
+        1.0
+      ],
+      "tp": 53,
+      "fp": 1,
+      "fn": 2,
+      "tn": 9,
+      "vme": 0.03636363636363636,
+      "me": 0.1
+    },
+    "random_forest": {
+      "name": "Random Forest (100 Trees)",
+      "n": 65,
+      "accuracy": 0.9384615384615385,
+      "accuracy_ci": [
+        0.8521784813447681,
+        0.9758109450336497
+      ],
+      "sensitivity": 0.9454545454545454,
+      "sensitivity_ci": [
+        0.851469394559462,
+        0.9812767844453155
+      ],
+      "specificity": 0.9,
+      "specificity_ci": [
+        0.5958499732047616,
+        0.9821237869049271
+      ],
+      "precision": 0.9811320754716981,
+      "precision_ci": [
+        0.9005708794749876,
+        0.9966615466117361
+      ],
+      "npv": 0.75,
+      "npv_ci": [
+        0.46769466506643437,
+        0.9110583316059452
+      ],
+      "f1": 0.9629629629629629,
+      "f1_ci": [
+        0.92,
+        0.991304347826087
+      ],
+      "roc_auc": 0.96,
+      "roc_auc_ci": [
+        0.873015873015873,
+        1.0
+      ],
+      "tp": 52,
+      "fp": 1,
+      "fn": 3,
+      "tn": 9,
+      "vme": 0.05454545454545454,
+      "me": 0.1
+    },
+    "dummy_baseline": {
+      "name": "Dummy Baseline (Majority Class)",
+      "n": 65,
+      "accuracy": 0.8461538461538461,
+      "accuracy_ci": [
+        0.7394468036002149,
+        0.914229059330115
+      ],
+      "sensitivity": 1.0,
+      "sensitivity_ci": [
+        0.9347150988829136,
+        1.0
+      ],
+      "specificity": 0.0,
+      "specificity_ci": [
+        0.0,
+        0.2775327998628892
+      ],
+      "precision": 0.8461538461538461,
+      "precision_ci": [
+        0.7394468036002149,
+        0.914229059330115
+      ],
+      "npv": 0.0,
+      "npv_ci": [
+        0.0,
+        0.0
+      ],
+      "f1": 0.9166666666666666,
+      "f1_ci": [
+        0.8596491228070176,
+        0.96
+      ],
+      "roc_auc": 0.5,
+      "roc_auc_ci": [
+        0.5,
+        0.5
+      ],
+      "tp": 55,
+      "fp": 10,
+      "fn": 0,
+      "tn": 0,
+      "vme": 0.0,
+      "me": 1.0
+    }
+  },
+  "comparison_old_vs_new": {
+    "old_model_n": 65,
+    "old_model_lr_acc": 0.9538,
+    "old_model_lr_f1": 0.9725,
+    "old_model_lr_auc": 0.9782,
+    "new_model_n": 65,
+    "new_model_lr_acc": 0.9538461538461539,
+    "new_model_lr_f1": 0.9724770642201835,
+    "new_model_lr_auc": 0.9781818181818183,
+    "delta_accuracy": 4.615384615391793e-05,
+    "delta_f1": -2.2935779816490864e-05,
+    "delta_auc": -1.8181818181695064e-05
+  },
+  "new_problems_checks": {
+    "class_imbalance_shift": "S: 72 (22.4%), R: 249 (77.6%)",
+    "zero_vector_dominance": "0 zero-vector isolates out of 321 total (0.0%)",
+    "single_class_prediction_risk": false,
+    "specificity_shift": "Phase 8: 90.00% -> Phase 8B: 90.00%",
+    "npv_shift": "Phase 8: 81.82% -> Phase 8B: 81.82%",
+    "feature_sparsity": "Average non-zero features per isolate: 13.43"
+  },
+  "biological_coefficients": {
+    "top_positive_resistance": [
+      [
+        "blaTEM-1",
+        2.6263887882232666
+      ],
+      [
+        "blaCMY-2",
+        2.5505428314208984
+      ],
+      [
+        "blaCMY=PARTIAL_END_OF_CONTIG",
+        1.715623140335083
+      ],
+      [
+        "ampC_C-42T=POINT",
+        1.067417025566101
+      ],
+      [
+        "gyrA_D87N=POINT",
+        1.01025390625
+      ],
+      [
+        "blaCTX-M-15",
+        0.912506639957428
+      ],
+      [
+        "sul1",
+        0.8874511122703552
+      ],
+      [
+        "blaTEM=PARTIAL_END_OF_CONTIG",
+        0.8599641919136047
+      ],
+      [
+        "parC_S80I=POINT",
+        0.8002333641052246
+      ],
+      [
+        "aph(3'')-Ib",
+        0.6609495282173157
+      ],
+      [
+        "parE_S458A=POINT",
+        0.6470210552215576
+      ],
+      [
+        "blaOXA-1",
+        0.645967960357666
+      ],
+      [
+        "ptsI_V25I=POINT",
+        0.5947858691215515
+      ],
+      [
+        "blaCTX-M-55",
+        0.5707954168319702
+      ],
+      [
+        "cyaA_S352T=POINT",
+        0.5593017935752869
+      ]
+    ],
+    "top_negative_susceptibility": [
+      [
+        "cirA_S110RfsTer2=POINT",
+        -0.2123299092054367
+      ],
+      [
+        "estX=MISTRANSLATION",
+        -0.2605542242527008
+      ],
+      [
+        "qnrB19",
+        -0.2605542242527008
+      ],
+      [
+        "ompC_Y259SfsTer9=POINT",
+        -0.2826286256313324
+      ],
+      [
+        "gyrA_D87Y=POINT",
+        -0.32581764459609985
+      ],
+      [
+        "aph(3'')-Ib=PARTIAL_END_OF_CONTIG",
+        -0.340756356716156
+      ],
+      [
+        "aph(3')-Ia",
+        -0.363972544670105
+      ],
+      [
+        "aadA2",
+        -0.37706100940704346
+      ],
+      [
+        "dfrA12",
+        -0.37706100940704346
+      ],
+      [
+        "sat2",
+        -0.39809921383857727
+      ],
+      [
+        "floR",
+        -0.42225292325019836
+      ],
+      [
+        "parC_S80R=POINT",
+        -0.4359891712665558
+      ],
+      [
+        "mdtM",
+        -0.45897912979125977
+      ],
+      [
+        "acrF=MISTRANSLATION",
+        -0.7521107792854309
+      ],
+      [
+        "tet(M)",
+        -0.7823680639266968
+      ]
+    ],
+    "target_gene_coefficients": {
+      "blaTEM-1": 2.6263887882232666,
+      "blaCMY-2": 2.5505428314208984,
+      "ampC_C-42T=POINT": 1.067417025566101,
+      "blaCTX-M-15": 0.912506639957428,
+      "acrF": 0.2096826583147049,
+      "acrF=PARTIAL": 0.13340424001216888,
+      "mdtM=PARTIAL": 0.09520896524190903,
+      "blaTEM-190": 0.08777504414319992,
+      "blaTEM-12": 0.03216990828514099,
+      "blaTEM-135": 0.028981098905205727,
+      "acrF=PARTIAL_END_OF_CONTIG": -0.00018424585869070143,
+      "mdtM": -0.45897912979125977,
+      "acrF=MISTRANSLATION": -0.7521107792854309
+    }
+  },
+  "reproducibility": {
+    "run_1_vs_run_2_identical": true
+  },
+  "bigquery_cost": {
+    "single_run_bytes_gb": 1.2,
+    "weekly_monthly_bytes_gb": 5.2,
+    "twice_weekly_monthly_bytes_gb": 10.39,
+    "free_tier_limit_gb": 1000,
+    "free_tier_usage_pct": 1.04,
+    "estimated_cost_usd": 0.0
+  }
+}

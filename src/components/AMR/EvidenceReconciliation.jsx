@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_ENDPOINTS, API_CONFIG } from '../../utils/config';
 import { formatGenotypeEntries } from '../../utils/amrFormatters';
+import { exportReconciliationReportPdf } from '../../utils/amrPdfExport';
 import './EvidenceReconciliation.css';
 
 const COMMON_ANTIBIOTICS = [
@@ -44,7 +45,7 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
   const [formAbx, setFormAbx] = useState('ceftriaxone');
   const [formPhenotype, setFormPhenotype] = useState('Resistant');
   const [formMic, setFormMic] = useState('');
-  const [formUnit, setFormUnit] = useState('ug/mL');
+  const [formUnit] = useState('ug/mL');
   const [formMethod, setFormMethod] = useState('Broth Microdilution');
   const [formNote, setFormNote] = useState('');
 
@@ -57,6 +58,43 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
   const [explaining, setExplaining] = useState(false);
   const [aiExplanation, setAiExplanation] = useState(null);
   const [aiError, setAiError] = useState('');
+
+  // Phase 9: ML Research Prediction state
+  const [mlPrediction, setMlPrediction] = useState(null);
+  const [mlLoading, setMlLoading] = useState(false);
+
+  // PDF Export state
+  const [pdfGenerating, setPdfGenerating] = useState(false);
+  const [pdfSuccess, setPdfSuccess] = useState(false);
+  const [pdfError, setPdfError] = useState('');
+
+  const handleDownloadPdf = () => {
+    if (!isolateDetails && !reconciliationResult) {
+      setPdfError('No isolate data available to export.');
+      return;
+    }
+
+    setPdfGenerating(true);
+    setPdfError('');
+    setPdfSuccess(false);
+
+    try {
+      exportReconciliationReportPdf({
+        isolateDetails,
+        reconciliationResult,
+        userLabRecords,
+        mlPrediction,
+        aiExplanation,
+        currentBioSample
+      });
+      setPdfSuccess(true);
+      setTimeout(() => setPdfSuccess(false), 4500);
+    } catch (err) {
+      setPdfError(err.message || 'Failed to generate PDF report.');
+    } finally {
+      setPdfGenerating(false);
+    }
+  };
 
   // Load BioSample isolate details whenever accession changes
   useEffect(() => {
@@ -71,7 +109,7 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
           setReconciliationResult(null);
           setAiExplanation(null);
         }
-      } catch (err) {
+      } catch {
         setIsolateDetails(null);
       }
     };
@@ -168,6 +206,7 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
     setReconciling(true);
     setAiExplanation(null);
     setAiError('');
+    setMlPrediction(null);
 
     try {
       const payload = {
@@ -177,6 +216,13 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
       const response = await axios.post(API_ENDPOINTS.amrReconcile, payload, API_CONFIG);
       if (response.data && response.data.status === 'success') {
         setReconciliationResult(response.data);
+        // Phase 9: Extract ML prediction from response if present
+        if (response.data.ml_prediction) {
+          setMlPrediction(response.data.ml_prediction);
+        } else {
+          // Fetch ML prediction separately as fallback
+          fetchMlPrediction(currentBioSample);
+        }
       } else {
         setReconcileError('Unexpected response from reconciliation endpoint.');
       }
@@ -188,6 +234,23 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
       );
     } finally {
       setReconciling(false);
+    }
+  };
+
+  // Phase 9: Fetch ML prediction separately
+  const fetchMlPrediction = async (biosample) => {
+    setMlLoading(true);
+    try {
+      const url = `${API_ENDPOINTS.amrMlPredict}/${encodeURIComponent(biosample.trim().toUpperCase())}`;
+      const res = await axios.get(url, API_CONFIG);
+      if (res.data) {
+        setMlPrediction(res.data);
+      }
+    } catch {
+      // ML failure is non-critical; silently ignore
+      setMlPrediction(null);
+    } finally {
+      setMlLoading(false);
     }
   };
 
@@ -226,10 +289,45 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
     <div className="reconciliation-container fade-in">
       {/* HEADER & SCIENTIFIC DISCLAIMER */}
       <div className="reconciliation-header">
-        <h2 className="reconciliation-main-title">Multi-Source Evidence Reconciliation</h2>
-        <p className="reconciliation-sub-text">
-          Evaluate consistency across Genomic AMR Determinants, NCBI Reference AST observations, and optional User Laboratory results.
-        </p>
+        <div className="reconciliation-title-action-row">
+          <div>
+            <h2 className="reconciliation-main-title">Multi-Source Evidence Reconciliation</h2>
+            <p className="reconciliation-sub-text">
+              Evaluate consistency across Genomic AMR Determinants, NCBI Reference AST observations, and optional User Laboratory results.
+            </p>
+          </div>
+          <div className="reconciliation-header-actions">
+            <button
+              type="button"
+              className="export-pdf-btn"
+              onClick={handleDownloadPdf}
+              disabled={pdfGenerating || !isolateDetails}
+              title="Download Complete Evidence Reconciliation PDF Report"
+            >
+              {pdfGenerating ? (
+                <>
+                  <span className="loading-spinner" style={{ width: 14, height: 14 }} />
+                  <span>Generating PDF...</span>
+                </>
+              ) : (
+                <>
+                  <span>📄</span>
+                  <span>Download PDF Report</span>
+                </>
+              )}
+            </button>
+            {pdfSuccess && (
+              <span className="pdf-status-toast success fade-in">
+                ✓ PDF generated successfully
+              </span>
+            )}
+            {pdfError && (
+              <span className="pdf-status-toast error fade-in">
+                ⚠️ {pdfError}
+              </span>
+            )}
+          </div>
+        </div>
 
         {/* Deterministic Architecture Flow */}
         <div className="reconciliation-architecture-pipeline">
@@ -522,7 +620,7 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
             <span className="section-card-title">
               <span>📋</span> Section E — Structured Reconciliation Findings
             </span>
-            <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', alignItems: 'center' }}>
               <span className="formula-part conc">
                 Concordant: {reconciliationResult.reconciliation_summary?.concordant || 0}
               </span>
@@ -532,6 +630,15 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
               <span className="formula-part notcomp">
                 Not Comparable: {reconciliationResult.reconciliation_summary?.not_comparable || 0}
               </span>
+              <button
+                type="button"
+                className="export-pdf-btn compact"
+                onClick={handleDownloadPdf}
+                disabled={pdfGenerating}
+                title="Download Complete Evidence Reconciliation PDF Report"
+              >
+                <span>📄</span> Export PDF
+              </button>
             </div>
           </div>
 
@@ -650,6 +757,115 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
               )}
             </button>
           </div>
+        </div>
+      )}
+
+      {/* PHASE 9: ML RESEARCH PREDICTION PANEL */}
+      {reconciliationResult && (mlPrediction || mlLoading) && (
+        <div className="ml-prediction-panel fade-in">
+          <div className="section-card-header">
+            <span className="section-card-title">
+              <span>🧠</span> ML Research Prediction
+              <span className="ml-research-badge">RESEARCH ONLY</span>
+            </span>
+            <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+              Informational — does not override deterministic classification
+            </span>
+          </div>
+
+          {mlLoading ? (
+            <div style={{ padding: '1rem', textAlign: 'center', color: '#94a3b8' }}>
+              <span className="loading-spinner" style={{ width: 16, height: 16, display: 'inline-block', marginRight: '0.5rem' }} />
+              Loading ML predictions for BioSample...
+            </div>
+          ) : mlPrediction ? (
+            <div className="ml-prediction-content">
+              {/* Target Organism & Coverage Banner */}
+              <div className="ml-scope-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(11, 18, 32, 0.6)', padding: '0.75rem 1rem', borderRadius: 8, border: '1px solid rgba(255, 255, 255, 0.05)', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <div>
+                  <span className="ml-info-label">Target Organism: </span>
+                  <span className="ml-info-val" style={{ color: '#38bdf8', fontSize: '0.95rem' }}>{mlPrediction.organism || isolateDetails?.organism || 'Escherichia coli'}</span>
+                </div>
+                <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+                  {mlPrediction.available_count !== undefined ? (
+                    <span><strong>{mlPrediction.available_count}</strong> of {mlPrediction.total_drugs || 1} evaluated drug(s) have validated ML models</span>
+                  ) : (
+                    <span>Model: {mlPrediction.model_version || mlPrediction.model}</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Dynamic Predictions List */}
+              <div className="ml-drug-predictions-grid">
+                {(mlPrediction.predictions && Array.isArray(mlPrediction.predictions) ? mlPrediction.predictions : [mlPrediction]).map((pred, pIdx) => (
+                  <div key={pIdx} className={`ml-drug-card ${pred.available ? 'available' : 'unavailable'}`}>
+                    <div className="ml-drug-header">
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                        <span className="ml-drug-title">{pred.antibiotic || 'Ampicillin'}</span>
+                        {pred.available && (
+                          <span className="ml-model-badge">{pred.model_version || pred.model}</span>
+                        )}
+                      </div>
+
+                      {pred.available ? (
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                          <span className="ml-pred-label">Prediction:</span>
+                          <span className={`ml-pred-class ${pred.prediction === 'Resistant' ? 'resistant' : 'susceptible'}`}>
+                            {pred.prediction}
+                          </span>
+                        </div>
+                      ) : (
+                        <span style={{ fontSize: '0.75rem', color: '#94a3b8', background: 'rgba(255,255,255,0.05)', padding: '0.2rem 0.5rem', borderRadius: 4 }}>
+                          No Validated Model
+                        </span>
+                      )}
+                    </div>
+
+                    {pred.available ? (
+                      <>
+                        {/* Probability Bar */}
+                        <div className="ml-prob-bar-container">
+                          <div className="ml-prob-bar-label-row">
+                            <span>Susceptible ({((pred.probability_susceptible || 0) * 100).toFixed(1)}%)</span>
+                            <span>Predicted Resistance Probability: <strong>{((pred.predicted_probability || pred.probability_resistant || 0) * 100).toFixed(1)}%</strong></span>
+                          </div>
+                          <div className="ml-prob-bar">
+                            <div
+                              className="ml-prob-bar-fill susceptible"
+                              style={{ width: `${(pred.probability_susceptible || 0) * 100}%` }}
+                            />
+                            <div
+                              className="ml-prob-bar-fill resistant"
+                              style={{ width: `${((pred.predicted_probability || pred.probability_resistant || 0)) * 100}%` }}
+                            />
+                          </div>
+                          <div className="ml-threshold-marker" style={{ left: '50%' }}>
+                            <span>Threshold: {pred.threshold !== undefined ? pred.threshold.toFixed(2) : '0.50'}</span>
+                          </div>
+                        </div>
+
+                        {/* Model Meta Row */}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#94a3b8', borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+                          <span>Recognized Genomic Features: <strong>{pred.recognized_features || 0}</strong> of {pred.total_determinants || 0} determinants</span>
+                          <span>Algorithm: {pred.algorithm || 'Logistic Regression (L2)'}</span>
+                          <span>Training Isolates: {pred.training_sample_count || 'Validated'}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div style={{ fontSize: '0.82rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                        No validated ML model is currently available for this organism–antibiotic combination.
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Research Disclaimer */}
+              <div className="ml-disclaimer-box">
+                {mlPrediction.disclaimer || 'Machine-learning predictions are statistical research estimates from validated models developed for specific organism–antibiotic combinations. They are intended for educational and preliminary research use only and must not be interpreted as clinical diagnostic results, susceptibility testing, or treatment recommendations.'}
+              </div>
+            </div>
+          ) : null}
         </div>
       )}
 
