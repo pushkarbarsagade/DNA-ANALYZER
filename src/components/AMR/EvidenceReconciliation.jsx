@@ -111,6 +111,9 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
         const res = await axios.get(url, API_CONFIG);
         if (res.data && res.data.status === 'success') {
           setIsolateDetails(res.data);
+          if (res.data.ml_prediction) {
+            setMlPrediction(res.data.ml_prediction);
+          }
           // Reset previous reconciliation and AI results on BioSample change
           setReconciliationResult(null);
           setAiExplanation(null);
@@ -363,7 +366,6 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
   };
 
   // Target Antibiotic Multi-Source & ML Metrics
-  const targetOrganism = isolateDetails?.organism || 'Escherichia coli';
   const targetFinding = reconciliationResult?.findings?.find(
     (f) => (f.antibiotic || '').toLowerCase() === selectedAntibiotic.toLowerCase()
   );
@@ -374,31 +376,61 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
     (r) => (r.antibiotic || '').toLowerCase() === selectedAntibiotic.toLowerCase()
   );
 
+  // Resolve active ML model data for selected antibiotic from singleMlResult or full prediction arrays
+  const targetFromPredictions = (mlPrediction?.predictions || []).find(
+    (p) => (p.antibiotic || '').toLowerCase() === selectedAntibiotic.toLowerCase()
+  ) || (isolateDetails?.ml_prediction?.predictions || []).find(
+    (p) => (p.antibiotic || '').toLowerCase() === selectedAntibiotic.toLowerCase()
+  ) || (reconciliationResult?.ml_prediction?.predictions || []).find(
+    (p) => (p.antibiotic || '').toLowerCase() === selectedAntibiotic.toLowerCase()
+  );
+
+  const activeMlData = (singleMlResult && (singleMlResult.antibiotic || '').toLowerCase() === selectedAntibiotic.toLowerCase())
+    ? singleMlResult
+    : (targetFromPredictions || singleMlResult);
+
+  const targetOrganism = isolateDetails?.organism || activeMlData?.organism || 'Escherichia coli';
+
   // Model status resolution
-  const hasSpec = !!singleMlResult?.has_specialist;
-  const hasExp = !hasSpec && !!singleMlResult?.has_experimental;
-  const hasBroad = !hasSpec && !hasExp && (!!singleMlResult?.has_broad || (singleMlResult?.available && singleMlResult?.model_family === 'broad'));
-  const hasNoModel = !hasSpec && !hasExp && !hasBroad && !singleMlResult?.available;
+  // Priority: 1. Validated Specialist Model -> 2. Broad ML1 Research Model -> 3. Experimental Specialist Model -> 4. No applicable model
+  const hasSpec = !!(
+    activeMlData?.has_specialist ||
+    (activeMlData?.available && activeMlData?.specialist_prediction?.status === 'validated') ||
+    (activeMlData?.model_family === 'specialist' && activeMlData?.available) ||
+    activeMlData?.specialist_prediction?.available
+  );
+  const hasBroad = !hasSpec && !!(
+    activeMlData?.has_broad ||
+    (activeMlData?.available && activeMlData?.model_family === 'broad') ||
+    activeMlData?.broad_prediction?.available
+  );
+  const hasExp = !hasSpec && !hasBroad && !!(
+    activeMlData?.has_experimental ||
+    activeMlData?.specialist_prediction?.status === 'experimental'
+  );
+  const hasNoModel = !hasSpec && !hasBroad && !hasExp && !activeMlData?.available;
 
   let modelStatusLabel = 'No applicable ML model available for this organism–antibiotic combination.';
   let modelStatusClass = 'none';
   if (hasSpec) {
     modelStatusLabel = 'Validated Specialist Model';
     modelStatusClass = 'validated';
+  } else if (hasBroad) {
+    modelStatusLabel = 'Broad ML1 Research Model';
+    modelStatusClass = 'broad';
   } else if (hasExp) {
     modelStatusLabel = 'Experimental Research Model';
     modelStatusClass = 'experimental';
-  } else if (hasBroad || singleMlResult?.available) {
-    modelStatusLabel = 'Broad ML1 Research Model';
-    modelStatusClass = 'broad';
   }
 
   // Active prediction object for selected antibiotic
   const activeMlPred = hasSpec
-    ? (singleMlResult?.specialist_prediction || singleMlResult)
-    : (singleMlResult?.broad_prediction || singleMlResult);
+    ? (activeMlData?.specialist_prediction || activeMlData)
+    : hasBroad
+    ? (activeMlData?.broad_prediction || activeMlData)
+    : (activeMlData?.specialist_prediction || activeMlData?.broad_prediction || activeMlData);
 
-  const isModelApplicable = (hasSpec || hasExp || hasBroad || singleMlResult?.available) && activeMlPred && activeMlPred.prediction;
+  const isModelApplicable = (hasSpec || hasBroad || hasExp || activeMlData?.available) && !!activeMlPred?.prediction;
 
   const predProbability = isModelApplicable && activeMlPred.predicted_probability !== undefined
     ? (activeMlPred.predicted_probability * 100).toFixed(1)
@@ -674,7 +706,7 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
             <div className="synthesis-box ml-box">
               <span className="synthesis-box-title">🧠 ML Research Result</span>
               <div className="synthesis-box-value">
-                {singleMlLoading ? (
+                {singleMlLoading && !activeMlData ? (
                   <span style={{ fontSize: '0.84rem', color: '#94a3b8' }}>Evaluating...</span>
                 ) : isModelApplicable ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>

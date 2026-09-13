@@ -495,17 +495,28 @@ def predict_specialist(
 
 def evaluate_ml_selection(
     organism: str,
-    genotype_str: str,
-    antibiotic: str
+    genotype_str: str = "",
+    antibiotic: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Evaluates both Broad ML1 and Specialist models for the given (organism, genotype, antibiotic).
-    Applies Part 8 explicit model selection logic:
-      Case A — Both exist: returns both predictions.
-      Case B — Broad ML1 exists, Specialist does not: returns Broad ML1 prediction.
-      Case C — Specialist exists, Broad ML1 does not: returns Specialist prediction.
-      Case D — Neither exists: returns clean unavailable state.
+    Supports flexible signatures:
+      evaluate_ml_selection(organism, genotype_str, antibiotic)
+      evaluate_ml_selection(organism, antibiotic)
+      evaluate_ml_selection(organism=..., genotype_str=..., antibiotic=...)
+    Applies explicit selection hierarchy:
+      1. Validated Specialist Model
+      2. Broad ML1 Research Model
+      3. Experimental Specialist Model
+      4. No applicable model
     """
+    if antibiotic is None:
+        # Called as evaluate_ml_selection(organism, antibiotic)
+        antibiotic = genotype_str or ""
+        genotype_str = ""
+    else:
+        genotype_str = genotype_str or ""
+
     spec_pred = predict(organism, genotype_str, antibiotic)
     broad_pred = predict_broad(organism, genotype_str, antibiotic)
 
@@ -515,17 +526,20 @@ def evaluate_ml_selection(
     if has_spec and has_broad:
         case = "both"
         note = "Broad ML1 and Specialist models are both available. Specialist model provides organism- and drug-specific context; Broad ML1 provides multi-organism dataset-conditioned research prediction."
-    elif has_broad and not has_spec:
-        case = "broad_only"
-        note = "Broad model prediction available; no specialist model currently validated for this combination."
     elif has_spec and not has_broad:
         case = "specialist_only"
         note = "Specialist model prediction available for this specific organism–antibiotic combination."
+    elif has_broad and not has_spec:
+        case = "broad_only"
+        note = "Broad model prediction available; no specialist model currently validated for this combination."
     else:
         case = "none"
         note = "No validated ML prediction available for this organism–antibiotic combination."
 
-    exp_entry = get_experimental_model_entry(organism, antibiotic)
+    # Priority 1: If validated specialist exists, experimental is never active
+    exp_entry = None
+    if not has_spec:
+        exp_entry = get_experimental_model_entry(organism, antibiotic)
     has_exp = exp_entry is not None
     exp_id = (exp_entry.get("model_version") or exp_entry.get("model_id")) if exp_entry else None
 

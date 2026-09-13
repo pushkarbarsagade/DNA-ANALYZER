@@ -108,6 +108,10 @@ def normalize_organism_key(organism: str) -> str:
         return "acinetobacter_baumannii"
     if any(p in org_clean for p in ("staphylococcus aureus", "s. aureus")):
         return "staphylococcus_aureus"
+    if org_clean == "escherichia":
+        return "escherichia_coli"
+    if org_clean == "klebsiella":
+        return "klebsiella_pneumoniae"
 
     # Generic alphanumeric normalization
     normalized = re.sub(r"[^a-z0-9]+", "_", org_clean).strip("_")
@@ -125,17 +129,29 @@ def normalize_antibiotic_key(antibiotic: str) -> str:
         return ""
     abx_clean = antibiotic.strip().lower()
 
-    # Common synonym mapping
+    # Strip parenthetical/bracketed tokens e.g. 'Ampicillin (AMP)' -> 'Ampicillin'
+    abx_clean = re.sub(r"\s*[\(\[].*?[\)\]]", "", abx_clean).strip()
+
+    # Common synonym and formulation mapping
     synonyms = {
         "co-trimoxazole": "trimethoprim_sulfamethoxazole",
         "trimethoprim/sulfamethoxazole": "trimethoprim_sulfamethoxazole",
+        "trimethoprim-sulfamethoxazole": "trimethoprim_sulfamethoxazole",
         "amox/clav": "amoxicillin_clavulanic_acid",
         "augmentin": "amoxicillin_clavulanic_acid",
+        "ampicillin sodium": "ampicillin",
+        "ampicillin-sodium": "ampicillin",
+        "ceftriaxone sodium": "ceftriaxone",
+        "ciprofloxacin hcl": "ciprofloxacin",
+        "ciprofloxacin hydrochloride": "ciprofloxacin",
     }
     if abx_clean in synonyms:
         return synonyms[abx_clean]
 
     normalized = re.sub(r"[^a-z0-9]+", "_", abx_clean).strip("_")
+    if normalized in synonyms:
+        return synonyms[normalized]
+
     return normalized
 
 
@@ -238,7 +254,12 @@ def has_model(organism: str, antibiotic: str) -> bool:
 
 
 def get_experimental_model_entry(organism: str, antibiotic: str) -> Optional[Dict[str, Any]]:
-    """Retrieve an experimental specialist model entry if one exists for this scope."""
+    """
+    Retrieve an experimental specialist model entry if one exists for this scope.
+    Strictly returns None if a validated specialist model is already active.
+    """
+    if has_model(organism, antibiotic):
+        return None
     reg = load_registry()
     org_key = normalize_organism_key(organism)
     abx_key = normalize_antibiotic_key(antibiotic)
