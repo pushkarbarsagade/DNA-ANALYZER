@@ -91,6 +91,73 @@
   transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
   position: relative;
   overflow: hidden;
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  .landing-container {
+    padding: 1rem 0.75rem 2rem 0.75rem;
+  }
+
+  .branches-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .branch-card {
+    padding: 1.25rem;
+  }
+
+  .branch-title {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .landing-container {
+    padding: 0.75rem 0.4rem 1.5rem 0.4rem;
+  }
+
+  .landing-headline {
+    font-size: clamp(1.5rem, 5vw, 1.9rem);
+    word-break: break-word;
+  }
+
+  .landing-subheading {
+    font-size: 0.9rem;
+    word-break: break-word;
+  }
+
+  .branch-card {
+    padding: 1rem;
+  }
+
+  .branch-title {
+    font-size: 1.15rem;
+  }
+
+  .branch-cta-btn {
+    font-size: 0.88rem;
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 360px) {
+  .landing-container {
+    padding: 0.5rem 0.25rem 1rem 0.25rem;
+  }
+
+  .landing-headline {
+    font-size: 1.4rem;
+    word-break: break-word;
+  }
+
+  .branch-card {
+    padding: 0.8rem;
+  }
+
+  .branch-title {
+    font-size: 1rem;
+  }
 }
 
 .branch-card:hover {

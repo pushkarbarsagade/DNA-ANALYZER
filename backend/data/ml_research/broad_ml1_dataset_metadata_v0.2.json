@@ -1,0 +1,375 @@
+{
+  "dataset_version": "AMR-DATASET-BROAD-v0.2",
+  "model_version": "AMR-ML1-BROAD-v0.2",
+  "created_at": "2026-09-13T14:00:00Z",
+  "source_release": "NCBI Pathogen Detection (11 Organism Releases)",
+  "total_unique_isolates": 1322,
+  "total_observations": 19244,
+  "unique_organisms": 35,
+  "unique_antibiotics": 91,
+  "feature_count": 1095,
+  "selected_algorithm": "Balanced Logistic Regression",
+  "class_distribution": {
+    "susceptible": 10309,
+    "resistant": 8935
+  },
+  "candidate_benchmark_results": {
+    "Logistic Regression (L2, C=1.0)": {
+      "accuracy": 0.7944,
+      "balanced_accuracy": 0.7914,
+      "sensitivity": 0.7494,
+      "specificity": 0.8334,
+      "precision": 0.7959,
+      "npv": 0.7933,
+      "f1": 0.772,
+      "roc_auc": 0.8733,
+      "pr_auc": 0.8539,
+      "tp": 6696,
+      "fp": 1717,
+      "tn": 8592,
+      "fn": 2239,
+      "vme": 0.2506,
+      "me": 0.1666,
+      "total_test_n": 19244,
+      "accuracy_ci": [
+        0.7887,
+        0.8001
+      ],
+      "sensitivity_ci": [
+        0.7403,
+        0.7583
+      ],
+      "specificity_ci": [
+        0.8261,
+        0.8405
+      ]
+    },
+    "Balanced Logistic Regression": {
+      "accuracy": 0.7935,
+      "balanced_accuracy": 0.7921,
+      "sensitivity": 0.7724,
+      "specificity": 0.8119,
+      "precision": 0.7807,
+      "npv": 0.8045,
+      "f1": 0.7765,
+      "roc_auc": 0.8732,
+      "pr_auc": 0.8529,
+      "tp": 6901,
+      "fp": 1939,
+      "tn": 8370,
+      "fn": 2034,
+      "vme": 0.2276,
+      "me": 0.1881,
+      "total_test_n": 19244,
+      "accuracy_ci": [
+        0.7878,
+        0.7992
+      ],
+      "sensitivity_ci": [
+        0.7635,
+        0.7809
+      ],
+      "specificity_ci": [
+        0.8043,
+        0.8193
+      ]
+    },
+    "Random Forest": {
+      "accuracy": 0.7489,
+      "balanced_accuracy": 0.743,
+      "sensitivity": 0.6605,
+      "specificity": 0.8254,
+      "precision": 0.7663,
+      "npv": 0.7372,
+      "f1": 0.7095,
+      "roc_auc": 0.8318,
+      "pr_auc": 0.8194,
+      "tp": 5902,
+      "fp": 1800,
+      "tn": 8509,
+      "fn": 3033,
+      "vme": 0.3395,
+      "me": 0.1746,
+      "total_test_n": 19244,
+      "accuracy_ci": [
+        0.7427,
+        0.7549
+      ],
+      "sensitivity_ci": [
+        0.6507,
+        0.6703
+      ],
+      "specificity_ci": [
+        0.8179,
+        0.8326
+      ]
+    }
+  },
+  "production_validation_metrics": {
+    "accuracy": 0.7935,
+    "balanced_accuracy": 0.7921,
+    "sensitivity": 0.7724,
+    "specificity": 0.8119,
+    "precision": 0.7807,
+    "npv": 0.8045,
+    "f1": 0.7765,
+    "roc_auc": 0.8732,
+    "pr_auc": 0.8529,
+    "tp": 6901,
+    "fp": 1939,
+    "tn": 8370,
+    "fn": 2034,
+    "vme": 0.2276,
+    "me": 0.1881,
+    "total_test_n": 19244,
+    "accuracy_ci": [
+      0.7878,
+      0.7992
+    ],
+    "sensitivity_ci": [
+      0.7635,
+      0.7809
+    ],
+    "specificity_ci": [
+      0.8043,
+      0.8193
+    ]
+  },
+  "per_organism_metrics": {
+    "acinetobacter_baumannii": {
+      "n": 293,
+      "accuracy": 0.8259,
+      "sensitivity": 0.9449,
+      "specificity": 0.3333,
+      "f1": 0.8974
+    },
+    "acinetobacter_sp_0000_0051_8448": {
+      "n": 10,
+      "accuracy": 1.0,
+      "sensitivity": 1.0,
+      "specificity": 0.0,
+      "f1": 1.0
+    },
+    "campylobacter_coli": {
+      "n": 108,
+      "accuracy": 0.8704,
+      "sensitivity": 0.4211,
+      "specificity": 0.9663,
+      "f1": 0.5333
+    },
+    "campylobacter_jejuni": {
+      "n": 126,
+      "accuracy": 0.8968,
+      "sensitivity": 0.2353,
+      "specificity": 1.0,
+      "f1": 0.381
+    },
+    "citrobacter_amalonaticus": {
+      "n": 14,
+      "accuracy": 0.9286,
+      "sensitivity": 0.0,
+      "specificity": 1.0,
+      "f1": 0.0
+    },
+    "citrobacter_freundii": {
+      "n": 183,
+      "accuracy": 0.7596,
+      "sensitivity": 0.7647,
+      "specificity": 0.7551,
+      "f1": 0.7471
+    },
+    "enterobacter_cloacae": {
+      "n": 268,
+      "accuracy": 0.7948,
+      "sensitivity": 0.7763,
+      "specificity": 0.819,
+      "f1": 0.811
+    },
+    "enterococcus_faecalis": {
+      "n": 48,
+      "accuracy": 0.5833,
+      "sensitivity": 0.3636,
+      "specificity": 0.7692,
+      "f1": 0.4444
+    },
+    "escherichia_coli": {
+      "n": 1310,
+      "accuracy": 0.784,
+      "sensitivity": 0.7521,
+      "specificity": 0.811,
+      "f1": 0.7616
+    },
+    "klebsiella_aerogenes_uci_15": {
+      "n": 12,
+      "accuracy": 0.5,
+      "sensitivity": 0.5556,
+      "specificity": 0.3333,
+      "f1": 0.625
+    },
+    "klebsiella_aerogenes_uci_47": {
+      "n": 12,
+      "accuracy": 0.5833,
+      "sensitivity": 0.2857,
+      "specificity": 1.0,
+      "f1": 0.4444
+    },
+    "klebsiella_pneumoniae": {
+      "n": 467,
+      "accuracy": 0.8308,
+      "sensitivity": 0.8732,
+      "specificity": 0.7083,
+      "f1": 0.8847
+    },
+    "klebsiella_variicola": {
+      "n": 17,
+      "accuracy": 0.9412,
+      "sensitivity": 0.0,
+      "specificity": 1.0,
+      "f1": 0.0
+    },
+    "pseudomonas_aeruginosa": {
+      "n": 239,
+      "accuracy": 0.7238,
+      "sensitivity": 0.7192,
+      "specificity": 0.7312,
+      "f1": 0.7609
+    },
+    "salmonella_enterica": {
+      "n": 355,
+      "accuracy": 0.9042,
+      "sensitivity": 0.4444,
+      "specificity": 0.9561,
+      "f1": 0.4848
+    },
+    "serratia_marcescens": {
+      "n": 254,
+      "accuracy": 0.6496,
+      "sensitivity": 0.4458,
+      "specificity": 0.7485,
+      "f1": 0.454
+    },
+    "staphylococcus_aureus": {
+      "n": 144,
+      "accuracy": 0.8681,
+      "sensitivity": 0.6842,
+      "specificity": 0.934,
+      "f1": 0.7324
+    }
+  },
+  "per_antibiotic_metrics": {
+    "gentamicin": {
+      "n": 238,
+      "accuracy": 0.7941,
+      "sensitivity": 0.6119,
+      "specificity": 0.8655,
+      "f1": 0.626
+    },
+    "ciprofloxacin": {
+      "n": 235,
+      "accuracy": 0.8596,
+      "sensitivity": 0.8632,
+      "specificity": 0.8559,
+      "f1": 0.8596
+    },
+    "trimethoprim_sulfamethoxazole": {
+      "n": 193,
+      "accuracy": 0.7824,
+      "sensitivity": 0.7632,
+      "specificity": 0.7949,
+      "f1": 0.7342
+    },
+    "tetracycline": {
+      "n": 185,
+      "accuracy": 0.5784,
+      "sensitivity": 0.5909,
+      "specificity": 0.56,
+      "f1": 0.625
+    },
+    "ceftriaxone": {
+      "n": 177,
+      "accuracy": 0.8531,
+      "sensitivity": 0.9455,
+      "specificity": 0.7015,
+      "f1": 0.8889
+    },
+    "amikacin": {
+      "n": 167,
+      "accuracy": 0.8743,
+      "sensitivity": 0.3077,
+      "specificity": 0.9787,
+      "f1": 0.4324
+    },
+    "ampicillin": {
+      "n": 164,
+      "accuracy": 0.8902,
+      "sensitivity": 0.958,
+      "specificity": 0.7111,
+      "f1": 0.9268
+    },
+    "meropenem": {
+      "n": 148,
+      "accuracy": 0.7838,
+      "sensitivity": 0.6094,
+      "specificity": 0.9167,
+      "f1": 0.7091
+    },
+    "levofloxacin": {
+      "n": 144,
+      "accuracy": 0.8194,
+      "sensitivity": 0.8646,
+      "specificity": 0.7292,
+      "f1": 0.8646
+    },
+    "cefoxitin": {
+      "n": 142,
+      "accuracy": 0.7958,
+      "sensitivity": 0.8429,
+      "specificity": 0.75,
+      "f1": 0.8027
+    },
+    "tobramycin": {
+      "n": 131,
+      "accuracy": 0.7481,
+      "sensitivity": 0.6885,
+      "specificity": 0.8,
+      "f1": 0.7179
+    },
+    "ceftazidime": {
+      "n": 130,
+      "accuracy": 0.7615,
+      "sensitivity": 0.8617,
+      "specificity": 0.5,
+      "f1": 0.8394
+    },
+    "amoxicillin_clavulanic_acid": {
+      "n": 129,
+      "accuracy": 0.7829,
+      "sensitivity": 0.8281,
+      "specificity": 0.7385,
+      "f1": 0.791
+    },
+    "cefepime": {
+      "n": 114,
+      "accuracy": 0.7193,
+      "sensitivity": 0.6071,
+      "specificity": 0.8276,
+      "f1": 0.68
+    },
+    "ertapenem": {
+      "n": 110,
+      "accuracy": 0.7091,
+      "sensitivity": 0.5111,
+      "specificity": 0.8462,
+      "f1": 0.5897
+    }
+  },
+  "holdout_comparison": {
+    "holdout_n": 3863,
+    "v01_common_n": 2105,
+    "v02_new_coverage_n": 1758,
+    "v01_common_accuracy": 0.8014,
+    "v02_common_accuracy": 0.8157,
+    "v01_common_f1": 0.7758,
+    "v02_common_f1": 0.7985
+  }
+}

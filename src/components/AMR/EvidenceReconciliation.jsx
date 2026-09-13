@@ -59,9 +59,10 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
   const [aiExplanation, setAiExplanation] = useState(null);
   const [aiError, setAiError] = useState('');
 
-  // Phase 9: ML Research Prediction state
+  // Phase 9 & 13: ML Research Prediction state
   const [mlPrediction, setMlPrediction] = useState(null);
   const [mlLoading, setMlLoading] = useState(false);
+  const [selectedMlDrug, setSelectedMlDrug] = useState('ALL');
 
   // PDF Export state
   const [pdfGenerating, setPdfGenerating] = useState(false);
@@ -795,70 +796,180 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
                 </div>
               </div>
 
-              {/* Dynamic Predictions List */}
-              <div className="ml-drug-predictions-grid">
-                {(mlPrediction.predictions && Array.isArray(mlPrediction.predictions) ? mlPrediction.predictions : [mlPrediction]).map((pred, pIdx) => (
-                  <div key={pIdx} className={`ml-drug-card ${pred.available ? 'available' : 'unavailable'}`}>
-                    <div className="ml-drug-header">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                        <span className="ml-drug-title">{pred.antibiotic || 'Ampicillin'}</span>
-                        {pred.available && (
-                          <span className="ml-model-badge">{pred.model_version || pred.model}</span>
-                        )}
-                      </div>
+              {/* Antibiotic Selector Tabs */}
+              {(() => {
+                const allPredictions = mlPrediction.predictions && Array.isArray(mlPrediction.predictions)
+                  ? mlPrediction.predictions
+                  : [mlPrediction];
+                const displayedPredictions = selectedMlDrug === 'ALL'
+                  ? allPredictions
+                  : allPredictions.filter(p => (p.antibiotic || '').toLowerCase() === selectedMlDrug.toLowerCase());
 
-                      {pred.available ? (
-                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                          <span className="ml-pred-label">Prediction:</span>
-                          <span className={`ml-pred-class ${pred.prediction === 'Resistant' ? 'resistant' : 'susceptible'}`}>
-                            {pred.prediction}
-                          </span>
-                        </div>
-                      ) : (
-                        <span style={{ fontSize: '0.75rem', color: '#94a3b8', background: 'rgba(255,255,255,0.05)', padding: '0.2rem 0.5rem', borderRadius: 4 }}>
-                          No Validated Model
-                        </span>
-                      )}
+                return (
+                  <>
+                    <div className="ml-drug-selector-bar">
+                      <button
+                        type="button"
+                        className={`ml-drug-filter-chip ${selectedMlDrug === 'ALL' ? 'active' : ''}`}
+                        onClick={() => setSelectedMlDrug('ALL')}
+                      >
+                        All Evaluated Drugs ({allPredictions.length})
+                      </button>
+                      {allPredictions.map((p, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          className={`ml-drug-filter-chip ${selectedMlDrug.toLowerCase() === (p.antibiotic || '').toLowerCase() ? 'active' : ''}`}
+                          onClick={() => setSelectedMlDrug(p.antibiotic || '')}
+                        >
+                          {p.antibiotic || '(Unknown)'} {(p.available || p.has_broad) ? '✓' : ''}
+                        </button>
+                      ))}
                     </div>
 
-                    {pred.available ? (
-                      <>
-                        {/* Probability Bar */}
-                        <div className="ml-prob-bar-container">
-                          <div className="ml-prob-bar-label-row">
-                            <span>Susceptible ({((pred.probability_susceptible || 0) * 100).toFixed(1)}%)</span>
-                            <span>Predicted Resistance Probability: <strong>{((pred.predicted_probability || pred.probability_resistant || 0) * 100).toFixed(1)}%</strong></span>
-                          </div>
-                          <div className="ml-prob-bar">
-                            <div
-                              className="ml-prob-bar-fill susceptible"
-                              style={{ width: `${(pred.probability_susceptible || 0) * 100}%` }}
-                            />
-                            <div
-                              className="ml-prob-bar-fill resistant"
-                              style={{ width: `${((pred.predicted_probability || pred.probability_resistant || 0)) * 100}%` }}
-                            />
-                          </div>
-                          <div className="ml-threshold-marker" style={{ left: '50%' }}>
-                            <span>Threshold: {pred.threshold !== undefined ? pred.threshold.toFixed(2) : '0.50'}</span>
-                          </div>
-                        </div>
+                    {/* Predictions Grid */}
+                    <div className="ml-drug-predictions-grid">
+                      {displayedPredictions.map((pred, pIdx) => {
+                        const broad = pred.broad_prediction || {};
+                        const specialist = pred.specialist_prediction || {};
+                        const hasBoth = pred.selection_case === 'both' || (pred.has_broad && pred.has_specialist);
+                        const hasBroadOnly = pred.selection_case === 'broad_only' || (pred.has_broad && !pred.has_specialist);
+                        const hasSpecOnly = pred.selection_case === 'specialist_only' || (!pred.has_broad && pred.has_specialist);
 
-                        {/* Model Meta Row */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#94a3b8', borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                          <span>Recognized Genomic Features: <strong>{pred.recognized_features || 0}</strong> of {pred.total_determinants || 0} determinants</span>
-                          <span>Algorithm: {pred.algorithm || 'Logistic Regression (L2)'}</span>
-                          <span>Training Isolates: {pred.training_sample_count || 'Validated'}</span>
-                        </div>
-                      </>
-                    ) : (
-                      <div style={{ fontSize: '0.82rem', color: '#94a3b8', fontStyle: 'italic' }}>
-                        No validated ML model is currently available for this organism–antibiotic combination.
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+                        return (
+                          <div key={pIdx} className={`ml-drug-card ${(pred.available || pred.has_broad) ? 'available' : 'unavailable'}`}>
+                            <div className="ml-drug-header">
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }}>
+                                <span className="ml-drug-title">{pred.antibiotic || '(Unknown Drug)'}</span>
+                                {hasBoth ? (
+                                  <>
+                                    <span className="ml-badge-specialist">Specialist</span>
+                                    <span className="ml-badge-broad">Broad ML1</span>
+                                  </>
+                                ) : hasBroadOnly ? (
+                                  <span className="ml-badge-broad">Broad ML1 Only</span>
+                                ) : hasSpecOnly ? (
+                                  <span className="ml-badge-specialist">Specialist Only</span>
+                                ) : pred.reason === 'ML_SERVICE_ERROR' ? (
+                                  <span style={{ fontSize: '0.75rem', color: '#f87171', background: 'rgba(239,68,68,0.08)', padding: '0.2rem 0.5rem', borderRadius: 4 }}>
+                                    ML Service Unavailable
+                                  </span>
+                                ) : (
+                                  <span style={{ fontSize: '0.75rem', color: '#94a3b8', background: 'rgba(255,255,255,0.05)', padding: '0.2rem 0.5rem', borderRadius: 4 }}>
+                                    No Validated Model
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Informational Selection Case Note */}
+                            {pred.display_note && (
+                              <div className="ml-case-note">
+                                {pred.display_note}
+                              </div>
+                            )}
+
+                            {pred.available ? (
+                              <div className={`ml-dual-models-container ${hasBoth ? 'two-columns' : ''}`}>
+                                {/* Broad ML1 Subcard */}
+                                {broad.available && (
+                                  <div className="ml-subcard broad">
+                                    <div className="ml-subcard-header">
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                                        <span className="ml-badge-broad">Broad ML1</span>
+                                        <span className="ml-subcard-title">{broad.model_version || 'AMR-ML1-BROAD-v0.1'}</span>
+                                      </div>
+                                      <span className={`ml-pred-class ${broad.prediction === 'Resistant' ? 'resistant' : 'susceptible'}`}>
+                                        {broad.prediction}
+                                      </span>
+                                    </div>
+
+                                    {/* Probability Bar */}
+                                    <div className="ml-prob-bar-container">
+                                      <div className="ml-prob-bar-label-row">
+                                        <span>Susceptible ({((broad.probability_susceptible || 0) * 100).toFixed(1)}%)</span>
+                                        <span>Predicted Resistance Probability: <strong>{((broad.predicted_probability || 0) * 100).toFixed(1)}%</strong></span>
+                                      </div>
+                                      <div className="ml-prob-bar">
+                                        <div
+                                          className="ml-prob-bar-fill susceptible"
+                                          style={{ width: `${(broad.probability_susceptible || 0) * 100}%` }}
+                                        />
+                                        <div
+                                          className="ml-prob-bar-fill resistant"
+                                          style={{ width: `${(broad.predicted_probability || 0) * 100}%` }}
+                                        />
+                                      </div>
+                                      <div className="ml-threshold-marker" style={{ left: '50%' }}>
+                                        <span>Threshold: 0.50</span>
+                                      </div>
+                                    </div>
+
+                                    <div style={{ fontSize: '0.74rem', color: '#94a3b8', borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: '0.35rem' }}>
+                                      Scope: Multi-Organism / Multi-Antibiotic Pan-Pathogen | Features: {broad.recognized_features || 0}/{broad.total_determinants || 0}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Specialist Model Subcard */}
+                                {specialist.available && (
+                                  <div className="ml-subcard specialist">
+                                    <div className="ml-subcard-header">
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                                        <span className="ml-badge-specialist">Specialist</span>
+                                        <span className="ml-subcard-title">{specialist.model_version || specialist.model}</span>
+                                      </div>
+                                      <span className={`ml-pred-class ${specialist.prediction === 'Resistant' ? 'resistant' : 'susceptible'}`}>
+                                        {specialist.prediction}
+                                      </span>
+                                    </div>
+
+                                    {/* Probability Bar */}
+                                    <div className="ml-prob-bar-container">
+                                      <div className="ml-prob-bar-label-row">
+                                        <span>Susceptible ({((specialist.probability_susceptible || 0) * 100).toFixed(1)}%)</span>
+                                        <span>Predicted Resistance Probability: <strong>{((specialist.predicted_probability || 0) * 100).toFixed(1)}%</strong></span>
+                                      </div>
+                                      <div className="ml-prob-bar">
+                                        <div
+                                          className="ml-prob-bar-fill susceptible"
+                                          style={{ width: `${(specialist.probability_susceptible || 0) * 100}%` }}
+                                        />
+                                        <div
+                                          className="ml-prob-bar-fill resistant"
+                                          style={{ width: `${(specialist.predicted_probability || 0) * 100}%` }}
+                                        />
+                                      </div>
+                                      <div className="ml-threshold-marker" style={{ left: '50%' }}>
+                                        <span>Threshold: 0.50</span>
+                                      </div>
+                                    </div>
+
+                                    <div style={{ fontSize: '0.74rem', color: '#94a3b8', borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: '0.35rem' }}>
+                                      Scope: {specialist.organism} + {specialist.antibiotic} | Training N = {specialist.training_sample_count || 'Validated'}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Specialist Unavailable notice when only Broad is present */}
+                                {hasBroadOnly && (
+                                  <div style={{ fontSize: '0.76rem', color: '#64748b', fontStyle: 'italic', padding: '0.35rem 0' }}>
+                                    Broad model prediction available; no specialist model currently validated for this combination.
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div style={{ fontSize: '0.82rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                                No validated ML prediction available for this organism–antibiotic combination.
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                );
+              })()}
 
               {/* Research Disclaimer */}
               <div className="ml-disclaimer-box">

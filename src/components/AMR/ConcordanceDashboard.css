@@ -249,6 +249,65 @@
   font-family: 'Inter', sans-serif;
 }
 
+@media (max-width: 768px) {
+  .isolate-header-card {
+    padding: 1rem 0.85rem;
+  }
+
+  .isolate-header-top {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .isolate-header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .export-pdf-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .isolate-meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .isolate-meta-val {
+    word-break: break-word;
+  }
+
+  .metrics-grid-four {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .isolate-header-card {
+    padding: 0.8rem 0.6rem;
+  }
+
+  .isolate-accession-badge {
+    font-size: 1.1rem;
+    word-break: break-word;
+  }
+
+  .metrics-grid-four {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-value-num {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .isolate-accession-badge {
+    font-size: 0.95rem;
+    word-break: break-all;
+  }
+}
+
 /* TOTAL RECONCILIATION BAR */
 .reconciliation-card {
   background: rgba(11, 18, 32, 0.8);

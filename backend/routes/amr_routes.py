@@ -847,17 +847,63 @@ def list_ml_models():
     """
     GET /api/amr/ml-models
 
-    Phase 11 — Lists all validated and candidate models in the model registry.
+    Lists all validated and candidate models in the model registry,
+    clearly separating Broad ML1 models and the Specialist Model Library.
     """
     try:
-        from backend.services.amr_model_registry import list_models, load_registry
+        from backend.services.amr_model_registry import (
+            list_models, load_registry, get_broad_model_entry
+        )
         reg = load_registry()
-        models = list_models(status=None)
+        all_models = list_models(status=None, model_family=None)
+        broad_entry = get_broad_model_entry()
+
+        specialist_models = [m for m in all_models if m.get("model_family") != "broad"]
+        broad_models = [m for m in all_models if m.get("model_family") == "broad"]
+
         return jsonify({
             "status": "success",
+            "broad_model": broad_entry,
+            "broad_models": broad_models,
+            "specialist_models": specialist_models,
             "active_models": reg.get("active_models", {}),
-            "total_models": len(models),
-            "models": models
+            "active_broad_model": reg.get("active_broad_model"),
+            "total_models": len(all_models),
+            "models": all_models
         }), 200
     except Exception as e:
         return jsonify({"status": "error", "error": str(e)}), 500
+
+
+@amr_bp.route("/retraining-status", methods=["GET"])
+def retraining_status():
+    """
+    GET /api/amr/retraining-status
+
+    Phase 13 — Returns periodic retraining audit history, active model version,
+    and dataset metadata.
+    """
+    try:
+        from backend.services.amr_retraining_service import get_retraining_history
+        from backend.services.amr_master_dataset import load_master_dataset_metadata
+        from backend.services.amr_model_registry import get_broad_model_entry
+
+        broad_entry = get_broad_model_entry() or {}
+        meta = load_master_dataset_metadata() or {}
+        history = get_retraining_history()
+
+        return jsonify({
+            "status": "success",
+            "active_broad_model": broad_entry.get("model_version"),
+            "dataset_version": meta.get("dataset_version"),
+            "source_release": meta.get("source_release"),
+            "total_isolates": meta.get("total_isolates"),
+            "total_observations": meta.get("total_observations"),
+            "eligible_combinations": meta.get("eligible_combinations_count"),
+            "rejected_combinations": meta.get("rejected_combinations_count"),
+            "retraining_history_count": len(history),
+            "recent_retraining_cycles": history[-5:] if history else []
+        }), 200
+    except Exception as e:
+        return jsonify({"status": "error", "error": str(e)}), 500
+

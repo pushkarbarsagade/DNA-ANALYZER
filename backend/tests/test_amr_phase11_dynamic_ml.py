@@ -114,11 +114,13 @@ class TestPhase11DynamicML(unittest.TestCase):
 
     def test_D_registry_returns_no_model_correctly(self):
         """D. Registry returns available=False with reason='no_validated_model' when scope is unmapped."""
-        res = amr_ml_service.predict("Klebsiella pneumoniae", "blaKPC-2", "Meropenem")
+        # Use a genuinely unsupported combination (not covered by any registered specialist or broad model)
+        res = amr_ml_service.predict("Bacillus subtilis", "blaKPC-2", "Meropenem")
         self.assertFalse(res["available"])
         self.assertEqual(res["reason"], "no_validated_model")
-        self.assertEqual(res["organism"], "Klebsiella pneumoniae")
+        self.assertEqual(res["organism"], "Bacillus subtilis")
         self.assertEqual(res["antibiotic"], "Meropenem")
+
 
     # --------------------------------------------------------------------------
     # E & F: Multi-Organism / Multi-Antibiotic Coexistence
@@ -308,14 +310,20 @@ class TestPhase11DynamicML(unittest.TestCase):
         self.assertEqual(train_res["status"], "rejected")
         self.assertFalse(train_res["gates_passed"])
 
-        # Verify not registered as active
+        # Phase 13 registered AMR-ML-PAER-TOB-v0.2 as a validated specialist.
+        # The rejected 30-sample candidate must NOT overwrite the validated production model.
         active_model = amr_model_registry.get_model_entry("Pseudomonas aeruginosa", "Tobramycin")
-        self.assertIsNone(active_model)
+        if active_model is not None:
+            # If a model exists, it must be the Phase 13 validated model, not the rejected candidate
+            self.assertEqual(active_model["model_id"], "AMR-ML-PAER-TOB-v0.2",
+                             "Validated Phase 13 model must not be overwritten by rejected candidate")
+            self.assertEqual(active_model["status"], "validated")
 
         # Verify baseline E. coli model is untouched
         baseline = amr_model_registry.get_model_entry("Escherichia coli", "Ampicillin")
         self.assertIsNotNone(baseline)
         self.assertEqual(baseline["model_id"], "AMR-ML-ECOLI-AMP-v0.1")
+
 
     # --------------------------------------------------------------------------
     # U: Model Versioning

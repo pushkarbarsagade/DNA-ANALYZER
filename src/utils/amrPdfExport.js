@@ -869,20 +869,38 @@ export function exportReconciliationReportPdf({
   // =========================================================================
   renderSectionHeader('Section 6 — Evidence Reconciliation Summary');
 
-  const recSummary = reconciliationResult?.reconciliation_summary || {};
-  const totalAstCount = recSummary.total_ast_records ?? astRecords.length;
-  const compPairs = recSummary.comparable_pairs ?? 0;
-  const concPairs = recSummary.concordant ?? 0;
-  const discPairs = recSummary.conflicts ?? recSummary.discordant ?? 0;
-  const notCompPairs = recSummary.not_comparable ?? 0;
-  const _notEvalPairs = recSummary.not_evaluable ?? 0;
+  // Derive metrics from Section 4 findings (deterministic evaluation)
+  const evaluatedFindings = reconciliationResult?.findings || [];
+  
+  let concPairs = 0;
+  let discPairs = 0;
+  let notCompPairs = 0;
+  let notEvalPairs = 0;
+
+  evaluatedFindings.forEach(f => {
+    const cat = (f.reconciliation_category || '').toLowerCase();
+    if (cat.startsWith('concordant')) {
+      concPairs++;
+    } else if (f.has_conflict) {
+      discPairs++;
+    } else if (cat === 'not_comparable') {
+      notCompPairs++;
+    } else if (cat === 'not_evaluable') {
+      notEvalPairs++;
+    }
+  });
+
+  const compPairs = concPairs + discPairs;
+  const totalAstCount = astRecords.length;
+  
+  const rawPercentage = compPairs > 0 ? (concPairs / compPairs) * 100 : null;
 
   const {
     displayStr: concDisplayStr,
     percentageStr: concPctStr,
     formula: concFormula,
     note: concNote
-  } = formatConcordanceMetrics(concPairs, compPairs, recSummary.concordance_percentage);
+  } = formatConcordanceMetrics(concPairs, compPairs, rawPercentage);
 
   const summaryBoxes = [
     { label: 'Total AST', val: String(totalAstCount), color: [241, 245, 249], border: [203, 213, 225], textCol: [30, 41, 59] },
@@ -943,7 +961,7 @@ export function exportReconciliationReportPdf({
 
   const availableMlCount = mlPrediction?.available_count !== undefined
     ? mlPrediction.available_count
-    : predictionsList.filter((p) => p.available).length;
+    : predictionsList.filter((p) => p.available || p.has_broad).length;
 
   const totalMlEvaluated = mlPrediction?.total_drugs || predictionsList.length;
 
@@ -952,28 +970,82 @@ export function exportReconciliationReportPdf({
     `Coverage: ${availableMlCount} of ${totalMlEvaluated || 1} evaluated drugs`
   );
 
-  const mlTableRows = predictionsList.length > 0
-    ? predictionsList.map((p) => {
-        const abx = p.antibiotic ? p.antibiotic.charAt(0).toUpperCase() + p.antibiotic.slice(1) : '—';
-        if (p.available) {
-          const prob = p.predicted_probability !== undefined
-            ? `${(p.predicted_probability * 100).toFixed(1)}%`
-            : (p.probability_resistant !== undefined ? `${(p.probability_resistant * 100).toFixed(1)}%` : '—');
-          const predClass = p.prediction || (p.predicted_probability >= 0.5 ? 'Resistant' : 'Susceptible');
-          const modelVer = p.model_version || p.model || 'AMR-ML';
-          const algo = p.algorithm || 'Logistic Regression (L2)';
-          const recognized = `${p.recognized_features || 0} of ${p.total_determinants || 0} determinants`;
-          return [abx, prob, predClass, modelVer, algo, recognized, 'Validated Model'];
-        } else {
-          return [abx, '—', 'No Validated Model', 'None', '—', '—', 'No Validated Model'];
+  // Informational banner about Dual Model Architecture (Specialist vs Broad ML1)
+  doc.setFillColor(241, 245, 249); // #f1f5f9
+  doc.setDrawColor(203, 213, 225); // #cbd5e1
+  doc.rect(margin, currentY, printableWidth, 6.5, 'FD');
+
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(30, 41, 59);
+  doc.text('Dual Model System:', margin + 3.5, currentY + 4.3);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(71, 85, 105);
+  doc.text('Specialist models provide dedicated organism x drug context; Broad ML1 provides multi-organism dataset-conditioned research coverage.', margin + 31, currentY + 4.3);
+
+  currentY += 9.5;
+
+  const mlTableRows = [];
+  const formatProb = (prob) => (prob !== undefined && prob !== null) ? `${(prob * 100).toFixed(1)}%` : '—';
+
+  if (predictionsList.length > 0) {
+    predictionsList.forEach((p) => {
+      const abx = p.antibiotic ? p.antibiotic.charAt(0).toUpperCase() + p.antibiotic.slice(1) : '—';
+      const hasBoth = p.selection_case === 'both' || (p.has_broad && p.has_specialist);
+      const hasBroadOnly = p.selection_case === 'broad_only' || (p.has_broad && !p.has_specialist);
+      const hasSpecOnly = p.selection_case === 'specialist_only' || (!p.has_broad && p.has_specialist);
+
+      if (hasBoth) {
+        // Row 1: Specialist Model
+        const spec = p.specialist_prediction || p;
+        const specProb = formatProb(spec.predicted_probability ?? spec.probability_resistant);
+        const specPred = spec.prediction || (spec.predicted_probability >= 0.5 ? 'Resistant' : 'Susceptible');
+        const specId = spec.model_version || spec.model_id || 'AMR-ML-ECOLI-AMP-v0.1';
+        const specFeat = `${spec.recognized_features || 0}/${spec.total_determinants || 0}`;
+        mlTableRows.push([abx, 'Specialist', specProb, specPred, specId, specFeat, 'Active Specialist (Primary)']);
+
+        // Row 2: Broad ML1 Reference
+        const broad = p.broad_prediction;
+        if (broad && (broad.available || broad.predicted_probability !== undefined)) {
+          const broadProb = formatProb(broad.predicted_probability ?? broad.probability_resistant);
+          const broadPred = broad.prediction || (broad.predicted_probability >= 0.5 ? 'Resistant' : 'Susceptible');
+          const broadId = broad.model_version || broad.model_id || 'AMR-ML1-BROAD-v0.1';
+          const broadFeat = `${broad.recognized_features || 0}/${broad.total_determinants || 0}`;
+          mlTableRows.push([`  ↳ (Broad Ref)`, 'Broad ML1', broadProb, broadPred, broadId, broadFeat, 'Pan-Pathogen Reference']);
         }
-      })
-    : [['No ML predictions available for this BioSample', '—', '—', '—', '—', '—', '—']];
+      } else if (hasBroadOnly) {
+        const broad = p.broad_prediction || p;
+        const broadProb = formatProb(broad.predicted_probability ?? broad.probability_resistant);
+        const broadPred = broad.prediction || (broad.predicted_probability >= 0.5 ? 'Resistant' : 'Susceptible');
+        const broadId = broad.model_version || broad.model_id || 'AMR-ML1-BROAD-v0.1';
+        const broadFeat = `${broad.recognized_features || 0}/${broad.total_determinants || 0}`;
+        mlTableRows.push([abx, 'Broad ML1', broadProb, broadPred, broadId, broadFeat, 'Broad Model (Multi-Organism)']);
+      } else if (hasSpecOnly) {
+        const spec = p.specialist_prediction || p;
+        const specProb = formatProb(spec.predicted_probability ?? spec.probability_resistant);
+        const specPred = spec.prediction || (spec.predicted_probability >= 0.5 ? 'Resistant' : 'Susceptible');
+        const specId = spec.model_version || spec.model_id || 'Specialist';
+        const specFeat = `${spec.recognized_features || 0}/${spec.total_determinants || 0}`;
+        mlTableRows.push([abx, 'Specialist', specProb, specPred, specId, specFeat, 'Active Specialist (Primary)']);
+      } else if (p.available) {
+        const prob = formatProb(p.predicted_probability ?? p.probability_resistant);
+        const predClass = p.prediction || (p.predicted_probability >= 0.5 ? 'Resistant' : 'Susceptible');
+        const modelVer = p.model_version || p.model || 'AMR-ML';
+        const recognized = `${p.recognized_features || 0}/${p.total_determinants || 0}`;
+        const fam = p.model_family === 'broad' ? 'Broad ML1' : 'Specialist';
+        mlTableRows.push([abx, fam, prob, predClass, modelVer, recognized, 'Validated Model']);
+      } else {
+        mlTableRows.push([abx, '—', '—', 'No Validated Model', 'None', '—', p.display_note || 'No Validated Model']);
+      }
+    });
+  } else {
+    mlTableRows.push(['No ML predictions available for this BioSample', '—', '—', '—', '—', '—', '—']);
+  }
 
   autoTable(doc, {
     startY: currentY,
     margin: { left: margin, right: margin, bottom: 16 },
-    head: [['Antibiotic', 'Predicted Resistance Prob.', 'Prediction', 'Model Version', 'Algorithm', 'Recognized Features', 'Model Status']],
+    head: [['Antibiotic', 'Model Family', 'Predicted Resist. Prob.', 'Prediction', 'Model Version', 'Determinants', 'Coverage Status']],
     body: mlTableRows,
     theme: 'grid',
     headStyles: {
@@ -991,17 +1063,17 @@ export function exportReconciliationReportPdf({
     },
     columnStyles: {
       0: { cellWidth: 32, fontStyle: 'bold' },
-      1: { cellWidth: 30 },
-      2: { cellWidth: 24, fontStyle: 'bold' },
-      3: { cellWidth: 30 },
-      4: { cellWidth: 28 },
-      5: { cellWidth: 22 },
+      1: { cellWidth: 24 },
+      2: { cellWidth: 26 },
+      3: { cellWidth: 22, fontStyle: 'bold' },
+      4: { cellWidth: 35 },
+      5: { cellWidth: 20 },
       6: { cellWidth: 'auto' }
     },
     didParseCell: (data) => {
       if (data.section === 'body') {
-        const predVal = String(data.cell.raw).toLowerCase();
-        if (data.column.index === 2) {
+        if (data.column.index === 3) {
+          const predVal = String(data.cell.raw).toLowerCase();
           if (predVal === 'resistant') {
             data.cell.styles.textColor = [185, 28, 28];
           } else if (predVal === 'susceptible') {
@@ -1009,6 +1081,15 @@ export function exportReconciliationReportPdf({
           } else if (predVal.includes('no validated')) {
             data.cell.styles.textColor = [100, 116, 139];
             data.cell.styles.fontStyle = 'normal';
+          }
+        } else if (data.column.index === 1) {
+          const famVal = String(data.cell.raw);
+          if (famVal === 'Specialist') {
+            data.cell.styles.textColor = [37, 99, 235];
+            data.cell.styles.fontStyle = 'bold';
+          } else if (famVal === 'Broad ML1') {
+            data.cell.styles.textColor = [5, 150, 105];
+            data.cell.styles.fontStyle = 'bold';
           }
         }
       }

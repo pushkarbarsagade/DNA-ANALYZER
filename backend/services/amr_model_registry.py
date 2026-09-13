@@ -39,6 +39,7 @@ BASELINE_MODEL_ID = "AMR-ML-ECOLI-AMP-v0.1"
 BASELINE_ENTRY: Dict[str, Any] = {
     "model_id": BASELINE_MODEL_ID,
     "model_version": BASELINE_MODEL_ID,
+    "model_family": "specialist",
     "organism": "Escherichia coli",
     "organism_key": "escherichia_coli",
     "antibiotic": "Ampicillin",
@@ -232,8 +233,26 @@ def get_model_entry(organism: str, antibiotic: str) -> Optional[Dict[str, Any]]:
 
 
 def has_model(organism: str, antibiotic: str) -> bool:
-    """Check if an active validated model exists for the scope."""
+    """Check if an active validated specialist model exists for the scope."""
     return get_model_entry(organism, antibiotic) is not None
+
+
+def get_broad_model_entry() -> Optional[Dict[str, Any]]:
+    """
+    Retrieve the active validated Broad ML1 model entry.
+    Returns None if no validated broad model is registered.
+    """
+    reg = load_registry()
+    active_broad_id = reg.get("active_broad_model") or "AMR-ML1-BROAD-v0.1"
+    model_entry = reg.get("models", {}).get(active_broad_id)
+    if model_entry and model_entry.get("status") == "validated":
+        return model_entry
+    return None
+
+
+def has_broad_model() -> bool:
+    """Check if an active validated Broad ML1 model exists."""
+    return get_broad_model_entry() is not None
 
 
 def get_available_antibiotics_for_organism(organism: str) -> List[str]:
@@ -249,12 +268,21 @@ def get_available_antibiotics_for_organism(organism: str) -> List[str]:
     return sorted(list(set(available)))
 
 
-def list_models(status: Optional[str] = "validated") -> List[Dict[str, Any]]:
+def list_models(
+    status: Optional[str] = "validated",
+    model_family: Optional[str] = "specialist"
+) -> List[Dict[str, Any]]:
     """
-    List all registered models, optionally filtered by status ('validated', 'rejected', or None for all).
+    List all registered models, optionally filtered by status ('validated', 'rejected', or None for all)
+    and model_family ('specialist', 'broad', or None for all).
     """
     reg = load_registry()
     models = list(reg.get("models", {}).values())
+    if model_family is not None:
+        if model_family == "specialist":
+            models = [m for m in models if m.get("model_family") != "broad"]
+        elif model_family == "broad":
+            models = [m for m in models if m.get("model_family") == "broad"]
     if status is not None:
         models = [m for m in models if m.get("status") == status]
     return sorted(models, key=lambda m: (m.get("organism", ""), m.get("antibiotic", "")))

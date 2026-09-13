@@ -102,14 +102,18 @@ class TestPhase12BroadSpectrumML(unittest.TestCase):
             self.assertIsNotNone(mem_model.get("rejection_reason"))
             self.assertIn("Sensitivity", mem_model["rejection_reason"])
 
-        # Check all validated models passed quality gates
+        # Check all validated models passed primary quality gates (Sens >= 0.90, F1 >= 0.90, ROC-AUC >= 0.90)
         validated = list_models(status="validated")
         for m in validated:
             if m["model_version"] != "AMR-ML-ECOLI-AMP-v0.1" and "sensitivity" in m.get("validation_metrics", {}):
                 mets = m["validation_metrics"]
-                self.assertGreaterEqual(mets["sensitivity"], 0.90)
-                self.assertGreaterEqual(mets["f1"], 0.90)
-                self.assertGreaterEqual(mets["roc_auc"], 0.90)
+                self.assertGreaterEqual(mets["sensitivity"], 0.90,
+                    f"Validated model {m['model_version']} failed strict sensitivity gate: {mets['sensitivity']:.4f} < 0.90")
+                self.assertGreaterEqual(mets["f1"], 0.90,
+                    f"Validated model {m['model_version']} failed strict F1 gate: {mets['f1']:.4f} < 0.90")
+                self.assertGreaterEqual(mets["roc_auc"], 0.90,
+                    f"Validated model {m['model_version']} failed strict ROC-AUC gate: {mets['roc_auc']:.4f} < 0.90")
+
 
     def test_4_frozen_benchmark_remains_strictly_26_of_28(self):
         """Verify deterministic concordance benchmark remains exactly 26/28 = 92.9%."""

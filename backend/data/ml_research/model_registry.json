@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "last_updated": "2026-09-12T13:27:54.500604+00:00",
+  "last_updated": "2026-09-13T15:21:48.927243+00:00",
   "models": {
     "AMR-ML-ECOLI-AMP-v0.1": {
       "model_id": "AMR-ML-ECOLI-AMP-v0.1",
@@ -56,125 +56,35 @@
       },
       "organism_key": "klebsiella_pneumoniae",
       "antibiotic_key": "ceftriaxone",
-      "created_at": "2026-09-12T13:27:50.937891+00:00"
-    },
-    "AMR-ML-SALM-AMP-v0.1": {
-      "model_id": "AMR-ML-SALM-AMP-v0.1",
-      "model_version": "AMR-ML-SALM-AMP-v0.1",
-      "organism": "Salmonella enterica",
-      "antibiotic": "Ampicillin",
-      "status": "validated",
-      "model_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.1.joblib",
-      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.1_vocab.json",
-      "model_type": "Logistic Regression (L2)",
-      "algorithm": "Logistic Regression (L2)",
-      "threshold": 0.5,
-      "feature_count": 2,
-      "n_isolates": 120,
-      "susceptible_count": 40,
-      "resistant_count": 80,
-      "validation_metrics": {
-        "accuracy": 1.0,
-        "accuracy_ci": [
-          0.862,
-          1.0
-        ],
-        "sensitivity": 1.0,
-        "sensitivity_ci": [
-          0.8389,
-          1.0
-        ],
-        "specificity": 1.0,
-        "specificity_ci": [
-          0.5101,
-          1.0
-        ],
-        "precision": 1.0,
-        "npv": 1.0,
-        "f1": 1.0,
-        "f1_ci": [
-          1.0,
-          1.0
-        ],
-        "roc_auc": 1.0,
-        "roc_auc_ci": [
-          1.0,
-          1.0
-        ],
-        "tp": 20,
-        "fp": 0,
-        "fn": 0,
-        "tn": 4,
-        "vme": 0.0,
-        "me": 0.0,
-        "train_n": 96,
-        "test_n": 24
-      },
-      "training_release": "PDG000000004.6300",
-      "research_only": true,
-      "rejection_reason": null,
-      "created_at": "2026-09-12T11:50:58.807495+00:00",
-      "organism_key": "salmonella_enterica",
-      "antibiotic_key": "ampicillin"
+      "created_at": "2026-09-13T15:21:45.412224+00:00"
     },
     "AMR-ML-SALM-AMP-v0.2": {
       "model_id": "AMR-ML-SALM-AMP-v0.2",
       "model_version": "AMR-ML-SALM-AMP-v0.2",
       "organism": "Salmonella enterica",
+      "organism_key": "salmonella_enterica",
       "antibiotic": "Ampicillin",
+      "antibiotic_key": "ampicillin",
       "status": "validated",
+      "model_family": "specialist",
       "model_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.2.joblib",
       "vocabulary_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.2_vocab.json",
-      "model_type": "Logistic Regression (L2)",
-      "algorithm": "Logistic Regression (L2)",
+      "algorithm": "Logistic Regression (L2 Balanced)",
       "threshold": 0.5,
-      "feature_count": 2,
-      "n_isolates": 120,
-      "susceptible_count": 40,
-      "resistant_count": 80,
+      "feature_count": 37,
+      "n_isolates": 140,
+      "susceptible_count": 111,
+      "resistant_count": 29,
       "validation_metrics": {
         "accuracy": 1.0,
-        "accuracy_ci": [
-          0.862,
-          1.0
-        ],
         "sensitivity": 1.0,
-        "sensitivity_ci": [
-          0.8389,
-          1.0
-        ],
         "specificity": 1.0,
-        "specificity_ci": [
-          0.5101,
-          1.0
-        ],
-        "precision": 1.0,
-        "npv": 1.0,
         "f1": 1.0,
-        "f1_ci": [
-          1.0,
-          1.0
-        ],
         "roc_auc": 1.0,
-        "roc_auc_ci": [
-          1.0,
-          1.0
-        ],
-        "tp": 20,
-        "fp": 0,
-        "fn": 0,
-        "tn": 4,
-        "vme": 0.0,
-        "me": 0.0,
-        "train_n": 96,
-        "test_n": 24
+        "test_n": 140
       },
-      "training_release": "PDG000000004.6300",
-      "research_only": true,
-      "rejection_reason": null,
-      "created_at": "2026-09-12T11:51:11.337432+00:00",
-      "organism_key": "salmonella_enterica",
-      "antibiotic_key": "ampicillin"
+      "training_release": "NCBI Pathogen Detection Multi-Organism Releases",
+      "research_only": true
     },
     "AMR-ML-ECOLI-CRO-v0.1": {
       "model_id": "AMR-ML-ECOLI-CRO-v0.1",
@@ -1356,6 +1266,740 @@
       "organism_key": "escherichia_coli",
       "antibiotic_key": "sulfisoxazole"
     },
+    "AMR-ML1-BROAD-v0.1": {
+      "model_id": "AMR-ML1-BROAD-v0.1",
+      "model_version": "AMR-ML1-BROAD-v0.1",
+      "model_family": "broad",
+      "organism": "Multi-Organism",
+      "antibiotic": "Multi-Antibiotic",
+      "organism_scope": "multi-organism",
+      "antibiotic_scope": "multi-antibiotic",
+      "status": "validated",
+      "model_path": "backend/data/ml_research/models/AMR-ML1-BROAD-v0.1.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML1-BROAD-v0.1_vocab.json",
+      "model_type": "Conditioned Logistic Regression (L2)",
+      "algorithm": "Conditioned Logistic Regression (L2)",
+      "threshold": 0.5,
+      "feature_count": 314,
+      "n_isolates": 696,
+      "total_observations": 7137,
+      "susceptible_count": 3802,
+      "resistant_count": 3335,
+      "supported_organisms": [
+        "escherichia_coli",
+        "klebsiella_pneumoniae",
+        "salmonella_enterica"
+      ],
+      "supported_antibiotics": [
+        "amikacin",
+        "amoxicillin_clavulanic_acid",
+        "ampicillin",
+        "ampicillin_sulbactam",
+        "azithromycin",
+        "aztreonam",
+        "cefazolin",
+        "cefepime",
+        "cefotaxime",
+        "cefotaxime_clavulanic_acid",
+        "cefotetan",
+        "cefoxitin",
+        "ceftazidime",
+        "ceftiofur",
+        "ceftriaxone",
+        "cefuroxime",
+        "cephalexin",
+        "cephalothin",
+        "chloramphenicol",
+        "ciprofloxacin",
+        "colistin",
+        "doripenem",
+        "ertapenem",
+        "fosfomycin",
+        "gentamicin",
+        "imipenem",
+        "kanamycin",
+        "levofloxacin",
+        "meropenem",
+        "moxifloxacin",
+        "nalidixic_acid",
+        "nitrofurantoin",
+        "norfloxacin",
+        "piperacillin",
+        "piperacillin_tazobactam",
+        "streptomycin",
+        "sulfamethoxazole",
+        "sulfisoxazole",
+        "tetracycline",
+        "ticarcillin_clavulanic_acid",
+        "tigecycline",
+        "tobramycin",
+        "trimethoprim",
+        "trimethoprim_sulfamethoxazole"
+      ],
+      "eligible_combinations_count": 26,
+      "rejected_combinations_count": 34,
+      "validation_metrics": {
+        "accuracy": 0.8142,
+        "accuracy_ci": [
+          0.7943,
+          0.8327
+        ],
+        "sensitivity": 0.7982,
+        "sensitivity_ci": [
+          0.7683,
+          0.825
+        ],
+        "specificity": 0.8296,
+        "specificity_ci": [
+          0.8021,
+          0.854
+        ],
+        "precision": 0.8173,
+        "npv": 0.8114,
+        "f1": 0.8076,
+        "f1_ci": [
+          0.7858,
+          0.828
+        ],
+        "roc_auc": 0.8949,
+        "roc_auc_ci": [
+          0.8799,
+          0.9092
+        ],
+        "tp": 613,
+        "fp": 137,
+        "fn": 155,
+        "tn": 667,
+        "vme": 0.2018,
+        "me": 0.1704,
+        "train_n": 5565,
+        "test_n": 1572,
+        "train_isolates": 513,
+        "test_isolates": 129
+      },
+      "training_release": "NCBI Pathogen Detection PDG000000004.6300",
+      "dataset_version": "AMR-DATASET-BROAD-v0.1",
+      "research_only": true,
+      "created_at": "2026-09-13T13:06:03.799125+00:00",
+      "notes": "Broad ML1 conditioning on organism, antibiotic, and genomic determinants. Frozen benchmark isolates excluded."
+    },
+    "AMR-ML-KPNEU-MEM-v0.2": {
+      "model_id": "AMR-ML-KPNEU-MEM-v0.2",
+      "model_version": "AMR-ML-KPNEU-MEM-v0.2",
+      "organism": "Klebsiella pneumoniae",
+      "organism_key": "klebsiella_pneumoniae",
+      "antibiotic": "Meropenem",
+      "antibiotic_key": "meropenem",
+      "status": "experimental",
+      "model_family": "specialist",
+      "model_path": "backend/data/ml_research/models/AMR-ML-KPNEU-MEM-v0.2.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-KPNEU-MEM-v0.2_vocab.json",
+      "algorithm": "Logistic Regression (L2 Balanced)",
+      "threshold": 0.5,
+      "feature_count": 184,
+      "n_isolates": 105,
+      "susceptible_count": 19,
+      "resistant_count": 86,
+      "validation_metrics": {
+        "accuracy": 0.819,
+        "sensitivity": 0.8372,
+        "specificity": 0.7368,
+        "f1": 0.8834,
+        "roc_auc": 0.8513,
+        "test_n": 105
+      },
+      "training_release": "NCBI Pathogen Detection Multi-Organism Releases",
+      "research_only": true,
+      "status_note": "Experimental Research Model \u2014 does not meet primary validation threshold (Sens >= 0.90, F1 >= 0.90, ROC-AUC >= 0.90, N >= 100)",
+      "gate_failures": [
+        "Minority class count (19) < 20",
+        "Sensitivity (0.8372) below primary validation gate (0.90)",
+        "F1 score (0.8834) below primary validation gate (0.90)",
+        "ROC-AUC (0.8513) below primary validation gate (0.90)"
+      ]
+    },
+    "AMR-ML-KPNEU-CIP-v0.2": {
+      "model_id": "AMR-ML-KPNEU-CIP-v0.2",
+      "model_version": "AMR-ML-KPNEU-CIP-v0.2",
+      "organism": "Klebsiella pneumoniae",
+      "organism_key": "klebsiella_pneumoniae",
+      "antibiotic": "Ciprofloxacin",
+      "antibiotic_key": "ciprofloxacin",
+      "status": "experimental",
+      "model_family": "specialist",
+      "model_path": "backend/data/ml_research/models/AMR-ML-KPNEU-CIP-v0.2.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-KPNEU-CIP-v0.2_vocab.json",
+      "algorithm": "Logistic Regression (L2 Balanced)",
+      "threshold": 0.5,
+      "feature_count": 177,
+      "n_isolates": 102,
+      "susceptible_count": 13,
+      "resistant_count": 89,
+      "validation_metrics": {
+        "accuracy": 0.9706,
+        "sensitivity": 0.9663,
+        "specificity": 1.0,
+        "f1": 0.9829,
+        "roc_auc": 0.9965,
+        "test_n": 102
+      },
+      "training_release": "NCBI Pathogen Detection Multi-Organism Releases",
+      "research_only": true,
+      "status_note": "Experimental Research Model \u2014 does not meet primary validation threshold (Sens >= 0.90, F1 >= 0.90, ROC-AUC >= 0.90, N >= 100)",
+      "gate_failures": [
+        "Minority class count (13) < 20"
+      ]
+    },
+    "AMR-ML-KPNEU-GEN-v0.2": {
+      "model_id": "AMR-ML-KPNEU-GEN-v0.2",
+      "model_version": "AMR-ML-KPNEU-GEN-v0.2",
+      "organism": "Klebsiella pneumoniae",
+      "organism_key": "klebsiella_pneumoniae",
+      "antibiotic": "Gentamicin",
+      "antibiotic_key": "gentamicin",
+      "status": "experimental",
+      "model_family": "specialist",
+      "model_path": "backend/data/ml_research/models/AMR-ML-KPNEU-GEN-v0.2.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-KPNEU-GEN-v0.2_vocab.json",
+      "algorithm": "Logistic Regression (L2 Balanced)",
+      "threshold": 0.5,
+      "feature_count": 175,
+      "n_isolates": 96,
+      "susceptible_count": 53,
+      "resistant_count": 43,
+      "validation_metrics": {
+        "accuracy": 0.8958,
+        "sensitivity": 0.8605,
+        "specificity": 0.9245,
+        "f1": 0.881,
+        "roc_auc": 0.9583,
+        "test_n": 96
+      },
+      "training_release": "NCBI Pathogen Detection Multi-Organism Releases",
+      "research_only": true,
+      "status_note": "Experimental Research Model \u2014 does not meet primary validation threshold (Sens >= 0.90, F1 >= 0.90, ROC-AUC >= 0.90, N >= 100)",
+      "gate_failures": [
+        "Cohort size N=96 < 100 minimum requirement",
+        "Sensitivity (0.8605) below primary validation gate (0.90)",
+        "F1 score (0.8810) below primary validation gate (0.90)"
+      ]
+    },
+    "AMR-ML-SALM-STR-v0.2": {
+      "model_id": "AMR-ML-SALM-STR-v0.2",
+      "model_version": "AMR-ML-SALM-STR-v0.2",
+      "organism": "Salmonella enterica",
+      "organism_key": "salmonella_enterica",
+      "antibiotic": "Streptomycin",
+      "antibiotic_key": "streptomycin",
+      "status": "validated",
+      "model_family": "specialist",
+      "model_path": "backend/data/ml_research/models/AMR-ML-SALM-STR-v0.2.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-SALM-STR-v0.2_vocab.json",
+      "algorithm": "Logistic Regression (L2 Balanced)",
+      "threshold": 0.5,
+      "feature_count": 37,
+      "n_isolates": 140,
+      "susceptible_count": 93,
+      "resistant_count": 47,
+      "validation_metrics": {
+        "accuracy": 0.9857,
+        "sensitivity": 0.9574,
+        "specificity": 1.0,
+        "f1": 0.9783,
+        "roc_auc": 0.9951,
+        "test_n": 140
+      },
+      "training_release": "NCBI Pathogen Detection Multi-Organism Releases",
+      "research_only": true
+    },
+    "AMR-ML-SALM-TET-v0.2": {
+      "model_id": "AMR-ML-SALM-TET-v0.2",
+      "model_version": "AMR-ML-SALM-TET-v0.2",
+      "organism": "Salmonella enterica",
+      "organism_key": "salmonella_enterica",
+      "antibiotic": "Tetracycline",
+      "antibiotic_key": "tetracycline",
+      "status": "validated",
+      "model_family": "specialist",
+      "model_path": "backend/data/ml_research/models/AMR-ML-SALM-TET-v0.2.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-SALM-TET-v0.2_vocab.json",
+      "algorithm": "Logistic Regression (L2 Balanced)",
+      "threshold": 0.5,
+      "feature_count": 37,
+      "n_isolates": 139,
+      "susceptible_count": 79,
+      "resistant_count": 60,
+      "validation_metrics": {
+        "accuracy": 0.9568,
+        "sensitivity": 0.9167,
+        "specificity": 0.9873,
+        "f1": 0.9483,
+        "roc_auc": 0.9941,
+        "test_n": 139
+      },
+      "training_release": "NCBI Pathogen Detection Multi-Organism Releases",
+      "research_only": true
+    },
+    "AMR-ML-ABAU-TOB-v0.2": {
+      "model_id": "AMR-ML-ABAU-TOB-v0.2",
+      "model_version": "AMR-ML-ABAU-TOB-v0.2",
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Tobramycin",
+      "organism_key": "acinetobacter_baumannii",
+      "antibiotic_key": "tobramycin",
+      "status": "rejected",
+      "rejection_reason": "Sensitivity (0.5733) below primary validation gate (0.90); F1 score (0.6515) below primary validation gate (0.90); ROC-AUC (0.7555) below primary validation gate (0.90)",
+      "model_family": "specialist",
+      "n_isolates": 133,
+      "susceptible_count": 58,
+      "resistant_count": 75,
+      "validation_metrics": {
+        "accuracy": 0.6541,
+        "sensitivity": 0.5733,
+        "specificity": 0.7586,
+        "f1": 0.6515,
+        "roc_auc": 0.7555
+      }
+    },
+    "AMR-ML-ABAU-AMK-v0.2": {
+      "model_id": "AMR-ML-ABAU-AMK-v0.2",
+      "model_version": "AMR-ML-ABAU-AMK-v0.2",
+      "organism": "Acinetobacter baumannii",
+      "organism_key": "acinetobacter_baumannii",
+      "antibiotic": "Amikacin",
+      "antibiotic_key": "amikacin",
+      "status": "experimental",
+      "model_family": "specialist",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ABAU-AMK-v0.2.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ABAU-AMK-v0.2_vocab.json",
+      "algorithm": "Logistic Regression (L2 Balanced)",
+      "threshold": 0.5,
+      "feature_count": 82,
+      "n_isolates": 100,
+      "susceptible_count": 62,
+      "resistant_count": 38,
+      "validation_metrics": {
+        "accuracy": 0.88,
+        "sensitivity": 0.9211,
+        "specificity": 0.8548,
+        "f1": 0.8537,
+        "roc_auc": 0.872,
+        "test_n": 100
+      },
+      "training_release": "NCBI Pathogen Detection Multi-Organism Releases",
+      "research_only": true,
+      "status_note": "Experimental Research Model \u2014 does not meet primary validation threshold (Sens >= 0.90, F1 >= 0.90, ROC-AUC >= 0.90, N >= 100)",
+      "gate_failures": [
+        "F1 score (0.8537) below primary validation gate (0.90)",
+        "ROC-AUC (0.8720) below primary validation gate (0.90)"
+      ]
+    },
+    "AMR-ML-ABAU-TET-v0.2": {
+      "model_id": "AMR-ML-ABAU-TET-v0.2",
+      "model_version": "AMR-ML-ABAU-TET-v0.2",
+      "organism": "Acinetobacter baumannii",
+      "organism_key": "acinetobacter_baumannii",
+      "antibiotic": "Tetracycline",
+      "antibiotic_key": "tetracycline",
+      "status": "experimental",
+      "model_family": "specialist",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ABAU-TET-v0.2.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ABAU-TET-v0.2_vocab.json",
+      "algorithm": "Logistic Regression (L2 Balanced)",
+      "threshold": 0.5,
+      "feature_count": 86,
+      "n_isolates": 92,
+      "susceptible_count": 44,
+      "resistant_count": 48,
+      "validation_metrics": {
+        "accuracy": 0.8913,
+        "sensitivity": 0.8958,
+        "specificity": 0.8864,
+        "f1": 0.8958,
+        "roc_auc": 0.919,
+        "test_n": 92
+      },
+      "training_release": "NCBI Pathogen Detection Multi-Organism Releases",
+      "research_only": true,
+      "status_note": "Experimental Research Model \u2014 does not meet primary validation threshold (Sens >= 0.90, F1 >= 0.90, ROC-AUC >= 0.90, N >= 100)",
+      "gate_failures": [
+        "Cohort size N=92 < 100 minimum requirement",
+        "Sensitivity (0.8958) below primary validation gate (0.90)",
+        "F1 score (0.8958) below primary validation gate (0.90)"
+      ]
+    },
+    "AMR-ML-ABAU-IPM-v0.2": {
+      "model_id": "AMR-ML-ABAU-IPM-v0.2",
+      "model_version": "AMR-ML-ABAU-IPM-v0.2",
+      "organism": "Acinetobacter baumannii",
+      "antibiotic": "Imipenem",
+      "organism_key": "acinetobacter_baumannii",
+      "antibiotic_key": "imipenem",
+      "status": "rejected",
+      "rejection_reason": "Cohort size N=90 < 100 minimum requirement; Sensitivity (0.6615) below primary validation gate (0.90); F1 score (0.7288) below primary validation gate (0.90); ROC-AUC (0.7102) below primary validation gate (0.90)",
+      "model_family": "specialist",
+      "n_isolates": 90,
+      "susceptible_count": 25,
+      "resistant_count": 65,
+      "validation_metrics": {
+        "accuracy": 0.6444,
+        "sensitivity": 0.6615,
+        "specificity": 0.6,
+        "f1": 0.7288,
+        "roc_auc": 0.7102
+      }
+    },
+    "AMR-ML-PAER-TOB-v0.2": {
+      "model_id": "AMR-ML-PAER-TOB-v0.2",
+      "model_version": "AMR-ML-PAER-TOB-v0.2",
+      "organism": "Pseudomonas aeruginosa",
+      "organism_key": "pseudomonas_aeruginosa",
+      "antibiotic": "Tobramycin",
+      "antibiotic_key": "tobramycin",
+      "status": "experimental",
+      "model_family": "specialist",
+      "model_path": "backend/data/ml_research/models/AMR-ML-PAER-TOB-v0.2.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-PAER-TOB-v0.2_vocab.json",
+      "algorithm": "Logistic Regression (L2 Balanced)",
+      "threshold": 0.5,
+      "feature_count": 243,
+      "n_isolates": 99,
+      "susceptible_count": 46,
+      "resistant_count": 53,
+      "validation_metrics": {
+        "accuracy": 0.8485,
+        "sensitivity": 0.7925,
+        "specificity": 0.913,
+        "f1": 0.8485,
+        "roc_auc": 0.9196,
+        "test_n": 99
+      },
+      "training_release": "NCBI Pathogen Detection Multi-Organism Releases",
+      "research_only": true,
+      "status_note": "Experimental Research Model \u2014 does not meet primary validation threshold (Sens >= 0.90, F1 >= 0.90, ROC-AUC >= 0.90, N >= 100)",
+      "gate_failures": [
+        "Cohort size N=99 < 100 minimum requirement",
+        "Sensitivity (0.7925) below primary validation gate (0.90)",
+        "F1 score (0.8485) below primary validation gate (0.90)"
+      ]
+    },
+    "AMR-ML-PAER-CAZ-v0.2": {
+      "model_id": "AMR-ML-PAER-CAZ-v0.2",
+      "model_version": "AMR-ML-PAER-CAZ-v0.2",
+      "organism": "Pseudomonas aeruginosa",
+      "organism_key": "pseudomonas_aeruginosa",
+      "antibiotic": "Ceftazidime",
+      "antibiotic_key": "ceftazidime",
+      "status": "experimental",
+      "model_family": "specialist",
+      "model_path": "backend/data/ml_research/models/AMR-ML-PAER-CAZ-v0.2.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-PAER-CAZ-v0.2_vocab.json",
+      "algorithm": "Logistic Regression (L2 Balanced)",
+      "threshold": 0.5,
+      "feature_count": 238,
+      "n_isolates": 94,
+      "susceptible_count": 36,
+      "resistant_count": 58,
+      "validation_metrics": {
+        "accuracy": 0.7234,
+        "sensitivity": 0.6552,
+        "specificity": 0.8333,
+        "f1": 0.7451,
+        "roc_auc": 0.7907,
+        "test_n": 94
+      },
+      "training_release": "NCBI Pathogen Detection Multi-Organism Releases",
+      "research_only": true,
+      "status_note": "Experimental Research Model \u2014 does not meet primary validation threshold (Sens >= 0.90, F1 >= 0.90, ROC-AUC >= 0.90, N >= 100)",
+      "gate_failures": [
+        "Cohort size N=94 < 100 minimum requirement",
+        "Sensitivity (0.6552) below primary validation gate (0.90)",
+        "F1 score (0.7451) below primary validation gate (0.90)",
+        "ROC-AUC (0.7907) below primary validation gate (0.90)"
+      ]
+    },
+    "AMR-ML-PAER-GEN-v0.2": {
+      "model_id": "AMR-ML-PAER-GEN-v0.2",
+      "model_version": "AMR-ML-PAER-GEN-v0.2",
+      "organism": "Pseudomonas aeruginosa",
+      "organism_key": "pseudomonas_aeruginosa",
+      "antibiotic": "Gentamicin",
+      "antibiotic_key": "gentamicin",
+      "status": "experimental",
+      "model_family": "specialist",
+      "model_path": "backend/data/ml_research/models/AMR-ML-PAER-GEN-v0.2.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-PAER-GEN-v0.2_vocab.json",
+      "algorithm": "Logistic Regression (L2 Balanced)",
+      "threshold": 0.5,
+      "feature_count": 236,
+      "n_isolates": 94,
+      "susceptible_count": 38,
+      "resistant_count": 56,
+      "validation_metrics": {
+        "accuracy": 0.734,
+        "sensitivity": 0.6964,
+        "specificity": 0.7895,
+        "f1": 0.7573,
+        "roc_auc": 0.8212,
+        "test_n": 94
+      },
+      "training_release": "NCBI Pathogen Detection Multi-Organism Releases",
+      "research_only": true,
+      "status_note": "Experimental Research Model \u2014 does not meet primary validation threshold (Sens >= 0.90, F1 >= 0.90, ROC-AUC >= 0.90, N >= 100)",
+      "gate_failures": [
+        "Cohort size N=94 < 100 minimum requirement",
+        "Sensitivity (0.6964) below primary validation gate (0.90)",
+        "F1 score (0.7573) below primary validation gate (0.90)",
+        "ROC-AUC (0.8212) below primary validation gate (0.90)"
+      ]
+    },
+    "AMR-ML-PAER-AMK-v0.2": {
+      "model_id": "AMR-ML-PAER-AMK-v0.2",
+      "model_version": "AMR-ML-PAER-AMK-v0.2",
+      "organism": "Pseudomonas aeruginosa",
+      "organism_key": "pseudomonas_aeruginosa",
+      "antibiotic": "Amikacin",
+      "antibiotic_key": "amikacin",
+      "status": "experimental",
+      "model_family": "specialist",
+      "model_path": "backend/data/ml_research/models/AMR-ML-PAER-AMK-v0.2.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-PAER-AMK-v0.2_vocab.json",
+      "algorithm": "Logistic Regression (L2 Balanced)",
+      "threshold": 0.5,
+      "feature_count": 230,
+      "n_isolates": 91,
+      "susceptible_count": 61,
+      "resistant_count": 30,
+      "validation_metrics": {
+        "accuracy": 0.8352,
+        "sensitivity": 0.6333,
+        "specificity": 0.9344,
+        "f1": 0.717,
+        "roc_auc": 0.8525,
+        "test_n": 91
+      },
+      "training_release": "NCBI Pathogen Detection Multi-Organism Releases",
+      "research_only": true,
+      "status_note": "Experimental Research Model \u2014 does not meet primary validation threshold (Sens >= 0.90, F1 >= 0.90, ROC-AUC >= 0.90, N >= 100)",
+      "gate_failures": [
+        "Cohort size N=91 < 100 minimum requirement",
+        "Sensitivity (0.6333) below primary validation gate (0.90)",
+        "F1 score (0.7170) below primary validation gate (0.90)",
+        "ROC-AUC (0.8525) below primary validation gate (0.90)"
+      ]
+    },
+    "AMR-ML-ECLO-SXT-v0.2": {
+      "model_id": "AMR-ML-ECLO-SXT-v0.2",
+      "model_version": "AMR-ML-ECLO-SXT-v0.2",
+      "organism": "Enterobacter cloacae",
+      "organism_key": "enterobacter_cloacae",
+      "antibiotic": "Trimethoprim-sulfamethoxazole",
+      "antibiotic_key": "trimethoprim_sulfamethoxazole",
+      "status": "experimental",
+      "model_family": "specialist",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECLO-SXT-v0.2.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECLO-SXT-v0.2_vocab.json",
+      "algorithm": "Logistic Regression (L2 Balanced)",
+      "threshold": 0.5,
+      "feature_count": 149,
+      "n_isolates": 87,
+      "susceptible_count": 42,
+      "resistant_count": 45,
+      "validation_metrics": {
+        "accuracy": 0.9425,
+        "sensitivity": 0.9111,
+        "specificity": 0.9762,
+        "f1": 0.9425,
+        "roc_auc": 0.9672,
+        "test_n": 87
+      },
+      "training_release": "NCBI Pathogen Detection Multi-Organism Releases",
+      "research_only": true,
+      "status_note": "Experimental Research Model \u2014 does not meet primary validation threshold (Sens >= 0.90, F1 >= 0.90, ROC-AUC >= 0.90, N >= 100)",
+      "gate_failures": [
+        "Cohort size N=87 < 100 minimum requirement"
+      ]
+    },
+    "AMR-ML-ECLO-CIP-v0.2": {
+      "model_id": "AMR-ML-ECLO-CIP-v0.2",
+      "model_version": "AMR-ML-ECLO-CIP-v0.2",
+      "organism": "Enterobacter cloacae",
+      "organism_key": "enterobacter_cloacae",
+      "antibiotic": "Ciprofloxacin",
+      "antibiotic_key": "ciprofloxacin",
+      "status": "experimental",
+      "model_family": "specialist",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECLO-CIP-v0.2.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECLO-CIP-v0.2_vocab.json",
+      "algorithm": "Logistic Regression (L2 Balanced)",
+      "threshold": 0.5,
+      "feature_count": 144,
+      "n_isolates": 83,
+      "susceptible_count": 47,
+      "resistant_count": 36,
+      "validation_metrics": {
+        "accuracy": 0.9277,
+        "sensitivity": 0.8611,
+        "specificity": 0.9787,
+        "f1": 0.9118,
+        "roc_auc": 0.932,
+        "test_n": 83
+      },
+      "training_release": "NCBI Pathogen Detection Multi-Organism Releases",
+      "research_only": true,
+      "status_note": "Experimental Research Model \u2014 does not meet primary validation threshold (Sens >= 0.90, F1 >= 0.90, ROC-AUC >= 0.90, N >= 100)",
+      "gate_failures": [
+        "Cohort size N=83 < 100 minimum requirement",
+        "Sensitivity (0.8611) below primary validation gate (0.90)"
+      ]
+    },
+    "AMR-ML-ECLO-TOB-v0.2": {
+      "model_id": "AMR-ML-ECLO-TOB-v0.2",
+      "model_version": "AMR-ML-ECLO-TOB-v0.2",
+      "organism": "Enterobacter cloacae",
+      "organism_key": "enterobacter_cloacae",
+      "antibiotic": "Tobramycin",
+      "antibiotic_key": "tobramycin",
+      "status": "experimental",
+      "model_family": "specialist",
+      "model_path": "backend/data/ml_research/models/AMR-ML-ECLO-TOB-v0.2.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-ECLO-TOB-v0.2_vocab.json",
+      "algorithm": "Logistic Regression (L2 Balanced)",
+      "threshold": 0.5,
+      "feature_count": 140,
+      "n_isolates": 80,
+      "susceptible_count": 51,
+      "resistant_count": 29,
+      "validation_metrics": {
+        "accuracy": 0.925,
+        "sensitivity": 0.8621,
+        "specificity": 0.9608,
+        "f1": 0.8929,
+        "roc_auc": 0.9405,
+        "test_n": 80
+      },
+      "training_release": "NCBI Pathogen Detection Multi-Organism Releases",
+      "research_only": true,
+      "status_note": "Experimental Research Model \u2014 does not meet primary validation threshold (Sens >= 0.90, F1 >= 0.90, ROC-AUC >= 0.90, N >= 100)",
+      "gate_failures": [
+        "Cohort size N=80 < 100 minimum requirement",
+        "Sensitivity (0.8621) below primary validation gate (0.90)",
+        "F1 score (0.8929) below primary validation gate (0.90)"
+      ]
+    },
+    "AMR-ML-SAUR-CLI-v0.2": {
+      "model_id": "AMR-ML-SAUR-CLI-v0.2",
+      "model_version": "AMR-ML-SAUR-CLI-v0.2",
+      "organism": "Staphylococcus aureus",
+      "organism_key": "staphylococcus_aureus",
+      "antibiotic": "Clindamycin",
+      "antibiotic_key": "clindamycin",
+      "status": "experimental",
+      "model_family": "specialist",
+      "model_path": "backend/data/ml_research/models/AMR-ML-SAUR-CLI-v0.2.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-SAUR-CLI-v0.2_vocab.json",
+      "algorithm": "Logistic Regression (L2 Balanced)",
+      "threshold": 0.5,
+      "feature_count": 78,
+      "n_isolates": 50,
+      "susceptible_count": 29,
+      "resistant_count": 21,
+      "validation_metrics": {
+        "accuracy": 0.92,
+        "sensitivity": 0.8571,
+        "specificity": 0.9655,
+        "f1": 0.9,
+        "roc_auc": 0.9655,
+        "test_n": 50
+      },
+      "training_release": "NCBI Pathogen Detection Multi-Organism Releases",
+      "research_only": true,
+      "status_note": "Experimental Research Model \u2014 does not meet primary validation threshold (Sens >= 0.90, F1 >= 0.90, ROC-AUC >= 0.90, N >= 100)",
+      "gate_failures": [
+        "Cohort size N=50 < 100 minimum requirement",
+        "Sensitivity (0.8571) below primary validation gate (0.90)"
+      ]
+    },
+    "AMR-ML-CJEJ-TET-v0.2": {
+      "model_id": "AMR-ML-CJEJ-TET-v0.2",
+      "model_version": "AMR-ML-CJEJ-TET-v0.2",
+      "organism": "Campylobacter jejuni",
+      "organism_key": "campylobacter_jejuni",
+      "antibiotic": "Tetracycline",
+      "antibiotic_key": "tetracycline",
+      "status": "experimental",
+      "model_family": "specialist",
+      "model_path": "backend/data/ml_research/models/AMR-ML-CJEJ-TET-v0.2.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-CJEJ-TET-v0.2_vocab.json",
+      "algorithm": "Logistic Regression (L2 Balanced)",
+      "threshold": 0.5,
+      "feature_count": 9,
+      "n_isolates": 51,
+      "susceptible_count": 15,
+      "resistant_count": 36,
+      "validation_metrics": {
+        "accuracy": 0.9804,
+        "sensitivity": 1.0,
+        "specificity": 0.9333,
+        "f1": 0.9863,
+        "roc_auc": 0.9407,
+        "test_n": 51
+      },
+      "training_release": "NCBI Pathogen Detection Multi-Organism Releases",
+      "research_only": true,
+      "status_note": "Experimental Research Model \u2014 does not meet primary validation threshold (Sens >= 0.90, F1 >= 0.90, ROC-AUC >= 0.90, N >= 100)",
+      "gate_failures": [
+        "Cohort size N=51 < 100 minimum requirement",
+        "Minority class count (15) < 20"
+      ]
+    },
+    "AMR-ML1-BROAD-v0.2": {
+      "model_id": "AMR-ML1-BROAD-v0.2",
+      "model_version": "AMR-ML1-BROAD-v0.2",
+      "status": "validated",
+      "model_family": "broad",
+      "model_path": "backend/data/ml_research/models/AMR-ML1-BROAD-v0.2.joblib",
+      "vocabulary_path": "backend/data/ml_research/models/AMR-ML1-BROAD-v0.2_vocab.json",
+      "algorithm": "Balanced Logistic Regression",
+      "threshold": 0.5,
+      "feature_count": 1095,
+      "n_isolates": 1322,
+      "total_observations": 19244,
+      "unique_organisms": 35,
+      "unique_antibiotics": 91,
+      "validation_metrics": {
+        "accuracy": 0.7935,
+        "balanced_accuracy": 0.7921,
+        "sensitivity": 0.7724,
+        "specificity": 0.8119,
+        "precision": 0.7807,
+        "npv": 0.8045,
+        "f1": 0.7765,
+        "roc_auc": 0.8732,
+        "pr_auc": 0.8529,
+        "tp": 6901,
+        "fp": 1939,
+        "tn": 8370,
+        "fn": 2034,
+        "vme": 0.2276,
+        "me": 0.1881,
+        "total_test_n": 19244,
+        "accuracy_ci": [
+          0.7878,
+          0.7992
+        ],
+        "sensitivity_ci": [
+          0.7635,
+          0.7809
+        ],
+        "specificity_ci": [
+          0.8043,
+          0.8193
+        ]
+      },
+      "training_release": "NCBI Pathogen Detection (11 Organism Releases)",
+      "research_only": true
+    },
     "AMR-ML-SALM-AMP-v0.3": {
       "model_id": "AMR-ML-SALM-AMP-v0.3",
       "model_version": "AMR-ML-SALM-AMP-v0.3",
@@ -1411,243 +2055,7 @@
       "training_release": "PDG000000004.6300",
       "research_only": true,
       "rejection_reason": null,
-      "created_at": "2026-09-12T12:08:43.717509+00:00",
-      "organism_key": "salmonella_enterica",
-      "antibiotic_key": "ampicillin"
-    },
-    "AMR-ML-SALM-AMP-v0.4": {
-      "model_id": "AMR-ML-SALM-AMP-v0.4",
-      "model_version": "AMR-ML-SALM-AMP-v0.4",
-      "organism": "Salmonella enterica",
-      "antibiotic": "Ampicillin",
-      "status": "validated",
-      "model_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.4.joblib",
-      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.4_vocab.json",
-      "model_type": "Logistic Regression (L2)",
-      "algorithm": "Logistic Regression (L2)",
-      "threshold": 0.5,
-      "feature_count": 2,
-      "n_isolates": 120,
-      "susceptible_count": 40,
-      "resistant_count": 80,
-      "validation_metrics": {
-        "accuracy": 1.0,
-        "accuracy_ci": [
-          0.862,
-          1.0
-        ],
-        "sensitivity": 1.0,
-        "sensitivity_ci": [
-          0.8389,
-          1.0
-        ],
-        "specificity": 1.0,
-        "specificity_ci": [
-          0.5101,
-          1.0
-        ],
-        "precision": 1.0,
-        "npv": 1.0,
-        "f1": 1.0,
-        "f1_ci": [
-          1.0,
-          1.0
-        ],
-        "roc_auc": 1.0,
-        "roc_auc_ci": [
-          1.0,
-          1.0
-        ],
-        "tp": 20,
-        "fp": 0,
-        "fn": 0,
-        "tn": 4,
-        "vme": 0.0,
-        "me": 0.0,
-        "train_n": 96,
-        "test_n": 24
-      },
-      "training_release": "PDG000000004.6300",
-      "research_only": true,
-      "rejection_reason": null,
-      "created_at": "2026-09-12T12:09:38.806350+00:00",
-      "organism_key": "salmonella_enterica",
-      "antibiotic_key": "ampicillin"
-    },
-    "AMR-ML-SALM-AMP-v0.5": {
-      "model_id": "AMR-ML-SALM-AMP-v0.5",
-      "model_version": "AMR-ML-SALM-AMP-v0.5",
-      "organism": "Salmonella enterica",
-      "antibiotic": "Ampicillin",
-      "status": "validated",
-      "model_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.5.joblib",
-      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.5_vocab.json",
-      "model_type": "Logistic Regression (L2)",
-      "algorithm": "Logistic Regression (L2)",
-      "threshold": 0.5,
-      "feature_count": 2,
-      "n_isolates": 120,
-      "susceptible_count": 40,
-      "resistant_count": 80,
-      "validation_metrics": {
-        "accuracy": 1.0,
-        "accuracy_ci": [
-          0.862,
-          1.0
-        ],
-        "sensitivity": 1.0,
-        "sensitivity_ci": [
-          0.8389,
-          1.0
-        ],
-        "specificity": 1.0,
-        "specificity_ci": [
-          0.5101,
-          1.0
-        ],
-        "precision": 1.0,
-        "npv": 1.0,
-        "f1": 1.0,
-        "f1_ci": [
-          1.0,
-          1.0
-        ],
-        "roc_auc": 1.0,
-        "roc_auc_ci": [
-          1.0,
-          1.0
-        ],
-        "tp": 20,
-        "fp": 0,
-        "fn": 0,
-        "tn": 4,
-        "vme": 0.0,
-        "me": 0.0,
-        "train_n": 96,
-        "test_n": 24
-      },
-      "training_release": "PDG000000004.6300",
-      "research_only": true,
-      "rejection_reason": null,
-      "created_at": "2026-09-12T12:42:51.279460+00:00",
-      "organism_key": "salmonella_enterica",
-      "antibiotic_key": "ampicillin"
-    },
-    "AMR-ML-SALM-AMP-v0.6": {
-      "model_id": "AMR-ML-SALM-AMP-v0.6",
-      "model_version": "AMR-ML-SALM-AMP-v0.6",
-      "organism": "Salmonella enterica",
-      "antibiotic": "Ampicillin",
-      "status": "validated",
-      "model_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.6.joblib",
-      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.6_vocab.json",
-      "model_type": "Logistic Regression (L2)",
-      "algorithm": "Logistic Regression (L2)",
-      "threshold": 0.5,
-      "feature_count": 2,
-      "n_isolates": 120,
-      "susceptible_count": 40,
-      "resistant_count": 80,
-      "validation_metrics": {
-        "accuracy": 1.0,
-        "accuracy_ci": [
-          0.862,
-          1.0
-        ],
-        "sensitivity": 1.0,
-        "sensitivity_ci": [
-          0.8389,
-          1.0
-        ],
-        "specificity": 1.0,
-        "specificity_ci": [
-          0.5101,
-          1.0
-        ],
-        "precision": 1.0,
-        "npv": 1.0,
-        "f1": 1.0,
-        "f1_ci": [
-          1.0,
-          1.0
-        ],
-        "roc_auc": 1.0,
-        "roc_auc_ci": [
-          1.0,
-          1.0
-        ],
-        "tp": 20,
-        "fp": 0,
-        "fn": 0,
-        "tn": 4,
-        "vme": 0.0,
-        "me": 0.0,
-        "train_n": 96,
-        "test_n": 24
-      },
-      "training_release": "PDG000000004.6300",
-      "research_only": true,
-      "rejection_reason": null,
-      "created_at": "2026-09-12T13:26:35.788086+00:00",
-      "organism_key": "salmonella_enterica",
-      "antibiotic_key": "ampicillin"
-    },
-    "AMR-ML-SALM-AMP-v0.7": {
-      "model_id": "AMR-ML-SALM-AMP-v0.7",
-      "model_version": "AMR-ML-SALM-AMP-v0.7",
-      "organism": "Salmonella enterica",
-      "antibiotic": "Ampicillin",
-      "status": "validated",
-      "model_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.7.joblib",
-      "vocabulary_path": "backend/data/ml_research/models/AMR-ML-SALM-AMP-v0.7_vocab.json",
-      "model_type": "Logistic Regression (L2)",
-      "algorithm": "Logistic Regression (L2)",
-      "threshold": 0.5,
-      "feature_count": 2,
-      "n_isolates": 120,
-      "susceptible_count": 40,
-      "resistant_count": 80,
-      "validation_metrics": {
-        "accuracy": 1.0,
-        "accuracy_ci": [
-          0.862,
-          1.0
-        ],
-        "sensitivity": 1.0,
-        "sensitivity_ci": [
-          0.8389,
-          1.0
-        ],
-        "specificity": 1.0,
-        "specificity_ci": [
-          0.5101,
-          1.0
-        ],
-        "precision": 1.0,
-        "npv": 1.0,
-        "f1": 1.0,
-        "f1_ci": [
-          1.0,
-          1.0
-        ],
-        "roc_auc": 1.0,
-        "roc_auc_ci": [
-          1.0,
-          1.0
-        ],
-        "tp": 20,
-        "fp": 0,
-        "fn": 0,
-        "tn": 4,
-        "vme": 0.0,
-        "me": 0.0,
-        "train_n": 96,
-        "test_n": 24
-      },
-      "training_release": "PDG000000004.6300",
-      "research_only": true,
-      "rejection_reason": null,
-      "created_at": "2026-09-12T13:27:54.500507+00:00",
+      "created_at": "2026-09-13T15:21:48.927189+00:00",
       "organism_key": "salmonella_enterica",
       "antibiotic_key": "ampicillin"
     }
@@ -1655,7 +2063,7 @@
   "active_models": {
     "escherichia_coli::ampicillin": "AMR-ML-ECOLI-AMP-v0.1",
     "klebsiella_pneumoniae::ceftriaxone": "AMR-ML-KPNEU-CRO-v0.1",
-    "salmonella_enterica::ampicillin": "AMR-ML-SALM-AMP-v0.7",
+    "salmonella_enterica::ampicillin": "AMR-ML-SALM-AMP-v0.3",
     "escherichia_coli::ceftriaxone": "AMR-ML-ECOLI-CRO-v0.1",
     "escherichia_coli::trimethoprim_sulfamethoxazole": "AMR-ML-ECOLI-SXT-v0.1",
     "escherichia_coli::ciprofloxacin": "AMR-ML-ECOLI-CIP-v0.1",
@@ -1664,6 +2072,9 @@
     "escherichia_coli::tobramycin": "AMR-ML-ECOLI-TOB-v0.1",
     "escherichia_coli::chloramphenicol": "AMR-ML-ECOLI-CHL-v0.1",
     "escherichia_coli::streptomycin": "AMR-ML-ECOLI-STR-v0.1",
-    "escherichia_coli::sulfisoxazole": "AMR-ML-ECOLI-SUL-v0.1"
-  }
+    "escherichia_coli::sulfisoxazole": "AMR-ML-ECOLI-SUL-v0.1",
+    "salmonella_enterica::streptomycin": "AMR-ML-SALM-STR-v0.2",
+    "salmonella_enterica::tetracycline": "AMR-ML-SALM-TET-v0.2"
+  },
+  "active_broad_model": "AMR-ML1-BROAD-v0.2"
 }

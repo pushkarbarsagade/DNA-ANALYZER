@@ -375,6 +375,63 @@ class TestAMREvidenceReconciliation(unittest.TestCase):
         self.assertEqual(data.get("biosample_accession"), "SAMN03177659")
         self.assertEqual(data.get("data_source"), "validation_fixture")
 
+    # 15. REGRESSION — PDF Section 6 summary metrics derivation from findings
+    #     The PDF must compute metrics from reconciliationResult.findings,
+    #     not from reconciliation_summary (which uses stale/incorrect fields).
+    def test_15_samn03177659_findings_yield_correct_pdf_metrics(self):
+        """
+        SAMN03177659 findings must yield:
+          concordant=4, conflict=1, not_comparable=10, not_evaluable=0,
+          comparable_pairs=5, concordance_rate=80.0%
+        These are the same values the PDF Section 6 now derives from findings.
+        """
+        payload = {"biosample": "SAMN03177659", "user_lab": []}
+        resp = self.client.post(
+            "/api/amr/reconcile",
+            data=json.dumps(payload),
+            content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, 200)
+        data = resp.get_json()
+        findings = data.get("findings", [])
+
+        # Total findings must equal total AST records (15)
+        self.assertEqual(len(findings), 15,
+            f"Expected 15 findings for SAMN03177659, got {len(findings)}")
+
+        # Derive metrics the same way the PDF Section 6 now does
+        concordant_count = 0
+        discordant_count = 0
+        not_comparable_count = 0
+        not_evaluable_count = 0
+
+        for f in findings:
+            cat = (f.get("reconciliation_category") or "").lower()
+            if cat.startswith("concordant"):
+                concordant_count += 1
+            elif f.get("has_conflict"):
+                discordant_count += 1
+            elif cat == "not_comparable":
+                not_comparable_count += 1
+            elif cat == "not_evaluable":
+                not_evaluable_count += 1
+
+        comparable_pairs = concordant_count + discordant_count
+        concordance_rate = (concordant_count / comparable_pairs * 100) if comparable_pairs > 0 else 0.0
+
+        self.assertEqual(concordant_count, 4,
+            f"Expected 4 concordant, got {concordant_count}")
+        self.assertEqual(discordant_count, 1,
+            f"Expected 1 discordant, got {discordant_count}")
+        self.assertEqual(not_comparable_count, 10,
+            f"Expected 10 not comparable, got {not_comparable_count}")
+        self.assertEqual(not_evaluable_count, 0,
+            f"Expected 0 not evaluable, got {not_evaluable_count}")
+        self.assertEqual(comparable_pairs, 5,
+            f"Expected 5 comparable pairs, got {comparable_pairs}")
+        self.assertAlmostEqual(concordance_rate, 80.0, places=1,
+            msg=f"Expected 80.0% concordance rate, got {concordance_rate}")
+
 
 if __name__ == "__main__":
     unittest.main()
