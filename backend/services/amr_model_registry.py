@@ -237,6 +237,18 @@ def has_model(organism: str, antibiotic: str) -> bool:
     return get_model_entry(organism, antibiotic) is not None
 
 
+def get_experimental_model_entry(organism: str, antibiotic: str) -> Optional[Dict[str, Any]]:
+    """Retrieve an experimental specialist model entry if one exists for this scope."""
+    reg = load_registry()
+    org_key = normalize_organism_key(organism)
+    abx_key = normalize_antibiotic_key(antibiotic)
+    for mid, m in reg.get("models", {}).items():
+        if m.get("model_family") != "broad" and m.get("status") == "experimental":
+            if m.get("organism_key") == org_key and m.get("antibiotic_key") == abx_key:
+                return m
+    return None
+
+
 def get_broad_model_entry() -> Optional[Dict[str, Any]]:
     """
     Retrieve the active validated Broad ML1 model entry.

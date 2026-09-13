@@ -29,6 +29,7 @@ import numpy as np
 
 from backend.services.amr_model_registry import (
     get_model_entry, has_model, get_broad_model_entry, has_broad_model,
+    get_experimental_model_entry,
     get_available_antibiotics_for_organism,
     list_models, normalize_organism_key, normalize_antibiotic_key
 )
@@ -524,6 +525,10 @@ def evaluate_ml_selection(
         case = "none"
         note = "No validated ML prediction available for this organism–antibiotic combination."
 
+    exp_entry = get_experimental_model_entry(organism, antibiotic)
+    has_exp = exp_entry is not None
+    exp_id = (exp_entry.get("model_version") or exp_entry.get("model_id")) if exp_entry else None
+
     # For Phase 12 backward-compatibility: 'available' indicates specialist model availability,
     # while 'has_broad' and 'broad_prediction' provide the broad-spectrum ML1 inference.
     primary = spec_pred if has_spec else (broad_pred if has_broad else spec_pred)
@@ -536,6 +541,8 @@ def evaluate_ml_selection(
         "display_note": note,
         "has_specialist": has_spec,
         "has_broad": has_broad,
+        "has_experimental": has_exp,
+        "experimental_model": exp_id,
         "specialist_prediction": spec_pred if has_spec else None,
         "broad_prediction": broad_pred if has_broad else None,
         # Backward-compatible flat fields:

@@ -64,6 +64,11 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
   const [mlLoading, setMlLoading] = useState(false);
   const [selectedMlDrug, setSelectedMlDrug] = useState('ALL');
 
+  // Antibiotic-specific selector & ML target state
+  const [selectedAntibiotic, setSelectedAntibiotic] = useState('Ampicillin');
+  const [singleMlResult, setSingleMlResult] = useState(null);
+  const [singleMlLoading, setSingleMlLoading] = useState(false);
+
   // PDF Export state
   const [pdfGenerating, setPdfGenerating] = useState(false);
   const [pdfSuccess, setPdfSuccess] = useState(false);
@@ -116,6 +121,77 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
     };
     fetchIsolate();
   }, [currentBioSample]);
+
+  // Derived available antibiotics from current isolate's AST observations & findings
+  const availableAntibiotics = React.useMemo(() => {
+    const list = [];
+    const seen = new Set();
+
+    const addDrug = (drug) => {
+      if (!drug) return;
+      const clean = drug.trim();
+      const lower = clean.toLowerCase();
+      if (!seen.has(lower)) {
+        seen.add(lower);
+        // Format with first letter capitalized
+        const formatted = clean.charAt(0).toUpperCase() + clean.slice(1);
+        list.push(formatted);
+      }
+    };
+
+    if (isolateDetails?.ast_records) {
+      isolateDetails.ast_records.forEach((r) => addDrug(r.antibiotic || r.drug));
+    }
+    if (reconciliationResult?.findings) {
+      reconciliationResult.findings.forEach((f) => addDrug(f.antibiotic));
+    }
+    if (mlPrediction?.predictions) {
+      mlPrediction.predictions.forEach((p) => addDrug(p.antibiotic));
+    }
+
+    list.sort((a, b) => a.localeCompare(b));
+    return list.length > 0 ? list : ['Ampicillin', 'Ceftriaxone', 'Ciprofloxacin', 'Streptomycin', 'Tetracycline'];
+  }, [isolateDetails, reconciliationResult, mlPrediction]);
+
+  // Automatically synchronize selectedAntibiotic with available isolate antibiotics
+  useEffect(() => {
+    if (availableAntibiotics.length > 0) {
+      const match = availableAntibiotics.find(
+        (a) => a.toLowerCase() === selectedAntibiotic.toLowerCase()
+      );
+      if (!match) {
+        // Favor Ampicillin if present, else default to first available
+        const hasAmp = availableAntibiotics.find((a) => a.toLowerCase() === 'ampicillin');
+        const defaultDrug = hasAmp || availableAntibiotics[0];
+        setSelectedAntibiotic(defaultDrug);
+        setFormAbx(defaultDrug.toLowerCase());
+      }
+    }
+  }, [availableAntibiotics]);
+
+  // Fetch antibiotic-specific ML inference dynamically for current organism + selected antibiotic
+  useEffect(() => {
+    if (!currentBioSample || !selectedAntibiotic) return;
+    let isMounted = true;
+    const fetchTargetMl = async () => {
+      setSingleMlLoading(true);
+      try {
+        const url = `${API_ENDPOINTS.amrMlPredict}/${encodeURIComponent(currentBioSample.trim().toUpperCase())}?antibiotic=${encodeURIComponent(selectedAntibiotic.trim())}`;
+        const res = await axios.get(url, API_CONFIG);
+        if (isMounted && res.data) {
+          setSingleMlResult(res.data);
+        }
+      } catch {
+        if (isMounted) setSingleMlResult(null);
+      } finally {
+        if (isMounted) setSingleMlLoading(false);
+      }
+    };
+    fetchTargetMl();
+    return () => {
+      isMounted = false;
+    };
+  }, [currentBioSample, selectedAntibiotic]);
 
   // Handle adding a user lab record
   const handleAddLabRecord = (e) => {
@@ -286,6 +362,75 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
     }
   };
 
+  // Target Antibiotic Multi-Source & ML Metrics
+  const targetOrganism = isolateDetails?.organism || 'Escherichia coli';
+  const targetFinding = reconciliationResult?.findings?.find(
+    (f) => (f.antibiotic || '').toLowerCase() === selectedAntibiotic.toLowerCase()
+  );
+  const targetAstRecord = (isolateDetails?.ast_records || []).find(
+    (r) => (r.antibiotic || r.drug || '').toLowerCase() === selectedAntibiotic.toLowerCase()
+  );
+  const targetUserLab = userLabRecords.find(
+    (r) => (r.antibiotic || '').toLowerCase() === selectedAntibiotic.toLowerCase()
+  );
+
+  // Model status resolution
+  const hasSpec = !!singleMlResult?.has_specialist;
+  const hasExp = !hasSpec && !!singleMlResult?.has_experimental;
+  const hasBroad = !hasSpec && !hasExp && (!!singleMlResult?.has_broad || (singleMlResult?.available && singleMlResult?.model_family === 'broad'));
+  const hasNoModel = !hasSpec && !hasExp && !hasBroad && !singleMlResult?.available;
+
+  let modelStatusLabel = 'No applicable ML model available for this organism–antibiotic combination.';
+  let modelStatusClass = 'none';
+  if (hasSpec) {
+    modelStatusLabel = 'Validated Specialist Model';
+    modelStatusClass = 'validated';
+  } else if (hasExp) {
+    modelStatusLabel = 'Experimental Research Model';
+    modelStatusClass = 'experimental';
+  } else if (hasBroad || singleMlResult?.available) {
+    modelStatusLabel = 'Broad ML1 Research Model';
+    modelStatusClass = 'broad';
+  }
+
+  // Active prediction object for selected antibiotic
+  const activeMlPred = hasSpec
+    ? (singleMlResult?.specialist_prediction || singleMlResult)
+    : (singleMlResult?.broad_prediction || singleMlResult);
+
+  const isModelApplicable = (hasSpec || hasExp || hasBroad || singleMlResult?.available) && activeMlPred && activeMlPred.prediction;
+
+  const predProbability = isModelApplicable && activeMlPred.predicted_probability !== undefined
+    ? (activeMlPred.predicted_probability * 100).toFixed(1)
+    : null;
+
+  const predClass = isModelApplicable ? (activeMlPred.prediction || 'Unknown') : 'N/A';
+
+  const observedPhenotype = targetAstRecord?.phenotype || targetFinding?.ncbi_ast?.phenotype || 'Not available';
+
+  // Prediction vs. Observed Phenotype calculation
+  let predVsObsStatus = 'Not comparable';
+  let predVsObsBadgeClass = 'not-comparable';
+  let predVsObsExplanation = 'Requires an applicable ML model and recorded experimental AST.';
+
+  if (isModelApplicable && observedPhenotype && observedPhenotype.toLowerCase() !== 'not available') {
+    const pNorm = (predClass || '').toLowerCase();
+    const oNorm = observedPhenotype.toLowerCase();
+    if (pNorm === oNorm) {
+      predVsObsStatus = 'Agreement';
+      predVsObsBadgeClass = 'agreement';
+      predVsObsExplanation = `Predicted ${predClass} matches experimentally observed ${observedPhenotype}.`;
+    } else if ((pNorm === 'resistant' && oNorm === 'susceptible') || (pNorm === 'susceptible' && oNorm === 'resistant')) {
+      predVsObsStatus = 'Disagreement';
+      predVsObsBadgeClass = 'disagreement';
+      predVsObsExplanation = `Predicted ${predClass} disagrees with experimentally observed ${observedPhenotype}.`;
+    } else {
+      predVsObsStatus = 'Not comparable';
+      predVsObsBadgeClass = 'not-comparable';
+      predVsObsExplanation = 'Intermediate or non-standard phenotype cannot be strictly categorized.';
+    }
+  }
+
   return (
     <div className="reconciliation-container fade-in">
       {/* HEADER & SCIENTIFIC DISCLAIMER */}
@@ -430,45 +575,157 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
         )}
       </div>
 
-      {/* SECTION B & C: EVIDENCE SUMMARY */}
+      {/* TARGET ANTIBIOTIC SELECTOR BANNER */}
       {isolateDetails && (
-        <div className="evidence-sources-row">
-          {/* Section B: Genomic Evidence */}
-          <div className="evidence-source-box genomic">
-            <span className="evidence-source-label">🧬 Section B — Genomic AMR Evidence</span>
-            <span className="evidence-source-sub">
-              AMR genotype information from the validated NCBI Pathogen Detection workflow.
+        <div className="antibiotic-selector-banner slide-down">
+          <div className="antibiotic-selector-label">
+            <span>🎯</span> Target Antibiotic:
+          </div>
+          <select
+            id="target-abx-select"
+            className="antibiotic-dropdown"
+            value={selectedAntibiotic}
+            onChange={(e) => {
+              const newAbx = e.target.value;
+              setSelectedAntibiotic(newAbx);
+              setFormAbx(newAbx.toLowerCase());
+            }}
+          >
+            {availableAntibiotics.map((abx) => (
+              <option key={abx} value={abx}>
+                {abx}
+              </option>
+            ))}
+          </select>
+          <div className="antibiotic-selector-count">
+            <span>{availableAntibiotics.length} tested antibiotic(s) identified for this isolate</span>
+          </div>
+        </div>
+      )}
+
+      {/* 4-SOURCE EVIDENCE RECONCILIATION SYNTHESIS */}
+      {isolateDetails && (
+        <div className="reconciliation-section-card fade-in">
+          <div className="section-card-header">
+            <span className="section-card-title">
+              <span>⚖️</span> Multi-Source Evidence Synthesis — {selectedAntibiotic}
             </span>
-            <div className="genotype-tags-list" style={{ marginTop: '0.5rem' }}>
-              {isolateDetails.amr_genotypes ? (
-                formatGenotypeEntries(isolateDetails.amr_genotypes).map((g, i) => (
-                  <span key={i} className="genotype-tag">{g}</span>
-                ))
-              ) : (
-                <span className="gene-evidence-none">No mapped determinants</span>
+            <span style={{ fontSize: '0.82rem', color: '#94a3b8' }}>
+              [Genomic Evidence] + [Public AST] + [User Laboratory AST] + [ML Research Result] → Evidence Summary
+            </span>
+          </div>
+
+          <div className="four-boxes-synthesis-grid">
+            {/* Box 1: Genomic Evidence */}
+            <div className="synthesis-box genomic-box">
+              <span className="synthesis-box-title">🧬 Genomic Evidence</span>
+              <div className="synthesis-box-value">
+                {targetFinding?.genomic_evidence?.has_determinant ? (
+                  <span className="gene-evidence-code">
+                    {formatGenotypeEntries(targetFinding.genomic_evidence.evidence_str).join(', ') || targetFinding.genomic_evidence.evidence_str}
+                  </span>
+                ) : isolateDetails.amr_genotypes ? (
+                  <span style={{ fontSize: '0.86rem', color: '#cbd5e1' }}>
+                    {formatGenotypeEntries(isolateDetails.amr_genotypes).slice(0, 2).join(', ')}
+                    {formatGenotypeEntries(isolateDetails.amr_genotypes).length > 2 ? ' ...' : ''}
+                  </span>
+                ) : (
+                  <span className="gene-evidence-none">No determinant detected</span>
+                )}
+              </div>
+              <div className="synthesis-box-sub">
+                {targetFinding?.genomic_evidence?.mapping_basis || 'NCBI AMRFinderPlus / ResFinder'}
+              </div>
+            </div>
+
+            {/* Box 2: Public AST */}
+            <div className="synthesis-box ast-box">
+              <span className="synthesis-box-title">🧪 Public AST</span>
+              <div className="synthesis-box-value">
+                <span className={`ast-phenotype-pill ${observedPhenotype.toLowerCase()}`}>
+                  {observedPhenotype}
+                </span>
+              </div>
+              <div className="synthesis-box-sub">
+                {targetAstRecord?.measurement ? `MIC: ${targetAstRecord.measurement}` : 'NCBI Reference Antibiogram'}
+              </div>
+            </div>
+
+            {/* Box 3: User Laboratory AST */}
+            <div className="synthesis-box user-box">
+              <span className="synthesis-box-title">🔬 User Laboratory AST</span>
+              <div className="synthesis-box-value">
+                {targetUserLab ? (
+                  <span className={`ast-phenotype-pill ${targetUserLab.phenotype.toLowerCase()}`}>
+                    {targetUserLab.phenotype}
+                  </span>
+                ) : (
+                  <span style={{ fontSize: '0.86rem', color: '#64748b', fontStyle: 'italic' }}>
+                    None entered (optional)
+                  </span>
+                )}
+              </div>
+              <div className="synthesis-box-sub">
+                {targetUserLab?.mic ? `MIC: ${targetUserLab.mic}` : 'In-House Testing (Section D)'}
+              </div>
+            </div>
+
+            {/* Box 4: ML Research Result */}
+            <div className="synthesis-box ml-box">
+              <span className="synthesis-box-title">🧠 ML Research Result</span>
+              <div className="synthesis-box-value">
+                {singleMlLoading ? (
+                  <span style={{ fontSize: '0.84rem', color: '#94a3b8' }}>Evaluating...</span>
+                ) : isModelApplicable ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <span className={`ml-pred-class ${predClass.toLowerCase()}`}>
+                      {predClass}
+                    </span>
+                    <span style={{ fontSize: '0.9rem', color: '#fbbf24', fontWeight: 700 }}>
+                      ({predProbability}%)
+                    </span>
+                  </div>
+                ) : (
+                  <span style={{ fontSize: '0.84rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                    No applicable model
+                  </span>
+                )}
+              </div>
+              <div className="synthesis-box-sub">
+                {modelStatusLabel}
+              </div>
+            </div>
+          </div>
+
+          {/* Synthesis Card Summary */}
+          <div className="synthesis-summary-card">
+            <div className="synthesis-summary-row">
+              <div>
+                <span style={{ fontSize: '0.78rem', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>
+                  Reconciliation Outcome:
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginTop: '0.25rem' }}>
+                  {targetFinding ? (
+                    <>
+                      <span className={`classification-badge ${targetFinding.has_conflict ? 'discordant' : targetFinding.reconciliation_category?.startsWith('concordant') ? 'concordant' : 'not-comparable'}`}>
+                        {targetFinding.reconciliation_status}
+                      </span>
+                      <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                        Strength: <strong>{targetFinding.evidence_strength}</strong>
+                      </span>
+                    </>
+                  ) : (
+                    <span style={{ fontSize: '0.88rem', color: '#f59e0b' }}>
+                      Ready for reconciliation — click &quot;Run Deterministic Evidence Reconciliation&quot; below to compare sources.
+                    </span>
+                  )}
+                </div>
+              </div>
+              {targetFinding?.summary_statement && (
+                <div style={{ fontSize: '0.85rem', color: '#cbd5e1', maxWidth: '580px' }}>
+                  {targetFinding.summary_statement}
+                </div>
               )}
-            </div>
-          </div>
-
-          {/* Section C: NCBI AST */}
-          <div className="evidence-source-box ncbi">
-            <span className="evidence-source-label">🧪 Section C — NCBI Reference AST</span>
-            <span className="evidence-source-sub">
-              Experimental antibiogram observations from NCBI BioSample XML records.
-            </span>
-            <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#cbd5e1' }}>
-              <strong>{isolateDetails.ast_records?.length || 0}</strong> standard antibiotic susceptibility records available.
-            </div>
-          </div>
-
-          {/* Section D Preview: User Lab */}
-          <div className="evidence-source-box user">
-            <span className="evidence-source-label">🔬 Section D — User Lab Evidence</span>
-            <span className="evidence-source-sub">
-              Optional experimental results supplied for multi-source reconciliation.
-            </span>
-            <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#f59e0b', fontWeight: 600 }}>
-              {userLabRecords.length} user laboratory observation(s) entered.
             </div>
           </div>
         </div>
@@ -494,13 +751,26 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
               <select
                 className="form-field-select"
                 value={formAbx}
-                onChange={(e) => setFormAbx(e.target.value)}
+                onChange={(e) => {
+                  setFormAbx(e.target.value);
+                  const match = availableAntibiotics.find(a => a.toLowerCase() === e.target.value.toLowerCase());
+                  if (match) setSelectedAntibiotic(match);
+                }}
               >
-                {COMMON_ANTIBIOTICS.map((abx) => (
-                  <option key={abx} value={abx}>
-                    {abx.charAt(0).toUpperCase() + abx.slice(1)}
-                  </option>
-                ))}
+                <optgroup label="Tested on this Isolate">
+                  {availableAntibiotics.map((abx) => (
+                    <option key={abx} value={abx.toLowerCase()}>
+                      {abx}
+                    </option>
+                  ))}
+                </optgroup>
+                <optgroup label="Other Standard Antibiotics">
+                  {COMMON_ANTIBIOTICS.filter(a => !availableAntibiotics.some(avail => avail.toLowerCase() === a.toLowerCase())).map((abx) => (
+                    <option key={abx} value={abx}>
+                      {abx.charAt(0).toUpperCase() + abx.slice(1)}
+                    </option>
+                  ))}
+                </optgroup>
               </select>
             </div>
 
@@ -794,6 +1064,145 @@ export default function EvidenceReconciliation({ activeBioSample, onNavigateAnal
                     <span>Model: {mlPrediction.model_version || mlPrediction.model}</span>
                   )}
                 </div>
+              </div>
+
+              {/* DEDICATED MACHINE LEARNING ANALYSIS SECTION */}
+              <div className="ml-analysis-section reconciliation-section-card">
+                <div className="section-card-header" style={{ paddingBottom: '0.5rem' }}>
+                  <span className="section-card-title">
+                    <span>🔬</span> Machine Learning Analysis — {selectedAntibiotic}
+                  </span>
+                  <span className={`ml-status-pill ${modelStatusClass}`}>
+                    {modelStatusLabel}
+                  </span>
+                </div>
+
+                <div className="ml-analysis-details-grid">
+                  {/* Item 1: Target Organism */}
+                  <div className="ml-metric-card">
+                    <span className="ml-metric-title">Target Organism</span>
+                    <div className="ml-metric-value highlight">
+                      {targetOrganism}
+                    </div>
+                    <span className="ml-metric-sub">
+                      Host pathogen taxonomic classification
+                    </span>
+                  </div>
+
+                  {/* Item 2: Target Antibiotic */}
+                  <div className="ml-metric-card">
+                    <span className="ml-metric-title">Target Antibiotic</span>
+                    <div className="ml-metric-value highlight">
+                      {selectedAntibiotic}
+                    </div>
+                    <span className="ml-metric-sub">
+                      Selected compound for model inference
+                    </span>
+                  </div>
+
+                  {/* Item 3: Model Status */}
+                  <div className="ml-metric-card">
+                    <span className="ml-metric-title">Model Status</span>
+                    <div style={{ marginTop: '0.2rem' }}>
+                      <span className={`ml-status-pill ${modelStatusClass}`}>
+                        {modelStatusLabel}
+                      </span>
+                    </div>
+                    <span className="ml-metric-sub">
+                      {hasSpec
+                        ? (singleMlResult?.specialist_prediction?.model_version || singleMlResult?.model || 'AMR Specialist Model')
+                        : hasExp
+                        ? (singleMlResult?.experimental_model || 'Specialist candidate (pending validation)')
+                        : hasBroad
+                        ? (singleMlResult?.broad_prediction?.model_version || 'AMR-ML1-BROAD-v0.2')
+                        : 'No validated model registered'}
+                    </span>
+                  </div>
+
+                  {/* Item 4: Predicted Resistance Probability */}
+                  <div className="ml-metric-card">
+                    <span className="ml-metric-title">Predicted Resistance Probability</span>
+                    <div className="ml-metric-value prob">
+                      {isModelApplicable ? `${predProbability}%` : 'N/A'}
+                    </div>
+                    {isModelApplicable && (
+                      <div className="ml-mini-prob-bar">
+                        <div
+                          className="ml-mini-fill"
+                          style={{ width: `${Math.min(100, Math.max(0, (activeMlPred.predicted_probability || 0) * 100))}%` }}
+                        />
+                      </div>
+                    )}
+                    <span className="ml-metric-sub">
+                      Decision Threshold: 0.50 (50.0%)
+                    </span>
+                  </div>
+
+                  {/* Item 5: Predicted Classification */}
+                  <div className="ml-metric-card">
+                    <span className="ml-metric-title">Predicted Classification</span>
+                    <div className="ml-metric-value">
+                      {isModelApplicable ? (
+                        <span className={`ml-pred-class ${predClass.toLowerCase()}`}>
+                          {predClass}
+                        </span>
+                      ) : (
+                        <span style={{ color: '#94a3b8' }}>N/A</span>
+                      )}
+                    </div>
+                    <span className="ml-metric-sub">
+                      Binary classification derived from genomic features
+                    </span>
+                  </div>
+
+                  {/* Item 6: Observed AST (Reference Only) */}
+                  <div className="ml-metric-card">
+                    <span className="ml-metric-title">Observed AST (Reference)</span>
+                    <div className="ml-metric-value">
+                      <span className={`ast-phenotype-pill ${observedPhenotype.toLowerCase()}`}>
+                        {observedPhenotype}
+                      </span>
+                    </div>
+                    <span className="ml-metric-sub">
+                      {targetAstRecord?.measurement ? `MIC: ${targetAstRecord.measurement}` : 'From isolate experimental record (AST is never an ML input)'}
+                    </span>
+                  </div>
+
+                  {/* Item 7: Prediction vs Observed Phenotype */}
+                  <div className="ml-metric-card full-width">
+                    <span className="ml-metric-title">Prediction vs. Observed Phenotype</span>
+                    <div className="ml-comparison-row" style={{ marginTop: '0.35rem' }}>
+                      <span className={`ml-agreement-badge ${predVsObsBadgeClass}`}>
+                        {predVsObsStatus}
+                      </span>
+                      <span className="ml-comparison-explanation">
+                        {predVsObsExplanation}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Item 8: Notice if no model is applicable */}
+                  {hasNoModel && (
+                    <div className="ml-no-model-alert">
+                      ℹ️ No applicable ML model available for this organism–antibiotic combination. Predictions are only produced for combinations with validated training data.
+                    </div>
+                  )}
+                </div>
+
+                {/* Specific Research Disclaimer */}
+                <div className="ml-disclaimer-box" style={{ marginTop: '0.75rem' }}>
+                  ML predictions are research-oriented and should not replace laboratory antimicrobial susceptibility testing or be used for clinical treatment decisions.
+                </div>
+              </div>
+
+              {/* SECTION G SUBHEADER: MULTI-DRUG PAN-PATHOGEN OVERVIEW */}
+              <div style={{ marginTop: '1.25rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#cbd5e1', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  📊 Multi-Drug Research Evaluation Grid
+                </span>
+                <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                  Click chips below to inspect other drugs tested for this isolate
+                </span>
               </div>
 
               {/* Antibiotic Selector Tabs */}
