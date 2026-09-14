@@ -27,13 +27,22 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 import numpy as np
 
-from backend.services.amr_model_registry import (
-    get_model_entry, has_model, get_broad_model_entry, has_broad_model,
-    get_experimental_model_entry,
-    get_available_antibiotics_for_organism,
-    list_models, normalize_organism_key, normalize_antibiotic_key
-)
-from backend.services.amr_ml_dataset import parse_amr_genes
+try:
+    from backend.services.amr_model_registry import (
+        get_model_entry, has_model, get_broad_model_entry, has_broad_model,
+        get_experimental_model_entry,
+        get_available_antibiotics_for_organism,
+        list_models, normalize_organism_key, normalize_antibiotic_key
+    )
+    from backend.services.amr_ml_dataset import parse_amr_genes
+except ImportError:
+    from services.amr_model_registry import (
+        get_model_entry, has_model, get_broad_model_entry, has_broad_model,
+        get_experimental_model_entry,
+        get_available_antibiotics_for_organism,
+        list_models, normalize_organism_key, normalize_antibiotic_key
+    )
+    from services.amr_ml_dataset import parse_amr_genes
 
 logger = logging.getLogger(__name__)
 

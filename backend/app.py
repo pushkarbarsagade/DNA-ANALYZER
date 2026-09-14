@@ -13,6 +13,14 @@ FIXES APPLIED:
 """
 import os
 import sys
+
+# Ensure both backend directory and project root are in sys.path for robust imports in all environments (Gunicorn, Render, tests)
+_BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+_PROJECT_ROOT = os.path.abspath(os.path.join(_BACKEND_DIR, ".."))
+for _p in (_PROJECT_ROOT, _BACKEND_DIR):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
 import requests
 
 # Fix Windows console encoding: cp1252 cannot render Unicode symbols (✓, ✅, ⚠️)

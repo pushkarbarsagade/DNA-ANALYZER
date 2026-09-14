@@ -23,18 +23,32 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from backend.services.amr_ml_dataset import (
-    FROZEN_BENCHMARK_BIOSAMPLES,
-    DEFAULT_MIN_TOTAL_ISOLATES,
-    DEFAULT_MIN_PER_CLASS,
-    extract_ast_pairs,
-    parse_amr_genes,
-    normalize_phenotype_binary,
-)
-from backend.services.amr_model_registry import (
-    normalize_organism_key,
-    normalize_antibiotic_key,
-)
+try:
+    from backend.services.amr_ml_dataset import (
+        FROZEN_BENCHMARK_BIOSAMPLES,
+        DEFAULT_MIN_TOTAL_ISOLATES,
+        DEFAULT_MIN_PER_CLASS,
+        extract_ast_pairs,
+        parse_amr_genes,
+        normalize_phenotype_binary,
+    )
+    from backend.services.amr_model_registry import (
+        normalize_organism_key,
+        normalize_antibiotic_key,
+    )
+except ImportError:
+    from services.amr_ml_dataset import (
+        FROZEN_BENCHMARK_BIOSAMPLES,
+        DEFAULT_MIN_TOTAL_ISOLATES,
+        DEFAULT_MIN_PER_CLASS,
+        extract_ast_pairs,
+        parse_amr_genes,
+        normalize_phenotype_binary,
+    )
+    from services.amr_model_registry import (
+        normalize_organism_key,
+        normalize_antibiotic_key,
+    )
 
 logger = logging.getLogger(__name__)
 

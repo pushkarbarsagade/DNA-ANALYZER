@@ -41,18 +41,32 @@ from sklearn.metrics import (
 )
 from sklearn.model_selection import GroupShuffleSplit
 
-from backend.services.amr_master_dataset import (
-    DATASET_VERSION,
-    SOURCE_RELEASE,
-    build_master_multitask_instances,
-    load_master_amr_data,
-    save_master_dataset_metadata,
-)
-from backend.services.amr_model_registry import (
-    load_registry,
-    save_registry,
-    get_broad_model_entry,
-)
+try:
+    from backend.services.amr_master_dataset import (
+        DATASET_VERSION,
+        SOURCE_RELEASE,
+        build_master_multitask_instances,
+        load_master_amr_data,
+        save_master_dataset_metadata,
+    )
+    from backend.services.amr_model_registry import (
+        load_registry,
+        save_registry,
+        get_broad_model_entry,
+    )
+except ImportError:
+    from services.amr_master_dataset import (
+        DATASET_VERSION,
+        SOURCE_RELEASE,
+        build_master_multitask_instances,
+        load_master_amr_data,
+        save_master_dataset_metadata,
+    )
+    from services.amr_model_registry import (
+        load_registry,
+        save_registry,
+        get_broad_model_entry,
+    )
 
 logger = logging.getLogger(__name__)
 

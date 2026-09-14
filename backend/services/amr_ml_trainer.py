@@ -38,10 +38,16 @@ from sklearn.metrics import (
     roc_auc_score, confusion_matrix
 )
 
-from backend.services.amr_model_registry import (
-    normalize_organism_key, normalize_antibiotic_key, register_model, load_registry
-)
-from backend.services.amr_ml_dataset import FROZEN_BENCHMARK_BIOSAMPLES
+try:
+    from backend.services.amr_model_registry import (
+        normalize_organism_key, normalize_antibiotic_key, register_model, load_registry
+    )
+    from backend.services.amr_ml_dataset import FROZEN_BENCHMARK_BIOSAMPLES
+except ImportError:
+    from services.amr_model_registry import (
+        normalize_organism_key, normalize_antibiotic_key, register_model, load_registry
+    )
+    from services.amr_ml_dataset import FROZEN_BENCHMARK_BIOSAMPLES
 
 logger = logging.getLogger(__name__)
 
